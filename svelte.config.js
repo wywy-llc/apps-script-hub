@@ -12,6 +12,7 @@ const config = {
       memory: 1024, // メモリ設定 (MB)
       maxDuration: 10, // 10秒タイムアウト
       split: false, // 単一関数として統合デプロイ
+      external: ['pg-native', 'cloudflare:sockets'],
     }),
   },
   extensions: ['.svelte', '.svx'],

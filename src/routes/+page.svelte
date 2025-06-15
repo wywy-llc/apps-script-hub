@@ -42,7 +42,7 @@
 				注目のライブラリ
 			</h2>
 			<p class="mt-4 text-lg text-gray-600">
-				コミュニティで評価されている、人気のライブラリを発見しましょう。
+				コミュニティで評価されている、人気のライブラリを紹介
 			</p>
 		</div>
 
@@ -52,7 +52,7 @@
 				<div class="p-6 flex-1 flex flex-col">
 					<h3 class="text-lg font-semibold text-gray-900">GasLogger</h3>
 					<p class="mt-2 text-sm text-gray-600 flex-1">
-						スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。
+						スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させるツールです。
 					</p>
 				</div>
 				<div class="px-6 pb-6 mt-auto">
