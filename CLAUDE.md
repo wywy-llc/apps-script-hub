@@ -57,9 +57,14 @@
 
 **注意**: `npm run test`は`npm run test:unit -- --run && npm run test:e2e`を実行し、ユニットテストを一度だけ実行してからE2Eテストを順次実行します。
 
+### 環境変数管理
+
+- **開発環境**: `.env`（チーム共有設定、Docker PostgreSQL）
+- **新規セットアップ**: `.env.example`を`.env`にコピー
+
 ### ビルド構成
 
 - Viteベースビルドシステム
-- SvelteでのMarkdownサポート用MDSvex
+- SvelteでのMarkdownサポート用MDSvex（マークダウン処理）
 - 厳密チェック付きTypeScript
 - コード品質用ESLint + Prettier
