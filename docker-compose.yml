@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:15
+    container_name: apps_script_hub_db
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+    volumes:
+      - apps_script_hub_db_data:/var/lib/postgresql/data
+
+volumes:
+  apps_script_hub_db_data:
