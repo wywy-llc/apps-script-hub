@@ -35,7 +35,7 @@
 
 <!-- デフォルトの検索ボックス（大きいサイズ） -->
 <Story 
-	name="Default" 
+	name="Default"
 	args={{
 		placeholder: 'GASライブラリを検索',
 		value: '',
