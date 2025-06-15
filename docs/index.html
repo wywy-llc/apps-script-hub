@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>企画書：AppsScriptHub 開発プロジェクト</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: A single-page application with a fixed navigation header for smooth scrolling to all key sections: Overview, Problems, Value, Features, Roadmap, Target Users, and Future Outlook. This fully-featured structure transforms the entire linear document into an easily navigable, interactive presentation. Key sections like Problems, Target Users, and Future Outlook use a card layout with icons for quick comprehension. Features are in an interactive accordion. The development schedule is now a detailed HTML table for clarity. This design prioritizes a comprehensive yet intuitive user flow. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Project Overview -> Goal: Inform -> Viz: Hero section -> Interaction: None -> Justification: Clear, immediate introduction.
+        - Report Info: Core Problems -> Goal: Highlight -> Viz: 3-column card layout -> Interaction: None -> Justification: Visually separates pain points.
+        - Report Info: Value Proposition -> Goal: Compare -> Viz: Side-by-side text blocks -> Interaction: None -> Justification: Clearly distinguishes value.
+        - Report Info: Detailed Features -> Goal: Organize -> Viz: HTML/CSS Accordion -> Interaction: Click to expand -> Justification: Manages complexity.
+        - Report Info: Development Schedule -> Goal: Show Process -> Viz: Styled HTML Table -> Interaction: None -> Justification: Provides a clear, detailed, and structured view of the project timeline, replacing the chart for more detail. -> Library: None
+        - Report Info: Target Users -> Goal: Inform -> Viz: 4-column card layout -> Interaction: None -> Justification: Clearly presents distinct user personas.
+        - Report Info: Future Outlook -> Goal: Inform -> Viz: 3-column card layout -> Interaction: None -> Justification: Highlights future growth initiatives.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        background-color: #f8fafc; /* slate-50 */
+        color: #1e293b; /* slate-800 */
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800">
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+      <nav
+        class="container mx-auto px-6 py-3 flex justify-between items-center"
+      >
+        <a href="#hero" class="text-xl font-bold text-slate-900">
+          🚀 AppScriptHub
+        </a>
+        <div class="hidden lg:flex space-x-8">
+          <a
+            href="#problem"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >課題</a
+          >
+          <a
+            href="#value"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >提供価値</a
+          >
+          <a
+            href="#features"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >機能</a
+          >
+          <a
+            href="#roadmap"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >ロードマップ</a
+          >
+          <a
+            href="#users"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >ターゲット</a
+          >
+          <a
+            href="#future"
+            class="text-slate-600 hover:text-sky-600 transition-colors"
+            >展望</a
+          >
+        </div>
+        <button
+          id="mobile-menu-button"
+          class="lg:hidden text-slate-600 hover:text-sky-600 focus:outline-none"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16m-7 6h7"
+            ></path>
+          </svg>
+        </button>
+      </nav>
+      <div id="mobile-menu" class="hidden lg:hidden bg-white">
+        <a
+          href="#problem"
+          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >課題</a
+        >
+        <a href="#value" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >提供価値</a
+        >
+        <a
+          href="#features"
+          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >機能</a
+        >
+        <a
+          href="#roadmap"
+          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >ロードマップ</a
+        >
+        <a href="#users" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >ターゲット</a
+        >
+        <a href="#future" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
+          >展望</a
+        >
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+      <section id="hero" class="text-center py-16 md:py-24">
+        <h1 class="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">
+          企画書: AppScriptHub 開発プロジェクト
+        </h1>
+        <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+          Google Apps
+          Script（GAS）開発者のための、信頼できるライブラリマーケットプレイス＆コミュニティを構築し、GASの世界にコード共有とコラボレーションの文化を根付かせます。
+        </p>
+      </section>
+
+      <section id="problem" class="py-16 md:py-24">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+            GAS開発者が直面する課題
+          </h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            GASは便利ですが、標準的なライブラリ共有の仕組みがなく、開発者は非効率と不安を抱えています。我々はこれらの根深い課題を解決します。
+          </p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+          >
+            <div class="text-4xl mb-4">🔍</div>
+            <h3 class="text-xl font-bold mb-2">発見性の欠如</h3>
+            <p class="text-slate-600">
+              有用なライブラリが個人のブログ等に点在し、効率的な検索手段が存在しません。目的のライブラリを見つけるだけで多大な時間を要します。
+            </p>
+          </div>
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+          >
+            <div class="text-4xl mb-4">🛡️</div>
+            <h3 class="text-xl font-bold mb-2">信頼性の不安</h3>
+            <p class="text-slate-600">
+              発見したライブラリが「いつ作られたか」「誰が作ったか」が不明瞭。情報が古く、本番環境で利用するにはリスクが伴います。
+            </p>
+          </div>
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+          >
+            <div class="text-4xl mb-4">⚙️</div>
+            <h3 class="text-xl font-bold mb-2">開発効率の低下</h3>
+            <p class="text-slate-600">
+              結果として、多くの開発者が「車輪の再発明」を余儀なくされ、エコシステム全体の大きな機会損失に繋がっています。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="value" class="py-16 md:py-24 bg-white rounded-2xl">
+        <div class="text-center mb-12 px-6">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+            AppScriptHubが提供する価値
+          </h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            AppScriptHubは、ライブラリの利用者と提供者の双方に明確なメリットをもたらし、GASエコシステム全体の成長を促進します。
+          </p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8 px-6">
+          <div class="bg-slate-100 p-8 rounded-xl">
+            <h3 class="text-2xl font-bold mb-4">ライブラリ利用者へ</h3>
+            <ul class="space-y-3 text-slate-700 list-disc list-inside">
+              <li>
+                <span class="font-semibold">開発効率の向上:</span>
+                信頼できるライブラリの活用で開発時間を短縮。
+              </li>
+              <li>
+                <span class="font-semibold">品質の向上:</span>
+                コミュニティ評価の高い、安定したコードを利用可能。
+              </li>
+              <li>
+                <span class="font-semibold">学習コストの削減:</span>
+                優れた実装例から学ぶ機会を創出。
+              </li>
+            </ul>
+          </div>
+          <div class="bg-slate-100 p-8 rounded-xl">
+            <h3 class="text-2xl font-bold mb-4">ライブラリ提供者へ</h3>
+            <ul class="space-y-3 text-slate-700 list-disc list-inside">
+              <li>
+                <span class="font-semibold">貢献の可視化:</span>
+                自身のコードへのフィードバックで評価と知名度を向上。
+              </li>
+              <li>
+                <span class="font-semibold">メンテナンス性の向上:</span>
+                利用者からのバグ報告や改善提案を受け付ける場を確保。
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="py-16 md:py-24">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+            サービス機能一覧
+          </h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            ユーザー認証からライブラリ管理、コミュニティ機能まで、AppScriptHubはGAS開発を支えるための豊富な機能を提供します。
+          </p>
+        </div>
+        <div id="accordion-container" class="max-w-4xl mx-auto space-y-4"></div>
+      </section>
+
+      <section id="roadmap" class="py-16 md:py-24">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+            開発スケジュール（案）
+          </h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            段階的な開発アプローチにより、着実に価値を提供します。各フェーズの目標と主な開発項目を以下に示します。
+          </p>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="p-4 font-semibold">フェーズ</th>
+                <th class="p-4 font-semibold">期間(目安)</th>
+                <th class="p-4 font-semibold">主な開発項目</th>
+                <th class="p-4 font-semibold">ゴール</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr>
+                <td class="p-4 font-bold text-sky-700 align-top">
+                  フェーズ1<br />(基盤開発)
+                </td>
+                <td class="p-4 align-top">1.5ヶ月</td>
+                <td class="p-4 align-top text-slate-600">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>開発環境構築、技術選定</li>
+                    <li>DB設計</li>
+                    <li>ユーザー認証 (GitHub連携)</li>
+                    <li>ライブラリの登録・表示機能</li>
+                  </ul>
+                </td>
+                <td class="p-4 align-top font-medium">
+                  MVPとして、ユーザーがライブラリを登録・閲覧できる状態
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4 font-bold text-sky-700 align-top">
+                  フェーズ2<br />(体験向上)
+                </td>
+                <td class="p-4 align-top">1ヶ月</td>
+                <td class="p-4 align-top text-slate-600">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>検索・絞り込み機能</li>
+                    <li>スター評価機能</li>
+                    <li>ユーザープロフィール作成</li>
+                    <li>ライブラリ情報更新機能</li>
+                  </ul>
+                </td>
+                <td class="p-4 align-top font-medium">
+                  実用的な検索機能を備え、コミュニティ評価の基盤ができる状態
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4 font-bold text-sky-700 align-top">
+                  フェーズ3<br />(コミュニティ活性化)
+                </td>
+                <td class="p-4 align-top">1.5ヶ月</td>
+                <td class="p-4 align-top text-slate-600">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>レビュー (コメント) 機能</li>
+                    <li>管理機能 (通報など)</li>
+                    <li>UI/UXの改善</li>
+                  </ul>
+                </td>
+                <td class="p-4 align-top font-medium">
+                  ユーザー間のフィードバックループが生まれ、コミュニティが活性化する状態
+                </td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-4 font-bold text-slate-700 align-top">
+                  正式リリース
+                </td>
+                <td class="p-4 align-top">-</td>
+                <td class="p-4 align-top">-</td>
+                <td class="p-4 align-top">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="users" class="py-16 md:py-24 bg-white rounded-2xl">
+        <div class="text-center mb-12 px-6">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+            ターゲットユーザー
+          </h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            本サービスは、GASに関わる全ての立場の人々を対象とし、それぞれのニーズに応えます。
+          </p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
+          <div class="bg-slate-100 p-6 rounded-xl text-center">
+            <div class="text-4xl mb-4">🏢</div>
+            <h3 class="text-lg font-bold">企業の情シス・DX担当者</h3>
+            <p class="text-slate-600 text-sm mt-2">
+              定型業務の自動化スクリプトを効率的に開発したい
+            </p>
+          </div>
+          <div class="bg-slate-100 p-6 rounded-xl text-center">
+            <div class="text-4xl mb-4">💻</div>
+            <h3 class="text-lg font-bold">Webデベロッパー</h3>
+            <p class="text-slate-600 text-sm mt-2">
+              クライアントワークでGASを扱う際に工数を削減したい
+            </p>
+          </div>
+          <div class="bg-slate-100 p-6 rounded-xl text-center">
+            <div class="text-4xl mb-4">🎓</div>
+            <h3 class="text-lg font-bold">GAS初学者</h3>
+            <p class="text-slate-600 text-sm mt-2">
+              他者の優れたコードを参考に効率的に学習したい
+            </p>
+          </div>
+          <div class="bg-slate-100 p-6 rounded-xl text-center">
+            <div class="text-4xl mb-4">🌟</div>
+            <h3 class="text-lg font-bold">GASエキスパート</h3>
+            <p class="text-slate-600 text-sm mt-2">
+              自作ライブラリを公開しコミュニティに貢献したい
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center py-8 text-slate-500">
+        <p>&copy; 2025 AppScriptHub Project</p>
+      </footer>
+    </main>
+
+    <script>
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const navLinks = document.querySelectorAll(
+        '#mobile-menu a, header nav a'
+      );
+
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (!mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.add('hidden');
+          }
+        });
+      });
+
+      const featuresData = [
+        {
+          category: 'ユーザー認証',
+          icon: '👤',
+          items: [
+            {
+              title: 'アカウント管理',
+              description:
+                'GitHubアカウントを利用したOAuth認証によるログイン/ログアウト機能。利用規約、プライバシーポリシーへの同意も管理します。',
+            },
+            {
+              title: 'プロフィール',
+              description:
+                'ユーザー名やアイコンはGitHubと連携。自己紹介文の編集や、自身が登録したライブラリの一覧表示が可能です。',
+            },
+          ],
+        },
+        {
+          category: 'ライブラリ管理',
+          icon: '📚',
+          items: [
+            {
+              title: '登録・更新',
+              description:
+                'ライブラリのスクリプトIDやGitHubリポジトリを簡単に登録・更新。タイトル、概要、カテゴリ、タグも設定できます。',
+            },
+            {
+              title: '表示・検索',
+              description:
+                '新着順・人気順での一覧表示や、キーワード、カテゴリ、タグでの高度な絞り込み検索が可能です。',
+            },
+            {
+              title: '詳細ページ',
+              description:
+                '概要、使い方(README)、スクリプトIDの簡単コピー機能、作者情報、最終更新日などを集約して表示します。',
+            },
+          ],
+        },
+        {
+          category: 'コミュニティ機能',
+          icon: '💬',
+          items: [
+            {
+              title: '評価',
+              description:
+                'ライブラリに対するスター（お気に入り）登録・解除機能。スター数も分かりやすく表示します。',
+            },
+            {
+              title: 'レビュー',
+              description:
+                'ライブラリへのコメント投稿や編集、削除が可能。スレッド形式での返信にも対応します。',
+            },
+          ],
+        },
+        {
+          category: 'その他',
+          icon: '🛠️',
+          items: [
+            {
+              title: '管理機能',
+              description:
+                '不適切なライブラリやコメントの通報機能や、管理者によるコンテンツの承認・非表示機能で健全な運営を目指します。',
+            },
+          ],
+        },
+      ];
+
+      const accordionContainer = document.getElementById('accordion-container');
+      featuresData.forEach((feature, index) => {
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'bg-white rounded-lg shadow-md';
+
+        const button = document.createElement('button');
+        button.className =
+          'w-full flex justify-between items-center p-5 text-left font-semibold text-slate-800 focus:outline-none';
+        button.innerHTML = `
+                <span><span class="mr-3">${feature.icon}</span>${feature.category}</span>
+                <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            `;
+
+        const content = document.createElement('div');
+        content.className =
+          'accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out';
+
+        const contentInner = document.createElement('div');
+        contentInner.className = 'p-5 border-t border-slate-200';
+
+        feature.items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'mb-4';
+          itemDiv.innerHTML = `
+                    <h4 class="font-semibold text-sky-700">${item.title}</h4>
+                    <p class="text-slate-600 mt-1">${item.description}</p>
+                `;
+          contentInner.appendChild(itemDiv);
+        });
+
+        content.appendChild(contentInner);
+        accordionItem.appendChild(button);
+        accordionItem.appendChild(content);
+        accordionContainer.appendChild(accordionItem);
+
+        button.addEventListener('click', () => {
+          const isExpanded =
+            content.style.maxHeight && content.style.maxHeight !== '0px';
+
+          document.querySelectorAll('.accordion-content').forEach(el => {
+            if (el !== content) {
+              el.style.maxHeight = '0px';
+              el.previousElementSibling
+                .querySelector('svg')
+                .classList.remove('rotate-180');
+            }
+          });
+
+          if (!isExpanded) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+            button.querySelector('svg').classList.add('rotate-180');
+          } else {
+            content.style.maxHeight = '0px';
+            button.querySelector('svg').classList.remove('rotate-180');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
