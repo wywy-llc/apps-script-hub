@@ -149,3 +149,6 @@ storybook-static/
 
 # Vercel
 .vercel/
+
+# Local environment overrides (if needed)
+.env.local
