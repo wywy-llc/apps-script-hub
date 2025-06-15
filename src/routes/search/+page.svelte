@@ -61,7 +61,7 @@
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const query = formData.get('search') as string;
-		
+
 		if (query.trim()) {
 			// 検索処理を実行し、URLを更新
 			window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
