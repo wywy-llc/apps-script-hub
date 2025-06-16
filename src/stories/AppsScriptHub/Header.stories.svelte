@@ -1,16 +1,16 @@
 <script module>
-	import Header from '$lib/components/Header.svelte';
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+  import Header from '$lib/components/Header.svelte';
+  import { defineMeta } from '@storybook/addon-svelte-csf';
 
-	// AppsScriptHubのヘッダーコンポーネントのStorybook設定
-	const { Story } = defineMeta({
-		title: 'AppsScriptHub/Header',
-		component: Header,
-		tags: ['autodocs'],
-		parameters: {
-			layout: 'fullscreen'
-		}
-	});
+  // AppsScriptHubのヘッダーコンポーネントのStorybook設定
+  const { Story } = defineMeta({
+    title: 'AppsScriptHub/Header',
+    component: Header,
+    tags: ['autodocs'],
+    parameters: {
+      layout: 'fullscreen',
+    },
+  });
 </script>
 
 <!-- デフォルトのヘッダー表示 -->
@@ -18,10 +18,10 @@
 
 <!-- モバイル表示用 -->
 <Story
-	name="Mobile"
-	parameters={{
-		viewport: {
-			defaultViewport: 'mobile1'
-		}
-	}}
+  name="Mobile"
+  parameters={{
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+  }}
 />
