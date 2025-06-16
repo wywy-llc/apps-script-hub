@@ -10,7 +10,10 @@
   let searchQuery = '';
   let totalResults = 0;
   let currentPage = 1;
-  let totalPages = 8;
+  const itemsPerPage = 10;
+
+  // 結果件数に基づいてページ数を動的に計算
+  $: totalPages = Math.ceil(totalResults / itemsPerPage);
 
   // 検索結果のモックデータ
   const mockLibraries = [
@@ -93,9 +96,7 @@
       <div class="-mt-px flex w-0 flex-1">
         {#if currentPage > 1}
           <a
-            href="/search?q={encodeURIComponent(
-              searchQuery
-            )}&page={currentPage - 1}"
+            href={`/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage - 1}`}
             class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
             <svg
@@ -149,9 +150,7 @@
       <div class="-mt-px flex w-0 flex-1 justify-end">
         {#if currentPage < totalPages}
           <a
-            href="/search?q={encodeURIComponent(
-              searchQuery
-            )}&page={currentPage + 1}"
+            href={`/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage + 1}`}
             class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
             次へ
