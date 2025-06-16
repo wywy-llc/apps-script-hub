@@ -24,8 +24,9 @@
         'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマットするためのユーティリティライブラリ。タイムゾーンの扱いもサポート。',
       tags: ['Date', 'Utility', 'Format'],
       author: 'user-name',
-      version: 'v1.2.0',
       lastUpdated: '3日前',
+      stars: 492,
+      downloads: 7300,
     },
     {
       id: 2,
@@ -34,8 +35,9 @@
         'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。繰り返しイベントの操作や、会議室の予約などを簡略化します。',
       tags: ['Calendar', 'Date', 'Utility'],
       author: 'developer-taro',
-      version: 'v2.0.1',
       lastUpdated: '2週間前',
+      stars: 876,
+      downloads: 13200,
     },
     {
       id: 3,
@@ -44,8 +46,9 @@
         '日本の祝日判定や和暦（元号）の変換機能を提供します。内閣府の祝日CSVデータソースと連携可能です。',
       tags: ['Date', 'Japan', 'Holiday'],
       author: 'gas-master',
-      version: 'v3.1.0',
       lastUpdated: '1ヶ月前',
+      stars: 325,
+      downloads: 4800,
     },
   ];
 

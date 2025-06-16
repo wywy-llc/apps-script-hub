@@ -15,8 +15,9 @@
         'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
       tags: ['Logging', 'Utility'],
       author: 'gas-developer',
-      version: 'v2.1.0',
       lastUpdated: '2025/05/28',
+      stars: 847,
+      downloads: 12500,
     },
     {
       id: 2,
@@ -25,8 +26,9 @@
         'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
       tags: ['WebApp', 'HTML'],
       author: 'html-master',
-      version: 'v1.5.2',
       lastUpdated: '2025/04/15',
+      stars: 623,
+      downloads: 8900,
     },
     {
       id: 3,
@@ -35,8 +37,9 @@
         'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
       tags: ['Testing', 'Utility'],
       author: 'test-ninja',
-      version: 'v3.0.1',
       lastUpdated: '2025/03/30',
+      stars: 1205,
+      downloads: 15600,
     },
     {
       id: 4,
@@ -45,8 +48,9 @@
         'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマット。タイムゾーンの扱いもサポートします。',
       tags: ['Date', 'Format', 'Utility'],
       author: 'date-wizard',
-      version: 'v1.8.3',
       lastUpdated: '2025/02/20',
+      stars: 392,
+      downloads: 6800,
     },
     {
       id: 5,
@@ -55,8 +59,9 @@
         'GoogleカレンダーとGoogleスプレッドシートを双方向同期。イベント管理を効率化し、チーム連携を強化します。',
       tags: ['Calendar', 'Spreadsheet', 'API'],
       author: 'sync-expert',
-      version: 'v2.3.0',
       lastUpdated: '2025/01/10',
+      stars: 758,
+      downloads: 11200,
     },
     {
       id: 6,
@@ -65,8 +70,9 @@
         'Gmail送信用のテンプレートエンジン。HTMLメール、添付ファイル、一括送信に対応した高機能メール送信ライブラリ。',
       tags: ['Email', 'Template', 'API'],
       author: 'mail-pro',
-      version: 'v1.4.7',
       lastUpdated: '2024/12/25',
+      stars: 534,
+      downloads: 7400,
     },
   ];
 </script>
