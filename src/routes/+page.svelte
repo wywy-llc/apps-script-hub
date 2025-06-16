@@ -1,9 +1,74 @@
 <script lang="ts">
+  import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
 
   // トップページコンポーネント
   // AppsScriptHubのメインランディングページ
   // ヒーローセクション、注目ライブラリ、CTA（コールトゥアクション）を表示
+
+  // 注目のライブラリサンプルデータ
+  const featuredLibraries = [
+    {
+      id: 1,
+      name: 'GasLogger',
+      description:
+        'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
+      tags: ['Logging', 'Utility'],
+      author: 'gas-developer',
+      version: 'v2.1.0',
+      lastUpdated: '2025/05/28',
+    },
+    {
+      id: 2,
+      name: 'GasHtml',
+      description:
+        'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
+      tags: ['WebApp', 'HTML'],
+      author: 'html-master',
+      version: 'v1.5.2',
+      lastUpdated: '2025/04/15',
+    },
+    {
+      id: 3,
+      name: 'GasTest',
+      description:
+        'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
+      tags: ['Testing', 'Utility'],
+      author: 'test-ninja',
+      version: 'v3.0.1',
+      lastUpdated: '2025/03/30',
+    },
+    {
+      id: 4,
+      name: 'GasDateFormatter',
+      description:
+        'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマット。タイムゾーンの扱いもサポートします。',
+      tags: ['Date', 'Format', 'Utility'],
+      author: 'date-wizard',
+      version: 'v1.8.3',
+      lastUpdated: '2025/02/20',
+    },
+    {
+      id: 5,
+      name: 'GasCalendarSync',
+      description:
+        'GoogleカレンダーとGoogleスプレッドシートを双方向同期。イベント管理を効率化し、チーム連携を強化します。',
+      tags: ['Calendar', 'Spreadsheet', 'API'],
+      author: 'sync-expert',
+      version: 'v2.3.0',
+      lastUpdated: '2025/01/10',
+    },
+    {
+      id: 6,
+      name: 'GasMailTemplate',
+      description:
+        'Gmail送信用のテンプレートエンジン。HTMLメール、添付ファイル、一括送信に対応した高機能メール送信ライブラリ。',
+      tags: ['Email', 'Template', 'API'],
+      author: 'mail-pro',
+      version: 'v1.4.7',
+      lastUpdated: '2024/12/25',
+    },
+  ];
 </script>
 
 <svelte:head>
@@ -15,14 +80,14 @@
 </svelte:head>
 
 <!-- ヒーローセクション -->
-<section class="py-20 sm:py-28 text-center bg-gray-50">
+<section class="py-20 sm:py-24 text-center bg-gray-50">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <h1
-      class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900"
+      class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900"
     >
       GAS開発を、もっと速く、もっと便利に。
     </h1>
-    <p class="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-600">
+    <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
       AppsScriptHubは、GASで使える便利なライブラリやツールを
       見つけ、共有するためのオープンなハブです。
     </p>
@@ -35,106 +100,27 @@
 <!-- 注目のライブラリセクション -->
 <section class="py-16 sm:py-24 bg-white">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center">
+    <div class="text-center mb-12">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
         注目のライブラリ
       </h2>
       <p class="mt-4 text-lg text-gray-600">
-        コミュニティで評価されている、人気のライブラリを紹介
+        コミュニティで評価されている、人気のライブラリを発見しましょう。
       </p>
     </div>
 
-    <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      <!-- ライブラリカード1 -->
-      <div
-        class="flex flex-col rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
-      >
-        <div class="p-6 flex-1 flex flex-col">
-          <h3 class="text-lg font-semibold text-gray-900">GasLogger</h3>
-          <p class="mt-2 text-sm text-gray-600 flex-1">
-            スプレッドシートやCloud
-            Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させるツールです。
-          </p>
-        </div>
-        <div class="px-6 pb-6 mt-auto">
-          <div class="flex items-center text-xs text-gray-500 mb-4">
-            <span>最終更新: 2025/05/28</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span
-              class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10"
-              >Logging</span
-            >
-            <span
-              class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-              >Utility</span
-            >
-            <span
-              class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20"
-              >Spreadsheet</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- ライブラリカード2 -->
-      <div
-        class="flex flex-col rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
-      >
-        <div class="p-6 flex-1 flex flex-col">
-          <h3 class="text-lg font-semibold text-gray-900">GasHtml</h3>
-          <p class="mt-2 text-sm text-gray-600 flex-1">
-            HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。
-          </p>
-        </div>
-        <div class="px-6 pb-6 mt-auto">
-          <div class="flex items-center text-xs text-gray-500 mb-4">
-            <span>最終更新: 2025/04/15</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span
-              class="inline-flex items-center rounded-md bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10"
-              >WebApp</span
-            >
-            <span
-              class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10"
-              >HTML</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- ライブラリカード3 -->
-      <div
-        class="flex flex-col rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
-      >
-        <div class="p-6 flex-1 flex flex-col">
-          <h3 class="text-lg font-semibold text-gray-900">GasTest</h3>
-          <p class="mt-2 text-sm text-gray-600 flex-1">
-            GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。
-          </p>
-        </div>
-        <div class="px-6 pb-6 mt-auto">
-          <div class="flex items-center text-xs text-gray-500 mb-4">
-            <span>最終更新: 2025/03/30</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span
-              class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
-              >Testing</span
-            >
-            <span
-              class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-              >Utility</span
-            >
-          </div>
-        </div>
-      </div>
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {#each featuredLibraries as library}
+        <LibraryCard {library} />
+      {/each}
     </div>
 
-    <div class="mt-12 text-center">
-      <a href="/libraries" class="text-blue-600 font-semibold hover:underline">
-        すべてのライブラリを見る &rarr;
+    <div class="mt-16 text-center">
+      <a
+        href="/libraries"
+        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+      >
+        すべてのライブラリを見る
       </a>
     </div>
   </div>
@@ -149,8 +135,8 @@
       あなたのライブラリを公開しませんか？
     </h2>
     <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-      作成した便利なGASライブラリやツールをAppsScriptHubで共有して、
-      GASの開発スキルをアップしましょう!
+      あなたが作成した便利なGASライブラリやツールをAppsScriptHubに登録して、
+      GASコミュニティに貢献しましょう。
     </p>
     <div class="mt-8 flex justify-center">
       <div class="inline-flex rounded-md shadow">
@@ -158,7 +144,7 @@
           href="/contribute"
           class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
         >
-          ライブラリの共有方法を見る
+          ライブラリ登録方法を見る
         </a>
       </div>
     </div>

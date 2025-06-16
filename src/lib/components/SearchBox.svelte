@@ -24,7 +24,7 @@
   // サイズによるスタイル切り替え
   $: inputClasses =
     size === 'large'
-      ? 'block w-full rounded-full border-0 bg-white py-4 pl-11 pr-4 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6'
+      ? 'block w-full rounded-full border-0 bg-white py-5 pl-12 pr-4 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-base leading-6'
       : 'block w-full rounded-full border-0 bg-white py-3 pl-10 pr-4 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-sm leading-6';
 
   $: iconContainerClasses =
@@ -36,7 +36,7 @@
 <form class="relative" on:submit={handleSearch}>
   <div class={iconContainerClasses}>
     <svg
-      class="h-5 w-5 text-gray-400"
+      class="h-6 w-6 text-gray-400"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
