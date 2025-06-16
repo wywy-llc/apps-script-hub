@@ -1,16 +1,17 @@
 <script lang="ts">
+  import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { 
-    app_title, 
-    hero_title, 
-    hero_description, 
-    featured_libraries, 
-    featured_description,
-    view_all_libraries,
-    cta_title,
+  import {
+    app_title,
     cta_description,
-    view_contribution_guide
+    cta_title,
+    featured_description,
+    featured_libraries,
+    hero_description,
+    hero_title,
+    view_all_libraries,
+    view_contribution_guide,
   } from '$lib/paraglide/messages.js';
 
   // トップページコンポーネント
@@ -90,10 +91,7 @@
 
 <svelte:head>
   <title>{app_title()} - Google Apps Scriptのライブラリハブ</title>
-  <meta
-    name="description"
-    content="{hero_description()}"
-  />
+  <meta name="description" content={hero_description()} />
 </svelte:head>
 
 <!-- ヒーローセクション -->
@@ -132,12 +130,9 @@
     </div>
 
     <div class="mt-16 text-center">
-      <a
-        href="/libraries"
-        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-      >
+      <Button variant="outline" size="lg" href="/libraries">
         {view_all_libraries()}
-      </a>
+      </Button>
     </div>
   </div>
 </section>
@@ -154,14 +149,9 @@
       {cta_description()}
     </p>
     <div class="mt-8 flex justify-center">
-      <div class="inline-flex rounded-md shadow">
-        <a
-          href="/contribute"
-          class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-        >
-          {view_contribution_guide()}
-        </a>
-      </div>
+      <Button variant="primary" size="lg" href="/contribute">
+        {view_contribution_guide()}
+      </Button>
     </div>
   </div>
 </section>
