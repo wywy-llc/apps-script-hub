@@ -1,7 +1,7 @@
 import * as auth from '$lib/server/auth';
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Handle } from '@sveltejs/kit';
-import { serverAsyncLocalStorage, extractLocaleFromRequest } from '$lib/paraglide/runtime.js';
+import { extractLocaleFromRequest } from '$lib/paraglide/runtime.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { overwriteServerAsyncLocalStorage } from '$lib/paraglide/runtime.js';
 import type { Locale } from '$lib';

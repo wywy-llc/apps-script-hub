@@ -1,7 +1,5 @@
 <script lang="ts">
   import { getLocale, setLocale, locales } from '$lib/paraglide/runtime.js';
-  import { localizeHref } from '$lib/paraglide/runtime.js';
-  import { page } from '$app/stores';
   import type { Locale } from '$lib';
   import { LANGUAGE_NAMES } from '$lib';
 
