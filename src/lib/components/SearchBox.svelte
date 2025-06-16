@@ -1,11 +1,12 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { search_placeholder } from '$lib/paraglide/messages.js';
 
   // GASライブラリ検索コンポーネント
   // トップページとサーチページで共通利用されるレスポンシブ検索ボックス
 
   // Props
-  export let placeholder = 'GASライブラリを検索';
+  export let placeholder = search_placeholder();
   export let value = '';
   export let size: 'small' | 'large' = 'large';
 

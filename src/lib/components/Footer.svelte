@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { copyright, terms, privacy } from '$lib/paraglide/messages.js';
+  
   // フッターコンポーネント
   // AppsScriptHubのメインフッターで、コピーライトとリンクを表示
 </script>
@@ -7,14 +9,14 @@
   <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center flex-col sm:flex-row">
       <p class="text-sm text-gray-500">
-        &copy; 2025 wywy LLC. All rights reserved.
+        {copyright()}
       </p>
       <div class="flex space-x-6 mt-4 sm:mt-0">
         <a href="/terms" class="text-sm text-gray-500 hover:text-gray-900"
-          >利用規約</a
+          >{terms()}</a
         >
         <a href="/privacy" class="text-sm text-gray-500 hover:text-gray-900"
-          >プライバシーポリシー</a
+          >{privacy()}</a
         >
       </div>
     </div>
