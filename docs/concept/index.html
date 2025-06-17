@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apps Script Hub: オーナーシップ機能 企画書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .concept-card {
+        background-color: #f8fafc;
+        border-left: 4px solid #4f46e5;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+      .concept-card:hover {
+        transform: translateY(-5px);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      .flow-step {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        background-color: white;
+        position: relative;
+      }
+      .flow-arrow {
+        position: absolute;
+        left: 50%;
+        bottom: -30px;
+        transform: translateX(-50%);
+        color: #9ca3af;
+      }
+      .benefit-list li {
+        position: relative;
+        padding-left: 1.75rem;
+      }
+      .benefit-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #22c55e;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+      <!-- Header -->
+      <header class="mb-12 text-center">
+        <div
+          class="inline-block bg-indigo-100 text-indigo-800 text-sm font-semibold px-4 py-2 rounded-full mb-4"
+        >
+          企画書
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900">
+          Apps Script Hub
+        </h1>
+        <p class="mt-4 text-lg text-gray-600">オーナーシップ機能コンセプト</p>
+      </header>
+
+      <!-- 1. Vision -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold border-b-2 border-indigo-500 pb-2 mb-4">
+          1. ビジョン：信頼されるエコシステムの構築
+        </h2>
+        <p class="text-base leading-relaxed">
+          現在のApps
+          Script開発環境では、有用なライブラリの情報が個人のブログや記事に散在し、その情報の鮮度や信頼性を見極めることが困難です。
+          <br /><br />
+          「Apps Script
+          Hub」は、この課題を解決するため、単なる情報の集約サイトに留まりません。本ドキュメントで提案する<strong
+            class="text-indigo-600"
+            >「オーナーシップの主張（Claim）」</strong
+          >と<strong class="text-indigo-600">「権限移譲」</strong
+          >の仕組みを導入することで、ライブラリ作者自身が情報の質を担保し、利用者が安心してライブラリを発見・活用できる、自律的で信頼性の高いエコシステムの構築を目指します。
+        </p>
+      </section>
+
+      <!-- 2. Core Concept -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold border-b-2 border-indigo-500 pb-2 mb-4">
+          2. コアコンセプト：自動収集から作者管理への移行モデル
+        </h2>
+        <div class="concept-card p-6 rounded-lg">
+          <p class="text-base leading-relaxed">
+            本プラットフォームは、以下の2段階アプローチで理想的な状態を実現します。
+          </p>
+          <ul class="list-decimal list-inside mt-4 space-y-2 text-gray-700">
+            <li>
+              <strong class="font-semibold">フェーズ1（自動収集）:</strong>
+              まずはWeb上からライブラリ情報を自動で収集・インデックス化し、「探せる場所」としての初期価値を提供します。
+            </li>
+            <li>
+              <strong class="font-semibold">フェーズ2（権限移譲）:</strong>
+              ライブラリ作者にページの管理権限を移譲し、情報の質と鮮度を作者自身の手で維持してもらうことで、プラットフォーム全体の信頼性を向上させます。
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 3. User Flow -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold border-b-2 border-indigo-500 pb-2 mb-4">
+          3. 機能の全体フロー
+        </h2>
+        <div class="space-y-12">
+          <!-- Step 1 -->
+          <div class="flow-step">
+            <div class="flex items-center mb-2">
+              <div
+                class="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4"
+              >
+                1
+              </div>
+              <h3 class="text-xl font-semibold">自動インデックス化</h3>
+            </div>
+            <p class="text-gray-600 ml-12">
+              システムがGitHub等の公開情報を元にGASライブラリを自動で収集し、一時的なライブラリページを生成します。このページには、情報の出典元へのリンクと「自動収集された情報」であることが明記されます。
+            </p>
+            <div class="flow-arrow">&#x2193;</div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flow-step">
+            <div class="flex items-center mb-2">
+              <div
+                class="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4"
+              >
+                2
+              </div>
+              <h3 class="text-xl font-semibold">
+                オーナーシップの主張（Claim）
+              </h3>
+            </div>
+            <p class="text-gray-600 ml-12">
+              ライブラリの作者は、自身が作成したライブラリのページに設置された<strong
+                class="text-indigo-600"
+                >「このライブラリの作者ですか？」</strong
+              >ボタンをクリックし、オーナー確認プロセスを開始します。
+            </p>
+            <div class="flow-arrow">&#x2193;</div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flow-step">
+            <div class="flex items-center mb-2">
+              <div
+                class="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4"
+              >
+                3
+              </div>
+              <h3 class="text-xl font-semibold">本人確認（Authentication）</h3>
+            </div>
+            <p class="text-gray-600 ml-12">
+              不正ななりすましを防ぐため、対象ライブラリの<strong
+                class="text-indigo-600"
+                >GitHubリポジトリへの書き込み権限</strong
+              >や、<strong class="text-indigo-600">Googleアカウント認証</strong
+              >を通じて、本物の作者であることを確認します。これは、プラットフォームの信頼性を担保する上で最も重要なステップです。
+            </p>
+            <div class="flow-arrow">&#x2193;</div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flow-step">
+            <div class="flex items-center mb-2">
+              <div
+                class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4"
+              >
+                4
+              </div>
+              <h3 class="text-xl font-semibold">権限移譲とメリットの提供</h3>
+            </div>
+            <p class="text-gray-600 ml-12">
+              認証が完了すると、ライブラリページの完全な編集権限が作者に渡されます。これにより、作者は自身の裁量で、最も正確で魅力的な情報へとページを更新できます。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Benefits -->
+      <section>
+        <h2 class="text-2xl font-bold border-b-2 border-indigo-500 pb-2 mb-4">
+          4. 各ステークホルダーへのメリット
+        </h2>
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- For Authors -->
+          <div class="bg-white p-6 rounded-lg border">
+            <h3 class="text-xl font-semibold mb-3 text-indigo-700">
+              ライブラリ作者にとってのメリット
+            </h3>
+            <ul class="benefit-list space-y-2 text-gray-700">
+              <li>自身のライブラリの公式な情報発信地を確保できる。</li>
+              <li>
+                使い方や仕様変更などを、利用者に正確かつ迅速に伝えられる。
+              </li>
+              <li>
+                利用者からのフィードバックやコントリビューションを受けやすくなる。
+              </li>
+              <li>（将来的には）利用状況の分析データを得られる。</li>
+            </ul>
+          </div>
+          <!-- For Users & Platform -->
+          <div class="bg-white p-6 rounded-lg border">
+            <h3 class="text-xl font-semibold mb-3 text-green-700">
+              利用者・プラットフォームにとってのメリット
+            </h3>
+            <ul class="benefit-list space-y-2 text-gray-700">
+              <li>
+                作者によって品質が保証された、信頼性の高い情報を得られる。
+              </li>
+              <li>
+                古い情報やメンテナンスされていないライブラリを使うリスクが低減する。
+              </li>
+              <li>プラットフォーム全体の情報の質が向上し、価値が高まる。</li>
+              <li>
+                健全なコミュニティが形成され、エコシステム全体が活性化する。
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-16 pt-8 border-t text-center text-gray-500">
+        <p>&copy; 2024 Apps Script Hub Project. All rights reserved.</p>
+      </footer>
+    </div>
+  </body>
+</html>
