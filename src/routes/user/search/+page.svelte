@@ -15,8 +15,8 @@
   // 結果件数に基づいてページ数を動的に計算
   $: totalPages = Math.ceil(totalResults / itemsPerPage);
 
-  // 検索結果のモックデータ
-  const mockLibraries = [
+  // 全ライブラリのモックデータ
+  const allLibraries = [
     {
       id: 1,
       name: 'GasDateFormatter',
@@ -50,17 +50,72 @@
       stars: 325,
       downloads: 4800,
     },
+    {
+      id: 4,
+      name: 'GasLogger',
+      description:
+        'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
+      tags: ['Logging', 'Utility'],
+      author: 'gas-developer',
+      lastUpdated: '2025/05/28',
+      stars: 847,
+      downloads: 12500,
+    },
+    {
+      id: 5,
+      name: 'GasHtml',
+      description:
+        'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
+      tags: ['WebApp', 'HTML'],
+      author: 'html-master',
+      lastUpdated: '2025/04/15',
+      stars: 623,
+      downloads: 8900,
+    },
+    {
+      id: 6,
+      name: 'GasTest',
+      description:
+        'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
+      tags: ['Testing', 'Utility'],
+      author: 'test-ninja',
+      lastUpdated: '2025/03/30',
+      stars: 1205,
+      downloads: 15600,
+    },
   ];
+
+  // 検索結果またはすべてのライブラリ
+  let displayedLibraries: typeof allLibraries = [];
+
+  // 検索クエリに基づいてライブラリをフィルタリング
+  function filterLibraries(query: string) {
+    if (!query) {
+      return allLibraries;
+    }
+
+    const lowerQuery = query.toLowerCase();
+    return allLibraries.filter(
+      library =>
+        library.name.toLowerCase().includes(lowerQuery) ||
+        library.description.toLowerCase().includes(lowerQuery) ||
+        library.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+        library.author.toLowerCase().includes(lowerQuery)
+    );
+  }
 
   onMount(() => {
     // URLクエリパラメータから検索キーワードを取得
     searchQuery = page.url.searchParams.get('q') || '';
-    totalResults = mockLibraries.length;
+    displayedLibraries = filterLibraries(searchQuery);
+    totalResults = displayedLibraries.length;
   });
 </script>
 
 <svelte:head>
-  <title>「{searchQuery}」の検索結果 - AppsScriptHub</title>
+  <title
+    >{searchQuery ? `「${searchQuery}」の検索結果` : 'ライブラリ一覧'} - AppsScriptHub</title
+  >
   <meta
     name="description"
     content="AppsScriptHubでのライブラリ検索結果ページ。GASで使える便利なライブラリを見つけよう。"
@@ -75,19 +130,19 @@
     </div>
     {#if searchQuery}
       <h1 class="text-2xl font-bold text-center text-gray-800">
-        {totalResults}件のライブラリが見つかりました
+        「{searchQuery}」の検索結果: {totalResults}件
       </h1>
     {:else}
       <h1 class="text-2xl font-bold text-center text-gray-800">
-        ライブラリを検索
+        すべてのライブラリ ({totalResults}件)
       </h1>
     {/if}
   </div>
 
-  <!-- 検索結果リスト -->
-  {#if searchQuery && mockLibraries.length > 0}
+  <!-- ライブラリリスト -->
+  {#if displayedLibraries.length > 0}
     <div class="max-w-3xl mx-auto space-y-6">
-      {#each mockLibraries as library}
+      {#each displayedLibraries as library}
         <LibraryCard {library} />
       {/each}
     </div>
@@ -178,27 +233,6 @@
         {/if}
       </div>
     </nav>
-  {:else if searchQuery}
-    <div class="max-w-3xl mx-auto text-center py-12">
-      <svg
-        class="mx-auto h-12 w-12 text-gray-400"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-        />
-      </svg>
-      <h3 class="mt-4 text-lg font-medium text-gray-900">
-        検索結果が見つかりませんでした
-      </h3>
-      <p class="mt-2 text-gray-500">別のキーワードで検索してみてください。</p>
-    </div>
   {:else}
     <div class="max-w-3xl mx-auto text-center py-12">
       <svg
@@ -216,10 +250,12 @@
         />
       </svg>
       <h3 class="mt-4 text-lg font-medium text-gray-900">
-        GASライブラリを検索
+        {searchQuery ? '検索結果が見つかりませんでした' : 'GASライブラリを検索'}
       </h3>
       <p class="mt-2 text-gray-500">
-        上の検索ボックスからライブラリを検索できます。
+        {searchQuery
+          ? '別のキーワードで検索してみてください。'
+          : '上の検索ボックスからライブラリを検索できます。'}
       </p>
     </div>
   {/if}
