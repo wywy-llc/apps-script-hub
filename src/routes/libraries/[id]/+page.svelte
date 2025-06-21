@@ -19,6 +19,9 @@
     libraryUrl: '',
   };
 
+  // スクリプトIDのコピー数を管理
+  let scriptIdCopyCount = 0;
+
   // モックデータ（実際の実装では API から取得）
   const mockLibraries = {
     '1': {
@@ -82,6 +85,11 @@ function myFunction() {
       try {
         document.execCommand('copy');
         console.log('Copied!');
+
+        // スクリプトIDがコピーされた場合はカウントを増加
+        if (elementId === 'script-id') {
+          scriptIdCopyCount++;
+        }
       } catch (err) {
         console.error('Copy failed', err);
       }
@@ -339,6 +347,10 @@ function myFunction() {
         <!-- Aboutカード -->
         <div class="border rounded-lg p-4">
           <dl>
+            <dt class="font-semibold text-gray-800">スクリプトIDコピー数</dt>
+            <dd class="mb-3">
+              {scriptIdCopyCount}回
+            </dd>
             <dt class="font-semibold text-gray-800">作者</dt>
             <dd class="mb-3">
               <a
