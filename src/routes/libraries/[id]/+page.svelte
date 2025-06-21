@@ -345,6 +345,9 @@ function myFunction() {
                 href="/users/{library.author}"
                 class="text-blue-600 hover:underline">{library.author}</a
               >
+              <div class="text-sm text-gray-500 mt-1">
+                Copyright (c) 2025 {library.author}
+              </div>
             </dd>
 
             <dt class="font-semibold text-gray-800">公開日</dt>
@@ -365,7 +368,16 @@ function myFunction() {
             </dd>
 
             <dt class="font-semibold text-gray-800">ライセンス</dt>
-            <dd class="mb-3">{library.license}</dd>
+            <dd class="mb-3">
+              <a
+                href="https://opensource.org/licenses/MIT"
+                class="text-blue-600 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                MIT License
+              </a>
+            </dd>
 
             <dt class="font-semibold text-gray-800">バージョン</dt>
             <dd>{library.version}</dd>
