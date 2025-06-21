@@ -18,7 +18,7 @@
     const query = formData.get('q') as string;
 
     if (query.trim()) {
-      goto(`/search?q=${encodeURIComponent(query.trim())}`);
+      goto(`/user/search?q=${encodeURIComponent(query.trim())}`);
     }
   }
 

@@ -70,7 +70,7 @@
     if (!libraryName) throw new Error('ライブラリ名が見つかりません');
     if (libraryName.textContent !== 'GasDateFormatter')
       throw new Error('ライブラリ名が正しく表示されていません');
-    if (libraryName.getAttribute('href') !== '/libraries/1')
+    if (libraryName.getAttribute('href') !== '/user/libraries/1')
       throw new Error('ライブラリリンクが正しくありません');
 
     // 説明文が表示されることを確認

@@ -130,7 +130,7 @@
     </div>
 
     <div class="mt-16 text-center">
-      <Button variant="outline" size="lg" href="/libraries">
+      <Button variant="outline" size="lg" href="/user/libraries">
         {view_all_libraries()}
       </Button>
     </div>

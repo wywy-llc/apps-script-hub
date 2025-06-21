@@ -25,7 +25,7 @@
 
   // タグクリック時の検索機能
   function searchByTag(tag: string) {
-    window.location.href = `/search?q=${encodeURIComponent(tag)}`;
+    window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
   }
 </script>
 
@@ -34,7 +34,7 @@
 >
   <div class="flex-grow">
     <h3 class="text-xl font-semibold text-blue-600 hover:underline">
-      <a href="/libraries/{library.id}">{library.name}</a>
+      <a href="/user/libraries/{library.id}">{library.name}</a>
     </h3>
     <p class="mt-2 text-gray-600 text-sm">
       {library.description}

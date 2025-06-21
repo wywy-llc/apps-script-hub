@@ -99,7 +99,7 @@
       <div class="-mt-px flex w-0 flex-1">
         {#if currentPage > 1}
           <a
-            href={`/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage - 1}`}
+            href={`/user/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage - 1}`}
             class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
             <svg
@@ -130,7 +130,7 @@
             </span>
           {:else}
             <a
-              href="/search?q={encodeURIComponent(searchQuery)}&page={pageNum}"
+              href="/user/search?q={encodeURIComponent(searchQuery)}&page={pageNum}"
               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
             >
               {pageNum}
@@ -143,7 +143,7 @@
             >...</span
           >
           <a
-            href="/search?q={encodeURIComponent(searchQuery)}&page={totalPages}"
+            href="/user/search?q={encodeURIComponent(searchQuery)}&page={totalPages}"
             class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
             {totalPages}
@@ -153,7 +153,7 @@
       <div class="-mt-px flex w-0 flex-1 justify-end">
         {#if currentPage < totalPages}
           <a
-            href={`/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage + 1}`}
+            href={`/user/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage + 1}`}
             class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
             次へ
