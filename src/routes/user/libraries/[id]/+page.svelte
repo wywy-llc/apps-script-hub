@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { onMount } from 'svelte';
 
   // ライブラリ詳細ページコンポーネント
@@ -72,7 +72,7 @@ function myFunction() {
 	`;
 
   onMount(() => {
-    libraryId = $page.params.id;
+    libraryId = page.params.id;
     // 実際の実装では API からライブラリ情報を取得
     library = mockLibraries[libraryId as keyof typeof mockLibraries] || library;
   });
