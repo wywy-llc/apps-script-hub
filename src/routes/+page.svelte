@@ -1,6 +1,18 @@
 <script lang="ts">
+  import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
+  import {
+    app_title,
+    cta_description,
+    cta_title,
+    featured_description,
+    featured_libraries,
+    hero_description,
+    hero_title,
+    view_all_libraries,
+    view_contribution_guide,
+  } from '$lib/paraglide/messages.js';
 
   // トップページコンポーネント
   // AppsScriptHubのメインランディングページ
@@ -78,11 +90,8 @@
 </script>
 
 <svelte:head>
-  <title>AppsScriptHub - Google Apps Scriptのライブラリハブ</title>
-  <meta
-    name="description"
-    content="GASで使える便利なライブラリやツールを見つけ、共有するためのオープンなハブです。"
-  />
+  <title>{app_title()} - Google Apps Scriptのライブラリハブ</title>
+  <meta name="description" content={hero_description()} />
 </svelte:head>
 
 <!-- ヒーローセクション -->
@@ -91,14 +100,13 @@
     <h1
       class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900"
     >
-      GAS開発を、もっと速く、もっと便利に。
+      {hero_title()}
     </h1>
     <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
-      AppsScriptHubは、GASで使える便利なライブラリやツールを
-      見つけ、共有するためのオープンなハブです。
+      {hero_description()}
     </p>
     <div class="mt-10 max-w-xl mx-auto">
-      <SearchBox placeholder="GASライブラリを検索" />
+      <SearchBox />
     </div>
   </div>
 </section>
@@ -108,10 +116,10 @@
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-12">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-        注目のライブラリ
+        {featured_libraries()}
       </h2>
       <p class="mt-4 text-lg text-gray-600">
-        コミュニティで評価されている、人気のライブラリを発見しましょう。
+        {featured_description()}
       </p>
     </div>
 
@@ -122,12 +130,9 @@
     </div>
 
     <div class="mt-16 text-center">
-      <a
-        href="/libraries"
-        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-      >
-        すべてのライブラリを見る
-      </a>
+      <Button variant="outline" size="lg" href="/libraries">
+        {view_all_libraries()}
+      </Button>
     </div>
   </div>
 </section>
@@ -138,21 +143,15 @@
     class="container mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 text-center"
   >
     <h2 class="text-3xl font-bold tracking-tight text-gray-900">
-      あなたのライブラリを公開しませんか？
+      {cta_title()}
     </h2>
     <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-      あなたが作成した便利なGASライブラリやツールをAppsScriptHubに登録して、
-      GASコミュニティに貢献しましょう。
+      {cta_description()}
     </p>
     <div class="mt-8 flex justify-center">
-      <div class="inline-flex rounded-md shadow">
-        <a
-          href="/contribute"
-          class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-        >
-          ライブラリ登録方法を見る
-        </a>
-      </div>
+      <Button variant="primary" size="lg" href="/contribute">
+        {view_contribution_guide()}
+      </Button>
     </div>
   </div>
 </section>

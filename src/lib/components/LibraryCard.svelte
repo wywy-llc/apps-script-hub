@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { last_updated, search_by_tag } from '$lib/paraglide/messages.js';
+  
   // ライブラリ情報を表示するカードコンポーネント
   // 検索結果やライブラリ一覧で使用される
 
@@ -44,7 +46,7 @@
         <button
           class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-700/10 hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-800/20 transition-colors cursor-pointer"
           on:click={() => searchByTag(tag)}
-          title="「{tag}」で検索"
+          title="{search_by_tag({ tag })}"
         >
           {tag}
         </button>
@@ -72,7 +74,7 @@
         >
       </div>
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>最終更新: {library.lastUpdated}</span>
+        <span>{last_updated()}: {library.lastUpdated}</span>
         <div class="flex items-center space-x-3">
           <div class="flex items-center space-x-1">
             <svg
