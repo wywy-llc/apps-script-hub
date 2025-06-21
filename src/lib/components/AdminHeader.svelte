@@ -26,7 +26,7 @@
       <!-- Right side actions -->
       <div class="flex items-center space-x-4">
         <button
-          on:click={onSignOut}
+          onclick={onSignOut}
           class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
         >
           Sign out
