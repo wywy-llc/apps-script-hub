@@ -1,5 +1,7 @@
 <script lang="ts">
   import AdminHeader from '$lib/components/AdminHeader.svelte';
+  import { enhance } from '$app/forms';
+  import { goto } from '$app/navigation';
   import type { ActionData } from './$types';
 
   // 管理者画面 - 新規ライブラリ追加ページ
@@ -18,19 +20,39 @@
   // フォーム送信時の処理
   $effect(() => {
     if (form?.success) {
-      submitMessage = form.message || 'ライブラリが正常に登録されました。';
-      // 詳細ページに遷移（テスト中は無効）
-      if (!form.message?.includes('テスト中')) {
-        setTimeout(() => {
-          window.location.href = `/admin/libraries/${form.id}`;
-        }, 1500);
-      }
+      submitMessage = 'ライブラリが正常に登録されました。詳細ページに移動します...';
+      // 詳細ページに遷移
+      setTimeout(() => {
+        goto(`/admin/libraries/${form.id}`);
+      }, 1500);
     }
   });
 
+  // バリデーション関数
+  function validateForm(formData: FormData): string | null {
+    const scriptId = formData.get('scriptId')?.toString();
+    const repoUrl = formData.get('repoUrl')?.toString();
+
+    if (!scriptId?.trim()) {
+      return 'GAS スクリプトIDを入力してください。';
+    }
+
+    if (!repoUrl?.trim()) {
+      return 'GitHub リポジトリURLを入力してください。';
+    }
+
+    // GitHub リポジトリURL形式の検証
+    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
+    if (!githubRepoPattern.test(repoUrl)) {
+      return 'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
+    }
+
+    return null;
+  }
+
   function handleCancel() {
     // ライブラリ一覧ページに戻る
-    window.location.href = '/admin/libraries';
+    goto('/admin/libraries');
   }
 
   function handleSignOut() {
@@ -56,7 +78,7 @@
         <h1 class="text-3xl font-bold text-gray-900">新規ライブラリ追加</h1>
         <p class="mt-2 text-sm text-gray-600">
           GAS スクリプトIDとGitHub リポジトリURLを入力してください。GitHub
-          APIから詳細情報を自動取得します。
+          APIから詳細情報を自動取得してデータベースに保存します。
         </p>
       </div>
 
@@ -72,7 +94,35 @@
       {/if}
 
       <!-- New Library Form -->
-      <form method="POST" class="space-y-8">
+      <form 
+        method="POST" 
+        class="space-y-8"
+        use:enhance={({ formData, cancel }) => {
+          // クライアントサイドバリデーション
+          const validationError = validateForm(formData);
+          if (validationError) {
+            submitMessage = validationError;
+            cancel();
+            return;
+          }
+
+          isSubmitting = true;
+          submitMessage = '';
+
+          return async ({ result, update }) => {
+            isSubmitting = false;
+            
+            if (result.type === 'failure') {
+              submitMessage = (result.data as any)?.message || 'エラーが発生しました。';
+            } else if (result.type === 'error') {
+              submitMessage = 'サーバーエラーが発生しました。';
+            }
+            
+            // フォームの状態を更新
+            await update();
+          };
+        }}
+      >
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
           <div class="px-6 py-8">
             <div class="space-y-10">
@@ -82,7 +132,7 @@
                   for="script-id"
                   class="block text-sm font-medium text-gray-700"
                 >
-                  GAS スクリプトID
+                  GAS スクリプトID <span class="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -91,6 +141,7 @@
                   class="block w-full px-1 py-2 mt-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
                   placeholder="1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg"
                   required
+                  disabled={isSubmitting}
                 />
                 <p class="mt-2 text-xs text-gray-500">
                   Google Apps
@@ -104,7 +155,7 @@
                   for="repo-url"
                   class="block text-sm font-medium text-gray-700"
                 >
-                  GitHub リポジトリURL
+                  GitHub リポジトリURL <span class="text-red-500">*</span>
                 </label>
                 <div class="mt-1 flex items-baseline">
                   <span class="text-gray-500 sm:text-sm"
@@ -115,13 +166,14 @@
                     name="repoUrl"
                     id="repo-url"
                     class="block w-full ml-2 px-1 pb-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
-                    placeholder="wywy-llc/gas-logger"
+                    placeholder="microsoft/TypeScript"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <p class="mt-2 text-xs text-gray-500">
                   「owner/repo」の形式で入力してください。GitHub
-                  APIから詳細情報を自動取得します。
+                  APIから詳細情報（名前、説明、README等）を自動取得します。
                 </p>
               </div>
             </div>
@@ -131,7 +183,8 @@
             <button
               type="button"
               onclick={handleCancel}
-              class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               キャンセル
             </button>
@@ -140,11 +193,46 @@
               disabled={isSubmitting}
               class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? '登録中...' : '登録'}
+              {#if isSubmitting}
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                登録中...
+              {:else}
+                登録
+              {/if}
             </button>
           </div>
         </div>
       </form>
+
+      <!-- 使用方法の説明 -->
+      <div class="mt-12 bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6 py-8">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">使用方法</h2>
+          <div class="space-y-4 text-sm text-gray-600">
+            <div>
+              <h3 class="font-medium text-gray-900">1. GAS スクリプトIDの取得</h3>
+              <p>Google Apps Scriptエディタで、ライブラリとして公開したいスクリプトのIDをコピーしてください。</p>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">2. GitHub リポジトリURLの指定</h3>
+              <p>「owner/repo」の形式で入力してください。例: microsoft/TypeScript</p>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">3. 自動情報取得</h3>
+              <p>GitHub APIから以下の情報を自動取得します:</p>
+              <ul class="list-disc list-inside ml-4 mt-2">
+                <li>ライブラリ名</li>
+                <li>説明文</li>
+                <li>作者情報</li>
+                <li>README内容</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
