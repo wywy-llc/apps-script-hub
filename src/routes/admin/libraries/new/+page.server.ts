@@ -1,5 +1,5 @@
+import { CreateLibraryService } from '$lib/server/services/library.js';
 import { error } from '@sveltejs/kit';
-import { nanoid } from 'nanoid';
 import type { Actions } from './$types.js';
 
 export const actions: Actions = {
@@ -22,41 +22,17 @@ export const actions: Actions = {
     }
 
     try {
-      const [owner, repo] = repoUrl.split('/');
-
-      // GitHub API から情報を取得
-      const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}`
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('指定されたGitHubリポジトリが見つかりません。');
-        }
-        throw new Error('GitHubリポジトリの情報取得に失敗しました。');
-      }
-
-      const repoData = await response.json();
-
-      // テスト用ID生成
-      const libraryId = nanoid();
-
-      console.log('ライブラリ作成（データベース無し）:', {
-        id: libraryId,
+      const libraryId = await CreateLibraryService.call({
         scriptId,
         repoUrl,
-        name: repoData.name,
-        description: repoData.description,
-        author: repoData.owner.login,
       });
 
       return {
         success: true,
         id: libraryId,
-        message: `ライブラリ「${repoData.name}」の情報を取得しました。データベース機能は開発中です。`,
       };
     } catch (err) {
-      console.error('ライブラリ作成エラー:', err);
+      console.error('❌ ライブラリ作成エラー:', err);
       throw error(500, {
         message:
           err instanceof Error
