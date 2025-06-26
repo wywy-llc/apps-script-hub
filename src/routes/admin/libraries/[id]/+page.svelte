@@ -7,12 +7,14 @@
   import json from 'highlight.js/lib/languages/json';
   import typescript from 'highlight.js/lib/languages/typescript';
   import bash from 'highlight.js/lib/languages/bash';
+  import plaintext from 'highlight.js/lib/languages/plaintext';
 
   // highlight.jsの言語を登録
   hljs.registerLanguage('javascript', javascript);
   hljs.registerLanguage('json', json);
   hljs.registerLanguage('typescript', typescript);
   hljs.registerLanguage('bash', bash);
+  hljs.registerLanguage('plaintext', plaintext);
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -113,9 +115,16 @@
       code(token: any) {
         const code = token.text;
         const lang = token.lang || 'plaintext';
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        const highlighted = hljs.highlight(code, { language }).value;
-        return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        
+        try {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          const highlighted = hljs.highlight(code, { language }).value;
+          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        } catch (error) {
+          console.warn('Highlight.js error:', error);
+          // エラーの場合はプレーンテキストとして表示
+          return `<pre><code class="hljs">${code}</code></pre>`;
+        }
       }
     },
     breaks: true,
