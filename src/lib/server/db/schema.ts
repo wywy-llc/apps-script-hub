@@ -16,6 +16,34 @@ export const session = pgTable('session', {
   }).notNull(),
 });
 
+export const library = pgTable('library', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  scriptId: text('script_id').notNull(),
+  repositoryUrl: text('repository_url').notNull(),
+  authorUrl: text('author_url').notNull(),
+  authorName: text('author_name'),
+  description: text('description'),
+  readmeContent: text('readme_content'),
+  status: text('status', { enum: ['pending', 'published', 'rejected'] })
+    .notNull()
+    .default('pending'),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Session = typeof session.$inferSelect;
 
 export type User = typeof user.$inferSelect;
+
+export type Library = typeof library.$inferSelect;
