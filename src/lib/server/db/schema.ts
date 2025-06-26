@@ -22,10 +22,10 @@ export const library = pgTable('library', {
   scriptId: text('script_id').notNull().unique(),
   repositoryUrl: text('repository_url').notNull().unique(),
   authorUrl: text('author_url').notNull(),
-  authorName: text('author_name'),
-  description: text('description'),
-  readmeContent: text('readme_content'),
-  starCount: integer('star_count').default(0),
+  authorName: text('author_name').notNull(),
+  description: text('description').notNull(),
+  readmeContent: text('readme_content').notNull(),
+  starCount: integer('star_count').default(0).notNull(),
   status: text('status', { enum: ['pending', 'published', 'rejected'] })
     .notNull()
     .default('pending'),
