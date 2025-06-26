@@ -68,8 +68,10 @@
     "@neondatabase/serverless": "^0.10.4",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
+    "@types/pg": "^8.15.4",
     "@vercel/postgres": "^0.10.0",
     "drizzle-orm": "^0.40.0",
-    "nanoid": "^5.1.5"
+    "nanoid": "^5.1.5",
+    "pg": "^8.16.2"
   }
 }
