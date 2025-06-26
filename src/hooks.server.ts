@@ -1,10 +1,12 @@
-import * as auth from '$lib/server/auth';
-import { sequence } from '@sveltejs/kit/hooks';
-import type { Handle } from '@sveltejs/kit';
-import { extractLocaleFromRequest } from '$lib/paraglide/runtime.js';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { overwriteServerAsyncLocalStorage } from '$lib/paraglide/runtime.js';
 import type { Locale } from '$lib';
+import {
+  extractLocaleFromRequest,
+  overwriteServerAsyncLocalStorage,
+} from '$lib/paraglide/runtime.js';
+import * as auth from '$lib/server/auth';
+import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
   const sessionToken = event.cookies.get(auth.sessionCookieName);
@@ -48,11 +50,12 @@ const handleI18n: Handle = async ({ event, resolve }) => {
       origin,
       messageCalls: new Set(),
     },
-    () => resolve(event, {
-      transformPageChunk: ({ html }) => {
-        return html.replace('%lang%', locale);
-      }
-    })
+    () =>
+      resolve(event, {
+        transformPageChunk: ({ html }) => {
+          return html.replace('%lang%', locale);
+        },
+      })
   );
 };
 
