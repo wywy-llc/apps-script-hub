@@ -1,84 +1,19 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import AdminHeader from '$lib/components/AdminHeader.svelte';
-  import { onMount } from 'svelte';
+  import type { PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
 
-  let libraryId = '';
-  let library = {
-    name: '',
-    scriptId: '',
-    repositoryUrl: '',
-    authorUrl: '',
-    status: 'pending' as 'pending' | 'published' | 'rejected',
-    createdAt: '',
-    updatedAt: '',
-  };
+  interface Props {
+    data: PageData;
+  }
 
-  let isScrapingInProgress = false;
-  let scrapingMessage = '';
+  let { data }: Props = $props();
+  let library = data.library;
 
-  // モックデータ（実際の実装では API から取得）
-  const mockLibraries = {
-    '1': {
-      name: 'GasLogger',
-      scriptId: '1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg',
-      repositoryUrl: 'https://github.com/wywy-llc/apps-script-hub',
-      authorUrl: 'https://github.com/wywy-llc',
-      status: 'pending' as const,
-      createdAt: '2025-06-21T10:00:00Z',
-      updatedAt: '2025-06-21T12:30:00Z',
-    },
-    '2': {
-      name: 'GasDateFormatter',
-      scriptId: '1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg',
-      repositoryUrl: 'https://github.com/user-name/gas-date-formatter',
-      authorUrl: 'https://github.com/user-name',
-      status: 'published' as const,
-      createdAt: '2025-05-28T10:00:00Z',
-      updatedAt: '2025-05-28T14:00:00Z',
-    },
-  };
-
-  const readmeContent = `
-## 概要
-
-GAS (Google Apps Script) の標準の \`Utilities.formatDate()\` は便利ですが、タイムゾーンの指定が必須であったり、フォーマット文字列が少し特殊だったりします。
-
-このライブラリは、より直感的で広く使われている [Moment.js](https://momentjs.com/) のような構文で日付フォーマットを可能にし、開発体験を向上させます。
-
-### 主な機能
-
-- **直感的なフォーマット**: \`YYYY-MM-DD\` のような分かりやすいパターンで日付を文字列に変換します。
-- **タイムゾーンの自動解決**: スクリプトのタイムゾーンを自動的に使用し、明示的な指定を不要にします。
-- **軽量**: 必要な機能に絞っているため、スクリプトの実行時間に与える影響は軽微です。
-
-## 使い方
-
-\`\`\`javascript
-function myFunction() {
-  // ライブラリをインポート (例: GasDateFormatter)
-  
-  const now = new Date();
-  
-  // 'YYYY/MM/DD HH:mm:ss' 形式でフォーマット
-  const formattedDate = GasDateFormatter.format(now, 'YYYY/MM/DD HH:mm:ss');
-  console.log(formattedDate); // 例: "2025/06/15 23:07:00"
-
-  // 和暦や曜日も利用可能
-  const warekiDate = GasDateFormatter.format(now, 'ggge年M月d日(E)');
-  console.log(warekiDate); // 例: "令和7年6月15日(日)"
-}
-\`\`\`
-  `;
-
-  onMount(() => {
-    libraryId = page.params.id;
-    // 実際の実装では API からライブラリ情報を取得
-    library = mockLibraries[libraryId as keyof typeof mockLibraries] || library;
-  });
+  let isScrapingInProgress = $state(false);
+  let scrapingMessage = $state('');
 
   function handleScraping() {
     if (isScrapingInProgress) return;
@@ -86,29 +21,47 @@ function myFunction() {
     isScrapingInProgress = true;
     scrapingMessage = 'GitHubリポジトリから情報を取得中...';
 
-    // 実際の実装では GitHub API からスクレイピング
-    setTimeout(() => {
-      scrapingMessage = 'スクレイピングが完了しました。';
-      isScrapingInProgress = false;
-
-      // 3秒後にメッセージを消去
-      setTimeout(() => {
-        scrapingMessage = '';
-      }, 3000);
-    }, 2000);
+    // GitHub API から情報を再取得
+    fetch(`/admin/libraries/${library.id}/scraping`, {
+      method: 'POST',
+    })
+      .then(async response => {
+        if (response.ok) {
+          scrapingMessage =
+            'スクレイピングが完了しました。ページを再読み込みしてください。';
+          // ページを再読み込み
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          const error = await response.json();
+          scrapingMessage = error.message || 'スクレイピングに失敗しました。';
+        }
+      })
+      .catch(error => {
+        console.error('スクレイピングエラー:', error);
+        scrapingMessage = 'スクレイピングに失敗しました。';
+      })
+      .finally(() => {
+        isScrapingInProgress = false;
+        // 3秒後にメッセージを消去
+        setTimeout(() => {
+          scrapingMessage = '';
+        }, 3000);
+      });
   }
 
   function handlePublish() {
     if (confirm('このライブラリを公開しますか？')) {
       library.status = 'published';
       // 実際の実装では API にPATCHリクエストを送信
-      console.log('ライブラリを公開:', libraryId);
+      console.log('ライブラリを公開:', library.id);
     }
   }
 
   function handleEdit() {
     // 編集ページに遷移
-    window.location.href = `/admin/libraries/${libraryId}/edit`;
+    window.location.href = `/admin/libraries/${library.id}/edit`;
   }
 
   function handleSignOut() {
@@ -265,17 +218,37 @@ function myFunction() {
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-500">GitHub 作者URL</dt>
-              <dd class="mt-1 text-base text-blue-600 hover:underline">
-                <a
-                  href={library.authorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {library.authorUrl}
-                </a>
+              <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
+              <dd class="mt-1 text-base">
+                {#if library.authorName}
+                  <a
+                    href={library.authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:underline"
+                  >
+                    {library.authorName}
+                  </a>
+                {:else}
+                  <a
+                    href={library.authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:underline"
+                  >
+                    {library.authorUrl}
+                  </a>
+                {/if}
               </dd>
             </div>
+            {#if library.description}
+              <div>
+                <dt class="text-sm font-medium text-gray-500">説明</dt>
+                <dd class="mt-1 text-base text-gray-900">
+                  {library.description}
+                </dd>
+              </div>
+            {/if}
             <div>
               <dt class="text-sm font-medium text-gray-500">作成日時</dt>
               <dd class="mt-1 text-base text-gray-900">
@@ -298,9 +271,18 @@ function myFunction() {
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
           <div class="px-6">
             <!-- README Section -->
-            <article class="markdown-body prose max-w-none">
-              {@html renderMarkdown(readmeContent)}
-            </article>
+            {#if library.readmeContent}
+              <article class="markdown-body prose max-w-none">
+                {@html renderMarkdown(library.readmeContent)}
+              </article>
+            {:else}
+              <div class="text-gray-500 text-center py-8">
+                <p>README が見つかりませんでした。</p>
+                <p class="text-sm mt-2">
+                  スクレイピングを実行してREADMEを取得してください。
+                </p>
+              </div>
+            {/if}
 
             <!-- Methods Section -->
             <div class="mt-12">
