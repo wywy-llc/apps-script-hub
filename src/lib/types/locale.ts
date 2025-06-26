@@ -8,7 +8,7 @@ export type Locale = 'en' | 'ja';
  */
 export const LANGUAGE_NAMES: Record<Locale, string> = {
   en: 'English',
-  ja: '日本語'
+  ja: '日本語',
 } as const;
 
 /**
