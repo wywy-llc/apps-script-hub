@@ -15,7 +15,9 @@ export class FetchGithubRepoService {
    */
   static async call(owner: string, repo: string) {
     try {
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -52,14 +54,18 @@ export class FetchGithubReadmeService {
    */
   static async call(owner: string, repo: string): Promise<string> {
     try {
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`);
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/readme`
+      );
 
       if (!response.ok) {
         return ''; // README が見つからない場合は空文字を返す
       }
 
       const readmeData = await response.json();
-      const readmeContent = Buffer.from(readmeData.content, 'base64').toString('utf-8');
+      const readmeContent = Buffer.from(readmeData.content, 'base64').toString(
+        'utf-8'
+      );
 
       return readmeContent;
     } catch (err) {
