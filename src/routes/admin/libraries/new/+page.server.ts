@@ -1,5 +1,5 @@
 import { CreateLibraryService } from '$lib/server/services/library.js';
-import { error } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types.js';
 
 export const actions: Actions = {
@@ -8,16 +8,19 @@ export const actions: Actions = {
     const scriptId = formData.get('scriptId')?.toString();
     const repoUrl = formData.get('repoUrl')?.toString();
 
-    if (!scriptId || !repoUrl) {
-      throw error(400, { message: '必要な情報が不足しています。' });
+    if (!scriptId?.trim()) {
+      return fail(400, { message: 'GAS スクリプトIDを入力してください' });
+    }
+
+    if (!repoUrl?.trim()) {
+      return fail(400, { message: 'GitHub リポジトリURLを入力してください' });
     }
 
     // バリデーション
     const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
     if (!githubRepoPattern.test(repoUrl)) {
-      throw error(400, {
-        message:
-          'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。',
+      return fail(400, {
+        message: 'GitHub リポジトリURLの形式が正しくありません',
       });
     }
 
@@ -33,7 +36,7 @@ export const actions: Actions = {
       };
     } catch (err) {
       console.error('❌ ライブラリ作成エラー:', err);
-      throw error(500, {
+      return fail(500, {
         message:
           err instanceof Error
             ? err.message

@@ -23,8 +23,16 @@
         </a>
       </div>
 
-      <!-- Right side actions -->
-      <div class="flex items-center space-x-4">
+      <!-- Navigation and actions -->
+      <div class="flex items-center space-x-6">
+        <nav class="flex items-center space-x-4">
+          <a
+            href="/admin/libraries"
+            class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+          >
+            ライブラリ一覧
+          </a>
+        </nav>
         <button
           onclick={onSignOut}
           class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"

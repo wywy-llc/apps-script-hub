@@ -1,7 +1,7 @@
 <script lang="ts">
-  import AdminHeader from '$lib/components/AdminHeader.svelte';
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
+  import AdminHeader from '$lib/components/AdminHeader.svelte';
   import type { ActionData } from './$types';
 
   // 管理者画面 - 新規ライブラリ追加ページ
@@ -20,7 +20,8 @@
   // フォーム送信時の処理
   $effect(() => {
     if (form?.success) {
-      submitMessage = 'ライブラリが正常に登録されました。詳細ページに移動します...';
+      submitMessage =
+        'ライブラリが正常に登録されました。詳細ページに移動します...';
       // 詳細ページに遷移
       setTimeout(() => {
         goto(`/admin/libraries/${form.id}`);
@@ -94,30 +95,23 @@
       {/if}
 
       <!-- New Library Form -->
-      <form 
-        method="POST" 
+      <form
+        method="POST"
         class="space-y-8"
         use:enhance={({ formData, cancel }) => {
-          // クライアントサイドバリデーション
-          const validationError = validateForm(formData);
-          if (validationError) {
-            submitMessage = validationError;
-            cancel();
-            return;
-          }
-
           isSubmitting = true;
           submitMessage = '';
 
           return async ({ result, update }) => {
             isSubmitting = false;
-            
+
             if (result.type === 'failure') {
-              submitMessage = (result.data as any)?.message || 'エラーが発生しました。';
+              submitMessage =
+                (result.data as any)?.message || 'エラーが発生しました。';
             } else if (result.type === 'error') {
               submitMessage = 'サーバーエラーが発生しました。';
             }
-            
+
             // フォームの状態を更新
             await update();
           };
@@ -194,9 +188,25 @@
               class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {#if isSubmitting}
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 登録中...
               {:else}
@@ -213,12 +223,21 @@
           <h2 class="text-xl font-semibold text-gray-900 mb-4">使用方法</h2>
           <div class="space-y-4 text-sm text-gray-600">
             <div>
-              <h3 class="font-medium text-gray-900">1. GAS スクリプトIDの取得</h3>
-              <p>Google Apps Scriptエディタで、ライブラリとして公開したいスクリプトのIDをコピーしてください。</p>
+              <h3 class="font-medium text-gray-900">
+                1. GAS スクリプトIDの取得
+              </h3>
+              <p>
+                Google Apps
+                Scriptエディタで、ライブラリとして公開したいスクリプトのIDをコピーしてください。
+              </p>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900">2. GitHub リポジトリURLの指定</h3>
-              <p>「owner/repo」の形式で入力してください。例: microsoft/TypeScript</p>
+              <h3 class="font-medium text-gray-900">
+                2. GitHub リポジトリURLの指定
+              </h3>
+              <p>
+                「owner/repo」の形式で入力してください。例: microsoft/TypeScript
+              </p>
             </div>
             <div>
               <h3 class="font-medium text-gray-900">3. 自動情報取得</h3>
