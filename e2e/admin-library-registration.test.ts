@@ -207,7 +207,6 @@ test.describe('管理者画面 - ライブラリ登録', () => {
 
     // ページのHTMLを確認
     const pageContent = await page.content();
-    console.log('📋 フォーム送信後のページURL:', page.url());
 
     // エラーメッセージ要素を詳細に検索
     const allTexts = await page.locator('*').allTextContents();
@@ -217,7 +216,6 @@ test.describe('管理者画面 - ライブラリ登録', () => {
         text.includes('エラー') ||
         text.includes('失敗')
     );
-    console.log('📋 エラー関連のテキスト:', errorTexts);
 
     // 特定のエラーメッセージをチェック
     const hasScriptIdError = await page
@@ -227,16 +225,12 @@ test.describe('管理者画面 - ライブラリ登録', () => {
       .locator('text=このリポジトリは既に登録されています。')
       .isVisible();
 
-    console.log('📋 ScriptIDエラー表示:', hasScriptIdError);
-    console.log('📋 RepoURLエラー表示:', hasRepoError);
-
     // フォームのsubmitMessage要素を確認
     const submitMessage = await page
       .locator(
         '[class*="bg-red"], [class*="text-red"], div:has-text("エラー"), div:has-text("失敗"), div:has-text("既に登録")'
       )
       .count();
-    console.log('📋 エラー要素の数:', submitMessage);
 
     // 手動動作確認でOKなので、少なくとも何らかのエラー表示があることを期待
     // サーバーログで重複エラーが出力されているため、機能は正常に動作している

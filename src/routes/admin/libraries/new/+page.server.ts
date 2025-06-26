@@ -35,7 +35,6 @@ export const actions: Actions = {
         id: libraryId,
       };
     } catch (err) {
-      console.error('❌ ライブラリ作成エラー:', err);
       return fail(500, {
         message:
           err instanceof Error

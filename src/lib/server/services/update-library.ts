@@ -77,7 +77,6 @@ export class UpdateLibraryFromGithubService {
         })
         .where(eq(library.id, libraryId));
     } catch (err) {
-      console.error('GitHub API エラー:', err);
       throw err;
     }
   }
