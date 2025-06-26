@@ -71,6 +71,9 @@
     "@types/pg": "^8.15.4",
     "@vercel/postgres": "^0.10.0",
     "drizzle-orm": "^0.40.0",
+    "github-markdown-css": "^5.8.1",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.12",
     "nanoid": "^5.1.5",
     "pg": "^8.16.2"
   }
