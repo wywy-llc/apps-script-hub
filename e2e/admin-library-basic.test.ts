@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ機能（基本）', () => {
   test('今回のケース: googleworkspace/apps-script-oauth2の登録テスト', async ({
     page,
   }) => {
+    await clearTestDataBeforeTest();
     // 実際に報告されたケースと同じデータでテスト
     const testData = {
       scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
@@ -66,6 +68,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
   });
 
   test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
+    await clearTestDataBeforeTest();
     const testData = {
       scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
       repoUrl: 'googleworkspace/apps-script-oauth2',
@@ -90,6 +93,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
   });
 
   test('管理者トップページのリダイレクト確認', async ({ page }) => {
+    await clearTestDataBeforeTest();
     // /admin にアクセス
     await page.goto('/admin');
 

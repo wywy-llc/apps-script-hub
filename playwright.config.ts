@@ -5,6 +5,9 @@ import { config } from 'dotenv';
 config();
 
 export default defineConfig({
+  globalSetup: './e2e/global-setup.ts',
+  workers: 1, // テストを順次実行してデータ競合を防ぐ
+  fullyParallel: false, // 並列実行を無効化
   webServer: {
     command: 'npm run build && npm run preview',
     port: 4173,

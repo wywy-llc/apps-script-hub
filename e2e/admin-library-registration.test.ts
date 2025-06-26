@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ登録', () => {
   test('新規ライブラリ登録から詳細ページ表示まで', async ({ page }) => {
+    // テスト前にデータをクリア
+    await clearTestDataBeforeTest();
     // テスト用のデータ
     const testData = {
       scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
@@ -44,8 +47,12 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     );
 
     // GAS スクリプトID（概要セクションの特定の要素を選択）
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toBeVisible();
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(testData.scriptId);
+    await expect(
+      page.locator('dt:has-text("GAS スクリプトID") + dd')
+    ).toBeVisible();
+    await expect(
+      page.locator('dt:has-text("GAS スクリプトID") + dd')
+    ).toContainText(testData.scriptId);
 
     // GitHub リポジトリURL
     await expect(
@@ -75,6 +82,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   });
 
   test('フォームバリデーション - 必須項目未入力', async ({ page }) => {
+    await clearTestDataBeforeTest();
     // 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
 
@@ -96,6 +104,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   });
 
   test('フォームバリデーション - GitHub URL形式エラー', async ({ page }) => {
+    await clearTestDataBeforeTest();
     // 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
 
@@ -121,8 +130,9 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   });
 
   test('存在しないGitHubリポジトリのエラーハンドリング', async ({ page }) => {
+    await clearTestDataBeforeTest();
     const testData = {
-      scriptId: 'TEST_SCRIPT_ID_' + Date.now(),
+      scriptId: 'TEST_SCRIPT_ID',
       repoUrl: 'nonexistent-user-999999/nonexistent-repo-999999',
     };
 
@@ -143,6 +153,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   });
 
   test('詳細ページから管理者ライブラリ一覧への戻り', async ({ page }) => {
+    await clearTestDataBeforeTest();
     // 既存のライブラリ詳細ページに直接アクセス（テスト用）
     await page.goto('/admin/libraries/new');
 
