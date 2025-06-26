@@ -20,7 +20,7 @@ export const library = pgTable('library', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   scriptId: text('script_id').notNull(),
-  repositoryUrl: text('repository_url').notNull(),
+  repositoryUrl: text('repository_url').notNull().unique(),
   authorUrl: text('author_url').notNull(),
   authorName: text('author_name'),
   description: text('description'),

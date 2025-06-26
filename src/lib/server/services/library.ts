@@ -1,5 +1,6 @@
 import { db, testConnection } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
+import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { FetchGithubReadmeService, FetchGithubRepoService } from './github.js';
 
@@ -27,6 +28,18 @@ export class CreateLibraryService {
     const isConnected = await testConnection();
     if (!isConnected) {
       throw new Error('データベース接続に失敗しました。');
+    }
+
+    // repositoryUrlが既に登録されているかチェック
+    const repositoryUrl = `https://github.com/${params.repoUrl}`;
+    const existingLibrary = await db
+      .select()
+      .from(library)
+      .where(eq(library.repositoryUrl, repositoryUrl))
+      .limit(1);
+
+    if (existingLibrary.length > 0) {
+      throw new Error('このリポジトリは既に登録されています。');
     }
 
     // GitHub から情報を取得
