@@ -6,10 +6,8 @@
 
   // フォームデータ
   let formData = {
-    libraryName: '',
     scriptId: '',
     repoUrl: '',
-    authorUrl: '',
   };
 
   // フォーム送信状態
@@ -25,12 +23,6 @@
     submitMessage = '';
 
     // バリデーション
-    if (!formData.libraryName.trim()) {
-      submitMessage = 'ライブラリ名を入力してください。';
-      isSubmitting = false;
-      return;
-    }
-
     if (!formData.scriptId.trim()) {
       submitMessage = 'GAS スクリプトIDを入力してください。';
       isSubmitting = false;
@@ -43,26 +35,44 @@
       return;
     }
 
-    if (!formData.authorUrl.trim()) {
-      submitMessage = 'GitHub 作者URLを入力してください。';
+    // GitHub リポジトリURL形式の検証
+    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
+    if (!githubRepoPattern.test(formData.repoUrl)) {
+      submitMessage =
+        'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
       isSubmitting = false;
       return;
     }
 
-    // 実際の実装では API にPOSTリクエストを送信
-    setTimeout(() => {
-      console.log('新規ライブラリ登録:', formData);
-      submitMessage = 'ライブラリが正常に登録されました。';
-      isSubmitting = false;
+    // フォームデータを送信
+    const formDataToSend = new FormData();
+    formDataToSend.append('scriptId', formData.scriptId);
+    formDataToSend.append('repoUrl', formData.repoUrl);
 
-      // フォームリセット
-      formData = {
-        libraryName: '',
-        scriptId: '',
-        repoUrl: '',
-        authorUrl: '',
-      };
-    }, 2000);
+    fetch('/admin/libraries/new', {
+      method: 'POST',
+      body: formDataToSend,
+    })
+      .then(async response => {
+        if (response.ok) {
+          const result = await response.json();
+          submitMessage = 'ライブラリが正常に登録されました。';
+          // 詳細ページに遷移
+          setTimeout(() => {
+            window.location.href = `/admin/libraries/${result.id}`;
+          }, 1500);
+        } else {
+          const error = await response.json();
+          submitMessage = error.message || 'エラーが発生しました。';
+        }
+      })
+      .catch(error => {
+        console.error('登録エラー:', error);
+        submitMessage = 'ライブラリの登録に失敗しました。';
+      })
+      .finally(() => {
+        isSubmitting = false;
+      });
   }
 
   function handleCancel() {
@@ -92,7 +102,8 @@
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">新規ライブラリ追加</h1>
         <p class="mt-2 text-sm text-gray-600">
-          新しいライブラリをシステムに登録します。GitHubリポジトリから情報を自動で取得します。
+          GAS スクリプトIDとGitHub リポジトリURLを入力してください。GitHub
+          APIから詳細情報を自動取得します。
         </p>
       </div>
 
@@ -112,28 +123,6 @@
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
           <div class="px-6 py-8">
             <div class="space-y-10">
-              <!-- Library Name -->
-              <div>
-                <label
-                  for="library-name"
-                  class="block text-sm font-medium text-gray-700"
-                >
-                  ライブラリ名
-                </label>
-                <input
-                  type="text"
-                  name="library-name"
-                  id="library-name"
-                  bind:value={formData.libraryName}
-                  class="block w-full px-1 py-2 mt-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
-                  placeholder="GasLogger"
-                  required
-                />
-                <p class="mt-2 text-xs text-gray-500">
-                  公開されるライブラリの名前です。
-                </p>
-              </div>
-
               <!-- GAS Script ID -->
               <div>
                 <label
@@ -175,34 +164,14 @@
                     id="repo-url"
                     bind:value={formData.repoUrl}
                     class="block w-full ml-2 px-1 pb-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
-                    placeholder="wywy-llc/apps-script-hub"
+                    placeholder="wywy-llc/gas-logger"
                     required
                   />
                 </div>
-              </div>
-
-              <!-- GitHub Author URL -->
-              <div>
-                <label
-                  for="author-url"
-                  class="block text-sm font-medium text-gray-700"
-                >
-                  GitHub 作者URL
-                </label>
-                <div class="mt-1 flex items-baseline">
-                  <span class="text-gray-500 sm:text-sm"
-                    >https://github.com/</span
-                  >
-                  <input
-                    type="text"
-                    name="author-url"
-                    id="author-url"
-                    bind:value={formData.authorUrl}
-                    class="block w-full ml-2 px-1 pb-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
-                    placeholder="wywy-llc"
-                    required
-                  />
-                </div>
+                <p class="mt-2 text-xs text-gray-500">
+                  「owner/repo」の形式で入力してください。GitHub
+                  APIから詳細情報を自動取得します。
+                </p>
               </div>
             </div>
           </div>
