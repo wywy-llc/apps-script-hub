@@ -11,7 +11,6 @@ import { clearTestData } from '../scripts/clear-test-data.js';
 export async function clearTestDataBeforeTest() {
   try {
     await clearTestData();
-    console.log('🧹 テストデータをクリアしました');
   } catch (error) {
     console.error('❌ テストデータのクリアに失敗しました:', error);
     throw error;

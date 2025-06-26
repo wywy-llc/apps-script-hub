@@ -23,18 +23,14 @@ const POSTGRES_CONFIG = {
 };
 
 async function clearTestData() {
-  console.log('🧹 テストデータをクリア中...');
-
   const client = new Client(POSTGRES_CONFIG);
-  
+
   try {
     await client.connect();
     const db = drizzle(client);
 
     // libraryテーブルのデータをクリア
     await db.execute(sql`DELETE FROM "library"`);
-    console.log('✅ libraryテーブルのデータをクリアしました');
-
   } catch (error) {
     console.error('❌ データクリアエラー:', error);
     throw error;
