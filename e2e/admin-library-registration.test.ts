@@ -4,10 +4,10 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   test('新規ライブラリ登録から詳細ページ表示まで', async ({ page }) => {
     // テスト用のデータ
     const testData = {
-      scriptId: 'TEST_SCRIPT_ID_' + Date.now(),
-      repoUrl: 'microsoft/TypeScript',
-      expectedName: 'TypeScript',
-      expectedAuthor: 'microsoft',
+      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+      repoUrl: 'googleworkspace/apps-script-oauth2',
+      expectedName: 'apps-script-oauth2',
+      expectedAuthor: 'googleworkspace',
     };
 
     // 1. 新規ライブラリ追加ページにアクセス
@@ -43,8 +43,9 @@ test.describe('管理者画面 - ライブラリ登録', () => {
       testData.expectedName
     );
 
-    // GAS スクリプトID
-    await expect(page.locator('text=' + testData.scriptId)).toBeVisible();
+    // GAS スクリプトID（概要セクションの特定の要素を選択）
+    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toBeVisible();
+    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(testData.scriptId);
 
     // GitHub リポジトリURL
     await expect(
@@ -122,7 +123,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   test('存在しないGitHubリポジトリのエラーハンドリング', async ({ page }) => {
     const testData = {
       scriptId: 'TEST_SCRIPT_ID_' + Date.now(),
-      repoUrl: 'nonexistent-user/nonexistent-repo-' + Date.now(),
+      repoUrl: 'nonexistent-user-999999/nonexistent-repo-999999',
     };
 
     // 新規ライブラリ追加ページにアクセス
@@ -147,8 +148,8 @@ test.describe('管理者画面 - ライブラリ登録', () => {
 
     // テストライブラリを作成
     const testData = {
-      scriptId: 'TEST_NAVIGATION_' + Date.now(),
-      repoUrl: 'facebook/react',
+      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+      repoUrl: 'googleworkspace/apps-script-oauth2',
     };
 
     await page.fill('input[name="scriptId"]', testData.scriptId);

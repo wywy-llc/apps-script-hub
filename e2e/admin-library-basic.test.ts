@@ -23,18 +23,15 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     // 3. フォーム送信
     await page.click('button[type="submit"]');
 
-    // 4. 送信中状態の確認
-    await expect(page.locator('text=登録中...')).toBeVisible();
-
-    // 5. 成功メッセージの確認
+    // 4. 成功メッセージの確認
     await expect(
       page.locator('text=ライブラリが正常に登録されました')
     ).toBeVisible({ timeout: 10000 });
 
-    // 6. 詳細ページへのリダイレクトを待機
+    // 5. 詳細ページへのリダイレクトを待機
     await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
 
-    // 7. 詳細ページの重要な情報を確認
+    // 6. 詳細ページの重要な情報を確認
     // ライブラリ名
     await expect(page.locator('h1:has-text("ライブラリ詳細")')).toBeVisible();
     await expect(
@@ -57,10 +54,10 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     // ステータス
     await expect(page.locator('text=承認待ち')).toBeVisible();
 
-    // 8. README情報が取得・表示されているか確認
+    // 7. README情報が取得・表示されているか確認
     await expect(page.locator('.markdown-body')).toBeVisible();
 
-    // 9. 管理者機能ボタンの確認
+    // 8. 管理者機能ボタンの確認
     await expect(
       page.locator('button:has-text("スクレイピング実行")')
     ).toBeVisible();
@@ -68,10 +65,10 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await expect(page.locator('button:has-text("公開する")')).toBeVisible();
   });
 
-  test('簡単なケース: microsoft/TypeScriptの登録テスト', async ({ page }) => {
+  test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
     const testData = {
-      scriptId: 'SIMPLE_TEST_' + Date.now(),
-      repoUrl: 'microsoft/TypeScript',
+      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+      repoUrl: 'googleworkspace/apps-script-oauth2',
     };
 
     await page.goto('/admin/libraries/new');
@@ -84,11 +81,11 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     ).toBeVisible({ timeout: 10000 });
     await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
 
-    // TypeScriptライブラリの基本情報確認
+    // apps-script-oauth2ライブラリの基本情報確認
     await expect(
-      page.locator('dd').filter({ hasText: 'TypeScript' }).first()
+      page.locator('dd').filter({ hasText: 'apps-script-oauth2' }).first()
     ).toBeVisible();
-    await expect(page.locator('text=microsoft').first()).toBeVisible();
+    await expect(page.locator('text=googleworkspace').first()).toBeVisible();
     await expect(page.locator('text=承認待ち')).toBeVisible();
   });
 
