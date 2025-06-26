@@ -30,15 +30,26 @@ export class CreateLibraryService {
       throw new Error('データベース接続に失敗しました。');
     }
 
+    // scriptIdが既に登録されているかチェック
+    const existingScriptId = await db
+      .select()
+      .from(library)
+      .where(eq(library.scriptId, params.scriptId))
+      .limit(1);
+    
+    if (existingScriptId.length > 0) {
+      throw new Error('このGASスクリプトIDは既に登録されています。');
+    }
+
     // repositoryUrlが既に登録されているかチェック
     const repositoryUrl = `https://github.com/${params.repoUrl}`;
-    const existingLibrary = await db
+    const existingRepositoryUrl = await db
       .select()
       .from(library)
       .where(eq(library.repositoryUrl, repositoryUrl))
       .limit(1);
 
-    if (existingLibrary.length > 0) {
+    if (existingRepositoryUrl.length > 0) {
       throw new Error('このリポジトリは既に登録されています。');
     }
 
