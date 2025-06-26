@@ -176,4 +176,104 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // ライブラリ一覧ページに遷移することを確認
     await expect(page).toHaveURL('/admin/libraries');
   });
+
+  test('重複データエラーハンドリング - 同じscriptIdでの登録', async ({
+    page,
+  }) => {
+    await clearTestDataBeforeTest();
+
+    const testData = {
+      scriptId: 'TEST_SCRIPT_ID_FOR_DUPLICATE_CHECK',
+      repoUrl: 'googleworkspace/apps-script-oauth2',
+    };
+
+    // 1回目の登録（成功）
+    await page.goto('/admin/libraries/new');
+    await page.fill('input[name="scriptId"]', testData.scriptId);
+    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.click('button[type="submit"]');
+
+    // 登録フォーム送信後、詳細ページまたはエラーメッセージのいずれかが表示されるまで待機
+    await page.waitForLoadState('networkidle');
+
+    // ページが詳細ページに遷移したかまたはフォームが残っているかを確認
+    const isOnDetailPage = await page
+      .url()
+      .match(/\/admin\/libraries\/[^\/]+$/);
+    const hasSuccessMessage = await page
+      .locator('text=ライブラリが正常に登録されました')
+      .isVisible();
+
+    if (isOnDetailPage || hasSuccessMessage) {
+      console.log('✅ 1回目の登録が成功しました');
+
+      // 2回目の登録（同じscriptIdで失敗）
+      await page.goto('/admin/libraries/new');
+      await page.fill('input[name="scriptId"]', testData.scriptId);
+      await page.fill('input[name="repoUrl"]', 'microsoft/TypeScript'); // 異なるリポジトリを使用
+      await page.click('button[type="submit"]');
+
+      // scriptId重複エラーメッセージの確認
+      await expect(
+        page.locator('text=このGASスクリプトIDは既に登録されています')
+      ).toBeVisible();
+    } else {
+      // 1回目の登録が失敗した場合は、scriptId重複エラーのテストをスキップ
+      console.log(
+        '⚠️ 1回目の登録が失敗したため、重複エラーテストをスキップします'
+      );
+
+      // 直接重複チェックをテスト（同じscriptIdで2回登録を試行）
+      await page.goto('/admin/libraries/new');
+      await page.fill('input[name="scriptId"]', testData.scriptId);
+      await page.fill('input[name="repoUrl"]', testData.repoUrl);
+      await page.click('button[type="submit"]');
+
+      await page.goto('/admin/libraries/new');
+      await page.fill('input[name="scriptId"]', testData.scriptId);
+      await page.fill('input[name="repoUrl"]', 'microsoft/TypeScript');
+      await page.click('button[type="submit"]');
+
+      // scriptId重複エラーメッセージの確認
+      await expect(
+        page.locator('text=このGASスクリプトIDは既に登録されています')
+      ).toBeVisible();
+    }
+  });
+
+  test('重複データエラーハンドリング - 同じrepositoryUrlでの登録', async ({
+    page,
+  }) => {
+    await clearTestDataBeforeTest();
+
+    const testData = {
+      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+      repoUrl: 'googleworkspace/apps-script-oauth2',
+    };
+
+    // 1回目の登録（成功）
+    await page.goto('/admin/libraries/new');
+    await page.fill('input[name="scriptId"]', testData.scriptId);
+    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.click('button[type="submit"]');
+
+    // 成功メッセージの確認
+    await expect(
+      page.locator('text=ライブラリが正常に登録されました')
+    ).toBeVisible({ timeout: 15000 });
+
+    // 詳細ページへのリダイレクトを待機
+    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
+
+    // 2回目の登録（同じrepositoryUrlで失敗）
+    await page.goto('/admin/libraries/new');
+    await page.fill('input[name="scriptId"]', 'DIFFERENT_SCRIPT_ID');
+    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.click('button[type="submit"]');
+
+    // repositoryUrl重複エラーメッセージの確認
+    await expect(
+      page.locator('text=このリポジトリは既に登録されています')
+    ).toBeVisible();
+  });
 });
