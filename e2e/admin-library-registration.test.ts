@@ -1,17 +1,13 @@
 import { expect, test } from '@playwright/test';
+import { LibraryTestDataFactory } from './factories/index.js';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ登録', () => {
   test('新規ライブラリ登録から詳細ページ表示まで', async ({ page }) => {
     // テスト前にデータをクリア
     await clearTestDataBeforeTest();
-    // テスト用のデータ
-    const testData = {
-      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-      repoUrl: 'googleworkspace/apps-script-oauth2',
-      expectedName: 'apps-script-oauth2',
-      expectedAuthor: 'googleworkspace',
-    };
+    // テスト用のデータをFactoryから生成
+    const testData = LibraryTestDataFactory.build();
 
     // 1. 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
@@ -131,10 +127,10 @@ test.describe('管理者画面 - ライブラリ登録', () => {
 
   test('存在しないGitHubリポジトリのエラーハンドリング', async ({ page }) => {
     await clearTestDataBeforeTest();
-    const testData = {
+    const testData = LibraryTestDataFactory.build({
       scriptId: 'TEST_SCRIPT_ID',
       repoUrl: 'nonexistent-user-999999/nonexistent-repo-999999',
-    };
+    });
 
     // 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
@@ -158,10 +154,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     await page.goto('/admin/libraries/new');
 
     // テストライブラリを作成
-    const testData = {
-      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-      repoUrl: 'googleworkspace/apps-script-oauth2',
-    };
+    const testData = LibraryTestDataFactory.build();
 
     await page.fill('input[name="scriptId"]', testData.scriptId);
     await page.fill('input[name="repoUrl"]', testData.repoUrl);
@@ -182,10 +175,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   }) => {
     await clearTestDataBeforeTest();
 
-    const testData = {
-      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-      repoUrl: 'googleworkspace/apps-script-oauth2',
-    };
+    const testData = LibraryTestDataFactory.build();
 
     // 1回目の登録
     await page.goto('/admin/libraries/new');
@@ -242,10 +232,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   }) => {
     await clearTestDataBeforeTest();
 
-    const testData = {
-      scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-      repoUrl: 'googleworkspace/apps-script-oauth2',
-    };
+    const testData = LibraryTestDataFactory.build();
 
     // 1回目の登録（成功）
     await page.goto('/admin/libraries/new');
