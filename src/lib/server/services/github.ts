@@ -34,6 +34,7 @@ export class FetchGithubRepoService {
         authorName: repoData.owner.login,
         authorUrl: `https://github.com/${repoData.owner.login}`,
         repositoryUrl: repoData.html_url,
+        starCount: repoData.stargazers_count || 0,
       };
     } catch (err) {
       console.error('GitHub API エラー:', err);

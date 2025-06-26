@@ -25,6 +25,7 @@ export const library = pgTable('library', {
   authorName: text('author_name'),
   description: text('description'),
   readmeContent: text('readme_content'),
+  starCount: integer('star_count').default(0),
   status: text('status', { enum: ['pending', 'published', 'rejected'] })
     .notNull()
     .default('pending'),

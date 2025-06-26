@@ -48,6 +48,7 @@ export class CreateLibraryService {
       authorName: repoInfo.authorName,
       description: repoInfo.description,
       readmeContent: readmeContent,
+      starCount: repoInfo.starCount,
       status: 'pending',
     });
 
@@ -56,6 +57,7 @@ export class CreateLibraryService {
       name: repoInfo.name,
       author: repoInfo.authorName,
       description: repoInfo.description,
+      starCount: repoInfo.starCount,
     });
 
     return libraryId;
