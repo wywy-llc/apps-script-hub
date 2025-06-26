@@ -18,13 +18,18 @@ export class FetchGithubRepoService {
       // GitHub API呼び出し用のヘッダー設定
       const headers: Record<string, string> = {
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'app-script-hub'
+        'User-Agent': 'app-script-hub',
       };
 
-      // GitHub API トークンが設定されている場合は認証ヘッダーを追加
-      if (process.env.GITHUB_TOKEN) {
-        headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+      // GitHub API トークンが必須
+      if (!process.env.GITHUB_TOKEN) {
+        const errorMessage =
+          process.env.NODE_ENV === 'test'
+            ? 'GITHUB_TOKEN環境変数が設定されていません。.envファイルにGitHub Personal Access Tokenを設定してください。\n設定手順:\n1. https://github.com/settings/tokens でPersonal Access Tokenを生成\n2. スコープ: public_repo を選択\n3. .envファイルのGITHUB_TOKEN=""に生成されたトークンを設定'
+            : 'GITHUB_TOKEN環境変数が設定されていません。.envファイルにGitHub Personal Access Tokenを設定してください。';
+        throw new Error(errorMessage);
       }
+      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
 
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}`,
@@ -36,7 +41,9 @@ export class FetchGithubRepoService {
           throw new Error('指定されたGitHubリポジトリが見つかりません。');
         }
         if (response.status === 403) {
-          throw new Error('GitHub API の制限に達しました。しばらく時間をおいてから再試行してください。');
+          throw new Error(
+            'GitHub API の制限に達しました。しばらく時間をおいてから再試行してください。'
+          );
         }
         throw new Error('GitHubリポジトリの情報取得に失敗しました。');
       }
@@ -73,13 +80,18 @@ export class FetchGithubReadmeService {
       // GitHub API呼び出し用のヘッダー設定
       const headers: Record<string, string> = {
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'app-script-hub'
+        'User-Agent': 'app-script-hub',
       };
 
-      // GitHub API トークンが設定されている場合は認証ヘッダーを追加
-      if (process.env.GITHUB_TOKEN) {
-        headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+      // GitHub API トークンが必須
+      if (!process.env.GITHUB_TOKEN) {
+        const errorMessage =
+          process.env.NODE_ENV === 'test'
+            ? 'GITHUB_TOKEN環境変数が設定されていません。.envファイルにGitHub Personal Access Tokenを設定してください。\n設定手順:\n1. https://github.com/settings/tokens でPersonal Access Tokenを生成\n2. スコープ: public_repo を選択\n3. .envファイルのGITHUB_TOKEN=""に生成されたトークンを設定'
+            : 'GITHUB_TOKEN環境変数が設定されていません。.envファイルにGitHub Personal Access Tokenを設定してください。';
+        throw new Error(errorMessage);
       }
+      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
 
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/readme`,
