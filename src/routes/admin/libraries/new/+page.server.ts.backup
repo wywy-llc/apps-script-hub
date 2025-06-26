@@ -1,0 +1,87 @@
+import { nanoid } from 'nanoid';
+import { error } from '@sveltejs/kit';
+import type { Actions } from './$types.js';
+
+/**
+ * GitHub リポジトリ情報を取得するサービス（テスト版）
+ */
+export class FetchGithubRepoService {
+  static async call(owner: string, repo: string) {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('指定されたGitHubリポジトリが見つかりません。');
+        }
+        throw new Error('GitHubリポジトリの情報取得に失敗しました。');
+      }
+
+      const repoData = await response.json();
+
+      return {
+        name: repoData.name,
+        description: repoData.description || '',
+        authorName: repoData.owner.login,
+        authorUrl: `https://github.com/${repoData.owner.login}`,
+        repositoryUrl: repoData.html_url,
+      };
+    } catch (err) {
+      console.error('GitHub API エラー:', err);
+      throw err;
+    }
+  }
+}
+
+export const actions: Actions = {
+  default: async ({ request }) => {
+    const formData = await request.formData();
+    const scriptId = formData.get('scriptId')?.toString();
+    const repoUrl = formData.get('repoUrl')?.toString();
+
+    if (!scriptId || !repoUrl) {
+      throw error(400, { message: '必要な情報が不足しています。' });
+    }
+
+    // バリデーション
+    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
+    if (!githubRepoPattern.test(repoUrl)) {
+      throw error(400, { 
+        message: 'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。' 
+      });
+    }
+
+    try {
+      const [owner, repo] = repoUrl.split('/');
+      
+      // GitHub API から情報を取得（テスト）
+      const repoInfo = await FetchGithubRepoService.call(owner, repo);
+      
+      // テスト用ID生成
+      const libraryId = nanoid();
+      
+      console.log('ライブラリ作成テスト:', {
+        id: libraryId,
+        scriptId,
+        repoUrl,
+        repoInfo
+      });
+
+      return {
+        success: true,
+        id: libraryId,
+        message: `ライブラリ「${repoInfo.name}」の情報を取得しました。データベース保存はテスト中のため無効です。`
+      };
+    } catch (err) {
+      console.error('ライブラリ作成エラー:', err);
+      throw error(500, {
+        message:
+          err instanceof Error
+            ? err.message
+            : 'ライブラリの作成に失敗しました。',
+      });
+    }
+  },
+};

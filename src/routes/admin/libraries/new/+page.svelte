@@ -1,79 +1,32 @@
 <script lang="ts">
   import AdminHeader from '$lib/components/AdminHeader.svelte';
+  import type { ActionData } from './$types';
 
   // 管理者画面 - 新規ライブラリ追加ページ
   // GitHubリポジトリから情報を自動取得してライブラリを登録
 
-  // フォームデータ
-  let formData = {
-    scriptId: '',
-    repoUrl: '',
-  };
+  interface Props {
+    form?: ActionData;
+  }
+
+  let { form = $bindable() }: Props = $props();
 
   // フォーム送信状態
-  let isSubmitting = false;
-  let submitMessage = '';
+  let isSubmitting = $state(false);
+  let submitMessage = $state('');
 
-  function handleSubmit(event: Event) {
-    event.preventDefault();
-
-    if (isSubmitting) return;
-
-    isSubmitting = true;
-    submitMessage = '';
-
-    // バリデーション
-    if (!formData.scriptId.trim()) {
-      submitMessage = 'GAS スクリプトIDを入力してください。';
-      isSubmitting = false;
-      return;
+  // フォーム送信時の処理
+  $effect(() => {
+    if (form?.success) {
+      submitMessage = form.message || 'ライブラリが正常に登録されました。';
+      // 詳細ページに遷移（テスト中は無効）
+      if (!form.message?.includes('テスト中')) {
+        setTimeout(() => {
+          window.location.href = `/admin/libraries/${form.id}`;
+        }, 1500);
+      }
     }
-
-    if (!formData.repoUrl.trim()) {
-      submitMessage = 'GitHub リポジトリURLを入力してください。';
-      isSubmitting = false;
-      return;
-    }
-
-    // GitHub リポジトリURL形式の検証
-    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
-    if (!githubRepoPattern.test(formData.repoUrl)) {
-      submitMessage =
-        'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
-      isSubmitting = false;
-      return;
-    }
-
-    // フォームデータを送信
-    const formDataToSend = new FormData();
-    formDataToSend.append('scriptId', formData.scriptId);
-    formDataToSend.append('repoUrl', formData.repoUrl);
-
-    fetch('/admin/libraries/new', {
-      method: 'POST',
-      body: formDataToSend,
-    })
-      .then(async response => {
-        if (response.ok) {
-          const result = await response.json();
-          submitMessage = 'ライブラリが正常に登録されました。';
-          // 詳細ページに遷移
-          setTimeout(() => {
-            window.location.href = `/admin/libraries/${result.id}`;
-          }, 1500);
-        } else {
-          const error = await response.json();
-          submitMessage = error.message || 'エラーが発生しました。';
-        }
-      })
-      .catch(error => {
-        console.error('登録エラー:', error);
-        submitMessage = 'ライブラリの登録に失敗しました。';
-      })
-      .finally(() => {
-        isSubmitting = false;
-      });
-  }
+  });
 
   function handleCancel() {
     // ライブラリ一覧ページに戻る
@@ -119,7 +72,7 @@
       {/if}
 
       <!-- New Library Form -->
-      <form onsubmit={handleSubmit} class="space-y-8">
+      <form method="POST" class="space-y-8">
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
           <div class="px-6 py-8">
             <div class="space-y-10">
@@ -133,9 +86,8 @@
                 </label>
                 <input
                   type="text"
-                  name="script-id"
+                  name="scriptId"
                   id="script-id"
-                  bind:value={formData.scriptId}
                   class="block w-full px-1 py-2 mt-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
                   placeholder="1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg"
                   required
@@ -160,9 +112,8 @@
                   >
                   <input
                     type="text"
-                    name="repo-url"
+                    name="repoUrl"
                     id="repo-url"
-                    bind:value={formData.repoUrl}
                     class="block w-full ml-2 px-1 pb-1 bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
                     placeholder="wywy-llc/gas-logger"
                     required
