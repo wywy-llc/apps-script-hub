@@ -232,6 +232,7 @@ function myFunction() {
       {/if}
 
       <!-- Library Details -->
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">概要</h2>
       <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="px-6 py-8">
           <dl class="space-y-8">
@@ -293,11 +294,9 @@ function myFunction() {
 
       <!-- Scraping Results -->
       <div class="mt-12">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">
-          スクレイピング結果
-        </h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">詳細</h2>
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
-          <div class="px-6 py-8">
+          <div class="px-6">
             <!-- README Section -->
             <article class="markdown-body prose max-w-none">
               {@html renderMarkdown(readmeContent)}
