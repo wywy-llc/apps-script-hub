@@ -45,8 +45,28 @@ function runCommand(command, args = [], options = {}) {
   });
 }
 
+function checkGitHubToken() {
+  if (!process.env.GITHUB_TOKEN) {
+    console.error('❌ GITHUB_TOKEN環境変数が設定されていません。');
+    console.error('');
+    console.error('🔧 設定手順:');
+    console.error('1. https://github.com/settings/tokens でPersonal Access Tokenを生成');
+    console.error('2. スコープ: public_repo を選択');
+    console.error('3. .envファイルのGITHUB_TOKEN=""に生成されたトークンを設定');
+    console.error('');
+    console.error('例: GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"');
+    return false;
+  }
+  return true;
+}
+
 async function runE2ETests() {
   console.log('🚀 E2Eテスト実行開始...');
+
+  // GITHUB_TOKEN事前チェック
+  if (!checkGitHubToken()) {
+    throw new Error('GITHUB_TOKEN環境変数が設定されていません。上記の手順に従って設定してください。');
+  }
 
   try {
     // 1. テスト用データベースをセットアップ
