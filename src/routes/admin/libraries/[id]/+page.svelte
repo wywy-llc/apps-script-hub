@@ -1,6 +1,18 @@
 <script lang="ts">
   import AdminHeader from '$lib/components/AdminHeader.svelte';
   import type { PageData } from './$types';
+  import { marked } from 'marked';
+  import hljs from 'highlight.js/lib/core';
+  import javascript from 'highlight.js/lib/languages/javascript';
+  import json from 'highlight.js/lib/languages/json';
+  import typescript from 'highlight.js/lib/languages/typescript';
+  import bash from 'highlight.js/lib/languages/bash';
+
+  // highlight.jsの言語を登録
+  hljs.registerLanguage('javascript', javascript);
+  hljs.registerLanguage('json', json);
+  hljs.registerLanguage('typescript', typescript);
+  hljs.registerLanguage('bash', bash);
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -95,32 +107,23 @@
     }
   }
 
-  // Markdownをシンプルにレンダリング
+  // marked.jsの設定とmarkdownレンダリング関数
+  marked.use({
+    renderer: {
+      code(token: any) {
+        const code = token.text;
+        const lang = token.lang || 'plaintext';
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        const highlighted = hljs.highlight(code, { language }).value;
+        return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+      }
+    },
+    breaks: true,
+    gfm: true,
+  });
+
   function renderMarkdown(content: string): string {
-    return content
-      .replace(
-        /```javascript\n([\s\S]*?)\n```/g,
-        '<pre><code class="language-javascript">$1</code></pre>'
-      )
-      .replace(
-        /`([^`]+)`/g,
-        '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>'
-      )
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(
-        /^### (.*$)/gm,
-        '<h3 class="text-lg font-semibold mt-6 mb-3">$1</h3>'
-      )
-      .replace(
-        /^## (.*$)/gm,
-        '<h2 class="text-xl font-semibold mt-8 mb-4">$1</h2>'
-      )
-      .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
-      .replace(/\n\n/g, '</p><p class="mb-4">')
-      .replace(/\n/g, '<br>')
-      .replace(/^(.*)/, '<p class="mb-4">$1')
-      .replace(/(.*?)$/, '$1</p>');
+    return marked.parse(content) as string;
   }
 </script>
 
@@ -130,6 +133,10 @@
     name="description"
     content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能"
   />
+  <!-- GitHub風マークダウンスタイル -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css">
+  <!-- highlight.jsのスタイル（GitHub風） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css">
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
@@ -272,7 +279,7 @@
           <div class="px-6">
             <!-- README Section -->
             {#if library.readmeContent}
-              <article class="markdown-body prose max-w-none">
+              <article class="markdown-body p-6 bg-white">
                 {@html renderMarkdown(library.readmeContent)}
               </article>
             {:else}
