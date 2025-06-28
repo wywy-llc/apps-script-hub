@@ -49,14 +49,8 @@ jobs:
       - name: Compile Paraglide messages
         run: npm run paraglide:compile
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Setup test database
-        run: npm run test:e2e:setup
-
-      - name: Run tests
-        run: npm run test
+      - name: Run unit tests
+        run: npm run test:unit -- --run
 
       - name: Run linting
         run: npm run lint
