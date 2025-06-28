@@ -16,7 +16,7 @@ config();
 const TEST_DB_NAME = process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db';
 const POSTGRES_CONFIG = {
   host: process.env.POSTGRES_HOST || 'localhost',
-  port: parseInt(process.env.POSTGRES_PORT || '5433'),
+  port: parseInt(process.env.POSTGRES_PORT || '5433', 10),
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: TEST_DB_NAME,
