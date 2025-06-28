@@ -18,6 +18,7 @@ jobs:
       POSTGRES_PASSWORD: postgres
       POSTGRES_TEST_DB: apps_script_hub_test_db
       GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      AUTH_SECRET: test-secret-for-ci
 
     services:
       postgres:
