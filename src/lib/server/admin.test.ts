@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // モックの環境変数
 const mockEnv = vi.hoisted(() => ({
-  ADMIN_EMAILS: 'admin@example.com,manager@test.com'
+  ADMIN_EMAILS: 'admin@example.com,manager@test.com',
 }));
 
 vi.mock('$env/dynamic/private', () => ({
-  env: mockEnv
+  env: mockEnv,
 }));
 
 describe('admin utils', () => {

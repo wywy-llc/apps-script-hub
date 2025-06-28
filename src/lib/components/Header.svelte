@@ -48,7 +48,7 @@
         {:else}
           <!-- 未ログインユーザー -->
           <Button variant="primary" size="md" href="/auth/login">
-            管理者ログイン
+            Login
           </Button>
         {/if}
       </div>

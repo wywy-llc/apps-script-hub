@@ -14,6 +14,7 @@ import * as table from '$lib/server/db/schema';
 import { nanoid } from 'nanoid';
 import { eq } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
+import { isAdminUser } from '$lib/server/admin';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
   // Auth.jsのセッション情報を取得
@@ -136,6 +137,17 @@ const { handle: authHandle } = SvelteKitAuth({
         }
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // ログイン成功後のリダイレクト先を決定
+      if (url.startsWith(baseUrl)) {
+        const urlObj = new URL(url);
+        if (urlObj.pathname === '/auth/callback/google') {
+          // Google OAuth コールバック後は適切なページにリダイレクト
+          return `${baseUrl}/auth/success`;
+        }
+      }
+      return url.startsWith(baseUrl) ? url : baseUrl;
     },
   },
 });

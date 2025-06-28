@@ -4,19 +4,16 @@
   import SearchBox from '$lib/components/SearchBox.svelte';
   import {
     app_title,
-    cta_description,
-    cta_title,
     featured_description,
     featured_libraries,
-    hero_description,
-    hero_title,
     view_all_libraries,
-    view_contribution_guide,
   } from '$lib/paraglide/messages.js';
+  import type { PageData } from './$types';
 
-  // トップページコンポーネント
-  // AppsScriptHubのメインランディングページ
-  // ヒーローセクション、注目ライブラリ、CTA（コールトゥアクション）を表示
+  let { data }: { data: PageData } = $props();
+  
+  // ユーザーダッシュボードコンポーネント
+  // ログイン済みユーザー向けのダッシュボードページ
 
   // 注目のライブラリサンプルデータ
   const featuredLibraries = [
@@ -90,22 +87,24 @@
 </script>
 
 <svelte:head>
-  <title>{app_title()} - Google Apps Scriptのライブラリハブ</title>
-  <meta name="description" content={hero_description()} />
+  <title>ダッシュボード - {app_title()}</title>
+  <meta name="description" content="ユーザーダッシュボード" />
 </svelte:head>
 
-<!-- ヒーローセクション -->
-<section class="py-20 sm:py-24 text-center bg-gray-50">
+<!-- ユーザーダッシュボードヘッダー -->
+<section class="py-12 bg-gray-50">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <h1
-      class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900"
-    >
-      {hero_title()}
-    </h1>
-    <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
-      {hero_description()}
-    </p>
-    <div class="mt-10 max-w-xl mx-auto">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+        ダッシュボード
+      </h1>
+      {#if data.session?.user}
+        <p class="mt-4 text-lg text-gray-600">
+          ようこそ、{data.session.user.name || data.session.user.email}さん
+        </p>
+      {/if}
+    </div>
+    <div class="mt-8 max-w-xl mx-auto">
       <SearchBox />
     </div>
   </div>
@@ -137,20 +136,23 @@
   </div>
 </section>
 
-<!-- コールトゥアクションセクション -->
+<!-- ユーザーアクションセクション -->
 <section class="bg-gray-50">
   <div
     class="container mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 text-center"
   >
     <h2 class="text-3xl font-bold tracking-tight text-gray-900">
-      {cta_title()}
+      何をしますか？
     </h2>
     <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-      {cta_description()}
+      ライブラリの検索や、あなたの作品を共有してください
     </p>
-    <div class="mt-8 flex justify-center">
-      <Button variant="primary" size="lg" href="/contribute">
-        {view_contribution_guide()}
+    <div class="mt-8 flex justify-center space-x-4">
+      <Button variant="primary" size="lg" href="/user/search">
+        ライブラリを検索
+      </Button>
+      <Button variant="outline" size="lg" href="/contribute">
+        ライブラリを共有
       </Button>
     </div>
   </div>

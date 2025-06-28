@@ -3,16 +3,16 @@
   import Button from './Button.svelte';
 
   async function handleGoogleLogin() {
-    await signIn('google', { redirectTo: '/admin' });
+    await signIn('google', { redirectTo: '/auth/success' });
   }
 </script>
 
 <div class="mx-auto max-w-md rounded-lg bg-white p-8 shadow-md">
-  <h2 class="mb-6 text-center text-2xl font-bold text-gray-900">管理者ログイン</h2>
+  <h2 class="mb-6 text-center text-2xl font-bold text-gray-900">ログイン</h2>
   
   <div class="space-y-4">
     <p class="text-center text-sm text-gray-600">
-      管理機能にアクセスするにはGoogleアカウントでログインしてください
+      Googleアカウントでログインしてください
     </p>
     
     <Button 

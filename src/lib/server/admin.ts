@@ -7,7 +7,7 @@ import { env } from '$env/dynamic/private';
  */
 export function isAdminUser(email: string): boolean {
   const adminEmails = env.ADMIN_EMAILS;
-  
+
   if (!adminEmails) {
     return false;
   }
@@ -27,7 +27,7 @@ export function isAdminUser(email: string): boolean {
  */
 export function getAdminEmails(): string[] {
   const adminEmails = env.ADMIN_EMAILS;
-  
+
   if (!adminEmails) {
     return [];
   }
