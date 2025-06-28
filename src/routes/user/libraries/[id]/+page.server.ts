@@ -12,23 +12,18 @@ export const load: PageServerLoad = async ({ params }) => {
     error(400, 'ライブラリIDが指定されていません');
   }
 
-  try {
-    // データベースから公開されているライブラリのみを取得
-    const [libraryData] = await db
-      .select()
-      .from(library)
-      .where(and(eq(library.id, libraryId), eq(library.status, LIBRARY_STATUS.PUBLISHED)))
-      .limit(1);
+  // データベースから公開されているライブラリのみを取得
+  const [libraryData] = await db
+    .select()
+    .from(library)
+    .where(and(eq(library.id, libraryId), eq(library.status, LIBRARY_STATUS.PUBLISHED)))
+    .limit(1);
 
-    if (!libraryData) {
-      error(404, 'ライブラリが見つかりません');
-    }
-
-    return {
-      library: libraryData,
-    };
-  } catch (err) {
-    console.error('ライブラリ取得エラー:', err);
-    error(500, 'サーバーエラーが発生しました');
+  if (!libraryData) {
+    error(404, 'ライブラリが見つかりません');
   }
+
+  return {
+    library: libraryData,
+  };
 };

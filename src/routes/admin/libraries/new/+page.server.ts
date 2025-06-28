@@ -35,6 +35,8 @@ export const actions: Actions = {
         id: libraryId,
       };
     } catch (err) {
+      // スタックトレースを出力してからユーザーフレンドリーなエラーを返す
+      console.error('ライブラリ作成エラー:', err);
       return fail(500, {
         message: err instanceof Error ? err.message : 'ライブラリの作成に失敗しました。',
       });
