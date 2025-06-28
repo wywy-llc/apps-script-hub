@@ -2,6 +2,8 @@
   import { signIn } from '@auth/sveltekit/client';
   import Button from './Button.svelte';
 
+  let isHovered = false;
+
   async function handleGoogleLogin() {
     await signIn('google', { redirectTo: '/auth/success' });
   }
@@ -17,9 +19,15 @@
     
     <button 
       on:click={handleGoogleLogin}
-      class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium shadow-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+      on:mouseenter={() => isHovered = true}
+      on:mouseleave={() => isHovered = false}
+      class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium shadow-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 cursor-pointer"
     >
-      <svg class="h-5 w-5" viewBox="0 0 24 24">
+      <!-- Googleアイコン（ホバー時にスケールとパルスエフェクト） -->
+      <svg 
+        class="h-5 w-5 transition-all duration-200 {isHovered ? 'scale-110 animate-pulse' : 'scale-100'}" 
+        viewBox="0 0 24 24"
+      >
         <path 
           fill="#4285F4" 
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
