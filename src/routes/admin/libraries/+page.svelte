@@ -10,6 +10,7 @@
     name: string;
     scriptId: string;
     authorName: string;
+    authorUrl: string;
     status: 'published' | 'pending' | 'rejected';
     updatedAt: Date;
     starCount: number;
@@ -144,10 +145,27 @@
                       {library.name}
                     </a>
                   </div>
-                  <div class="text-sm text-gray-500 truncate max-w-xs" title={library.scriptId}>{library.scriptId}</div>
+                  <div class="text-sm text-gray-500 truncate max-w-xs">
+                    <a
+                      href={`https://script.google.com/u/1/home/projects/${library.scriptId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={library.scriptId}
+                      class="text-blue-600 hover:text-blue-900 hover:underline"
+                    >
+                      {library.scriptId}
+                    </a>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {library.authorName}
+                  <a
+                    href={library.authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:text-blue-900 hover:underline"
+                  >
+                    {library.authorName}
+                  </a>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class={getStatusBadge(library.status)}>
