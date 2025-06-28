@@ -21,12 +21,6 @@
         <!-- 管理者ナビゲーション -->
         <nav class="flex items-center space-x-4">
           <a
-            href="/admin"
-            class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            管理画面
-          </a>
-          <a
             href="/admin/libraries"
             class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
