@@ -21,9 +21,27 @@
 >
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <!-- ロゴ -->
-      <div class="flex items-center">
+      <!-- ロゴとナビゲーション -->
+      <div class="flex items-center space-x-8">
         <a href="/" class="text-xl font-bold text-gray-900">{app_title()}</a>
+        
+        {#if session && user}
+          <!-- ページ遷移リンク -->
+          <nav class="flex items-center space-x-4">
+            <a
+              href="/admin"
+              class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              管理画面
+            </a>
+            <a
+              href="/user"
+              class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              ダッシュボード
+            </a>
+          </nav>
+        {/if}
       </div>
 
       <!-- 右側のアクション -->
@@ -35,12 +53,6 @@
             <span class="text-sm text-gray-700">
               {user.name || user.email}
             </span>
-            <a
-              href="/admin"
-              class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              管理画面
-            </a>
             <Button variant="outline" size="sm" on:click={handleSignOut}>
               ログアウト
             </Button>
