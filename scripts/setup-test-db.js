@@ -10,8 +10,8 @@ import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Client } from 'pg';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 const TEST_DB_NAME = process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db';
 const POSTGRES_CONFIG = {

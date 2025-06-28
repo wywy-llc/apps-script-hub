@@ -1,8 +1,8 @@
 import { defineConfig } from '@playwright/test';
 import { config } from 'dotenv';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 export default defineConfig({
   globalSetup: './e2e/global-setup.ts',

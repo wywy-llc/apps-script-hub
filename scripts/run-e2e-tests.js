@@ -10,8 +10,8 @@ import { config } from 'dotenv';
 import { cleanupTestDatabase } from './cleanup-test-db.js';
 import { setupTestDatabase } from './setup-test-db.js';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {

@@ -3,8 +3,8 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Factory } from 'fishery';
 import { Client } from 'pg';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 /**
  * データベース接続設定
