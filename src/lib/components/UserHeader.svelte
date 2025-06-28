@@ -17,7 +17,7 @@
     <div class="flex items-center justify-between h-16">
       <!-- ロゴ -->
       <div class="flex items-center">
-        <a href="/" class="text-xl font-bold text-gray-900">{app_title()}</a>
+        <a href="/user" class="text-xl font-bold text-gray-900">{app_title()}</a>
       </div>
 
       <!-- 右側のアクション -->

@@ -16,7 +16,7 @@
     <div class="flex items-center justify-between h-16">
       <!-- ロゴとナビゲーション -->
       <div class="flex items-center space-x-8">
-        <a href="/" class="text-xl font-bold text-gray-900">{app_title()}</a>
+        <a href="/admin" class="text-xl font-bold text-gray-900">{app_title()}</a>
 
         <!-- 管理者ナビゲーション -->
         <nav class="flex items-center space-x-4">
