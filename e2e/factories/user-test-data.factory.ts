@@ -68,9 +68,6 @@ export const UserTestDataFactories = createPresetFactories<UserTestData>({
   }),
 });
 
-// 後方互換性のため単一ファクトリをエクスポート
-export const UserTestDataFactory = UserTestDataFactories.default;
-
 /**
  * データベース作成用のユーザーデータFactory
  * 共通化されたcreateDatabaseFactoryを使用してデータベースに直接ユーザーを作成
