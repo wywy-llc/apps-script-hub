@@ -7,7 +7,6 @@
     "ms-playwright.playwright",
     "vitest.explorer",
     "christian-kohler.path-intellisense",
-    "formulahendry.auto-rename-tag",
-    "unifiedjs.vscode-mdx"
+    "formulahendry.auto-rename-tag"
   ]
 }
