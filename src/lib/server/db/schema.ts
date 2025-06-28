@@ -43,8 +43,34 @@ export const library = pgTable('library', {
     .defaultNow(),
 });
 
+export const libraryMethod = pgTable('library_method', {
+  id: text('id').primaryKey(),
+  libraryId: text('library_id')
+    .notNull()
+    .references(() => library.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  parameters: text('parameters').notNull(), // JSON文字列として保存
+  returnType: text('return_type').notNull(),
+  returnDescription: text('return_description').notNull(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Session = typeof session.$inferSelect;
 
 export type User = typeof user.$inferSelect;
 
 export type Library = typeof library.$inferSelect;
+
+export type LibraryMethod = typeof libraryMethod.$inferSelect;

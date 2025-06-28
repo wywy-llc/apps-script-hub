@@ -1,3 +1,4 @@
+import { ScrapeGasMethodsService } from '$lib/server/services/scrape-gas-methods-service.js';
 import { UpdateLibraryFromGithubService } from '$lib/server/services/update-library.js';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
@@ -10,11 +11,16 @@ export const POST: RequestHandler = async ({ params }) => {
   }
 
   try {
+    // GitHubからライブラリ情報を更新
     await UpdateLibraryFromGithubService.call(libraryId);
+
+    // Google Apps Scriptライブラリページからメソッド情報をスクレイピング
+    const gasResult = await ScrapeGasMethodsService.call(libraryId);
 
     return json({
       success: true,
-      message: 'スクレイピングが完了しました。',
+      message: `スクレイピングが完了しました。${gasResult.methodCount}個のメソッドを取得しました。`,
+      methodCount: gasResult.methodCount,
     });
   } catch (err) {
     console.error('スクレイピングエラー:', err);

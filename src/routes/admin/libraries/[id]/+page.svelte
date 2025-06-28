@@ -1,13 +1,13 @@
 <script lang="ts">
   import AdminHeader from '$lib/components/AdminHeader.svelte';
-  import type { PageData } from './$types';
-  import { marked } from 'marked';
   import hljs from 'highlight.js/lib/core';
+  import bash from 'highlight.js/lib/languages/bash';
   import javascript from 'highlight.js/lib/languages/javascript';
   import json from 'highlight.js/lib/languages/json';
-  import typescript from 'highlight.js/lib/languages/typescript';
-  import bash from 'highlight.js/lib/languages/bash';
   import plaintext from 'highlight.js/lib/languages/plaintext';
+  import typescript from 'highlight.js/lib/languages/typescript';
+  import { marked } from 'marked';
+  import type { PageData } from './$types';
 
   // highlight.jsの言語を登録
   hljs.registerLanguage('javascript', javascript);
@@ -25,6 +25,7 @@
 
   let { data }: Props = $props();
   let library = data.library;
+  let methods = data.methods || [];
 
   let isScrapingInProgress = $state(false);
   let scrapingMessage = $state('');
@@ -115,7 +116,7 @@
       code(token: any) {
         const code = token.text;
         const lang = token.lang || 'plaintext';
-        
+
         try {
           const language = hljs.getLanguage(lang) ? lang : 'plaintext';
           const highlighted = hljs.highlight(code, { language }).value;
@@ -125,7 +126,7 @@
           // エラーの場合はプレーンテキストとして表示
           return `<pre><code class="hljs">${code}</code></pre>`;
         }
-      }
+      },
     },
     breaks: true,
     gfm: true,
@@ -143,9 +144,15 @@
     content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能"
   />
   <!-- GitHub風マークダウンスタイル -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css"
+  />
   <!-- highlight.jsのスタイル（GitHub風） -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
+  />
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
@@ -306,67 +313,83 @@
                 メソッド
               </h2>
 
-              <!-- Method Detail Card -->
-              <div
-                id="format"
-                class="border border-gray-200 rounded-lg overflow-hidden mb-8"
-              >
-                <div class="bg-gray-50 p-4 border-b">
-                  <h3 class="text-xl font-mono font-semibold">
-                    format(pattern)
-                  </h3>
-                </div>
-                <div class="p-6">
-                  <p class="mb-6 text-gray-700">
-                    Dateオブジェクトを指定されたパターン文字列に基づいてフォーマットします。
+              {#if methods.length > 0}
+                {#each methods as method (method.id)}
+                  <!-- Method Detail Card -->
+                  <div
+                    id={method.name}
+                    class="border border-gray-200 rounded-lg overflow-hidden mb-8"
+                  >
+                    <div class="bg-gray-50 p-4 border-b">
+                      <h3 class="text-xl font-mono font-semibold">
+                        {method.name}({method.parameters
+                          .map((p: { name: any }) => p.name)
+                          .join(', ')})
+                      </h3>
+                    </div>
+                    <div class="p-6">
+                      <p class="mb-6 text-gray-700">
+                        {method.description}
+                      </p>
+
+                      {#if method.parameters.length > 0}
+                        <!-- Parameters -->
+                        <h4 class="font-semibold mb-2">引数</h4>
+                        <div class="overflow-x-auto">
+                          <table class="min-w-full border rounded-md">
+                            <thead class="bg-gray-50">
+                              <tr>
+                                <th class="text-left p-3 font-medium">名前</th>
+                                <th class="text-left p-3 font-medium">型</th>
+                                <th class="text-left p-3 font-medium">説明</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {#each method.parameters as param}
+                                <tr class="border-t">
+                                  <td class="p-3 font-mono">{param.name}</td>
+                                  <td class="p-3 font-mono text-purple-600"
+                                    >{param.type}</td
+                                  >
+                                  <td class="p-3">{param.description}</td>
+                                </tr>
+                              {/each}
+                            </tbody>
+                          </table>
+                        </div>
+                      {/if}
+
+                      <!-- Return Value -->
+                      <h4 class="font-semibold mt-6 mb-2">戻り値</h4>
+                      <div class="overflow-x-auto">
+                        <table class="min-w-full border rounded-md">
+                          <thead class="bg-gray-50">
+                            <tr>
+                              <th class="text-left p-3 font-medium">型</th>
+                              <th class="text-left p-3 font-medium">説明</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="border-t">
+                              <td class="p-3 font-mono text-purple-600"
+                                >{method.returnType}</td
+                              >
+                              <td class="p-3">{method.returnDescription}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                {/each}
+              {:else}
+                <div class="text-gray-500 text-center py-8">
+                  <p>メソッド情報が見つかりませんでした。</p>
+                  <p class="text-sm mt-2">
+                    スクレイピングを実行してメソッド情報を取得してください。
                   </p>
-
-                  <!-- Parameters -->
-                  <h4 class="font-semibold mb-2">引数</h4>
-                  <div class="overflow-x-auto">
-                    <table class="min-w-full border rounded-md">
-                      <thead class="bg-gray-50">
-                        <tr>
-                          <th class="text-left p-3 font-medium">名前</th>
-                          <th class="text-left p-3 font-medium">型</th>
-                          <th class="text-left p-3 font-medium">説明</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr class="border-t">
-                          <td class="p-3 font-mono">pattern</td>
-                          <td class="p-3 font-mono text-purple-600">String</td>
-                          <td class="p-3"
-                            >フォーマットパターン。<code
-                              class="text-sm bg-gray-100 px-1 py-0.5 rounded"
-                              >YYYY/MM/DD HH:mm:ss</code
-                            > のように指定します。</td
-                          >
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- Return Value -->
-                  <h4 class="font-semibold mt-6 mb-2">戻り値</h4>
-                  <div class="overflow-x-auto">
-                    <table class="min-w-full border rounded-md">
-                      <thead class="bg-gray-50">
-                        <tr>
-                          <th class="text-left p-3 font-medium">型</th>
-                          <th class="text-left p-3 font-medium">説明</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr class="border-t">
-                          <td class="p-3 font-mono text-purple-600">String</td>
-                          <td class="p-3">フォーマットされた日付文字列。</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
-              </div>
+              {/if}
             </div>
           </div>
         </div>
