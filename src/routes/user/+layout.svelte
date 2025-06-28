@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import Footer from '$lib/components/Footer.svelte';
   import Header from '$lib/components/Header.svelte';
   import UserHeader from '$lib/components/UserHeader.svelte';
@@ -7,10 +6,10 @@
   // ユーザー向けページ用レイアウト
   // ログイン状態に応じてヘッダーを切り替え
 
-  let { children } = $props();
+  let { children, data } = $props();
 
-  let session = $derived($page.data.session);
-  let user = $derived($page.data.user);
+  let session = $derived(data.session);
+  let user = $derived(data.user);
   let isLoggedIn = $derived(session && user);
 </script>
 
