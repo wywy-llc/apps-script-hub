@@ -206,14 +206,6 @@
           >
             承認・公開
           </button>
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('pending')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            承認待ちに戻す
-          </button>
         {/if}
       </div>
     </div>
@@ -361,8 +353,12 @@
     action="?/updateStatus"
     use:enhance={() => {
       isStatusUpdateInProgress = true;
-      return async ({ update }) => {
+      return async ({ result, update }) => {
         await update();
+        // 成功時にライブラリのステータスを即座に更新
+        if (result.type === 'success' && result.data?.success) {
+          library = { ...library, status: 'published' };
+        }
         isStatusUpdateInProgress = false;
       };
     }}
@@ -377,8 +373,12 @@
     action="?/updateStatus"
     use:enhance={() => {
       isStatusUpdateInProgress = true;
-      return async ({ update }) => {
+      return async ({ result, update }) => {
         await update();
+        // 成功時にライブラリのステータスを即座に更新
+        if (result.type === 'success' && result.data?.success) {
+          library = { ...library, status: 'rejected' };
+        }
         isStatusUpdateInProgress = false;
       };
     }}
@@ -393,8 +393,12 @@
     action="?/updateStatus"
     use:enhance={() => {
       isStatusUpdateInProgress = true;
-      return async ({ update }) => {
+      return async ({ result, update }) => {
         await update();
+        // 成功時にライブラリのステータスを即座に更新
+        if (result.type === 'success' && result.data?.success) {
+          library = { ...library, status: 'pending' };
+        }
         isStatusUpdateInProgress = false;
       };
     }}
