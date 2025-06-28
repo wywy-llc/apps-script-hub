@@ -175,7 +175,6 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // デバッグ用：フォーム送信後の状態を確認
     await page.waitForLoadState('networkidle');
 
-
     // フォームのsubmitMessage要素を確認
     const submitMessage = await page
       .locator(

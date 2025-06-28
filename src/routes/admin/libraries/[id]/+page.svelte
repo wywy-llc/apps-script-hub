@@ -63,7 +63,6 @@
     window.location.href = `/admin/libraries/${library.id}/edit`;
   }
 
-
   function getStatusBadge(status: string) {
     switch (status) {
       case 'published':

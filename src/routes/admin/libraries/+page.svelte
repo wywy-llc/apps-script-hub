@@ -65,7 +65,6 @@
       console.log('削除:', id);
     }
   }
-
 </script>
 
 <svelte:head>

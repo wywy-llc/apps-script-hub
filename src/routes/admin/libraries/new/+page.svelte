@@ -27,12 +27,10 @@
     }
   });
 
-
   function handleCancel() {
     // ライブラリ一覧ページに戻る
     goto('/admin/libraries');
   }
-
 </script>
 
 <svelte:head>
