@@ -50,6 +50,9 @@ jobs:
       - name: Compile Paraglide messages
         run: npm run paraglide:compile
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Setup test database
         run: npm run test:e2e:setup
 
