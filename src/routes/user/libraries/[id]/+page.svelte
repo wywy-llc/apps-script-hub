@@ -27,8 +27,7 @@
   const mockLibraries = {
     '1': {
       name: 'GasDateFormatter',
-      description:
-        'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマット',
+      description: 'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマット',
       author: 'user-name',
       publishedDate: '2025/05/28',
       repository: 'https://github.com/user-name/gas-date-formatter',
@@ -103,12 +102,12 @@ function myFunction() {
   <meta name="description" content={library.description} />
 </svelte:head>
 
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+<div class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
   <div class="lg:grid lg:grid-cols-12 lg:gap-8">
     <!-- メインコンテンツ（左カラム） -->
     <div class="lg:col-span-9">
       <div class="mb-6">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">
+        <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">
           {library.name}
         </h1>
         <p class="mt-2 text-gray-500">{library.description}</p>
@@ -119,15 +118,12 @@ function myFunction() {
 
       <!-- メソッドセクション -->
       <div class="mt-12">
-        <h2 class="text-2xl font-semibold border-b pb-2 mb-6">メソッド</h2>
+        <h2 class="mb-6 border-b pb-2 text-2xl font-semibold">メソッド</h2>
 
         <!-- メソッド詳細カード -->
-        <div
-          id="format"
-          class="border border-gray-200 rounded-lg overflow-hidden mb-8"
-        >
-          <div class="bg-gray-50 p-4 border-b">
-            <h3 class="text-xl font-mono font-semibold">format(pattern)</h3>
+        <div id="format" class="mb-8 overflow-hidden rounded-lg border border-gray-200">
+          <div class="border-b bg-gray-50 p-4">
+            <h3 class="font-mono text-xl font-semibold">format(pattern)</h3>
           </div>
           <div class="p-6">
             <p class="mb-6 text-gray-700">
@@ -135,14 +131,14 @@ function myFunction() {
             </p>
 
             <!-- 引数 -->
-            <h4 class="font-semibold mb-2">引数</h4>
+            <h4 class="mb-2 font-semibold">引数</h4>
             <div class="overflow-x-auto">
-              <table class="min-w-full border rounded-md">
+              <table class="min-w-full rounded-md border">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="text-left p-3 font-medium">名前</th>
-                    <th class="text-left p-3 font-medium">型</th>
-                    <th class="text-left p-3 font-medium">説明</th>
+                    <th class="p-3 text-left font-medium">名前</th>
+                    <th class="p-3 text-left font-medium">型</th>
+                    <th class="p-3 text-left font-medium">説明</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -150,9 +146,7 @@ function myFunction() {
                     <td class="p-3 font-mono">pattern</td>
                     <td class="p-3 font-mono text-purple-600">String</td>
                     <td class="p-3"
-                      >フォーマットパターン。<code class="text-sm"
-                        >YYYY/MM/DD HH:mm:ss</code
-                      > のように指定します。</td
+                      >フォーマットパターン。<code class="text-sm">YYYY/MM/DD HH:mm:ss</code> のように指定します。</td
                     >
                   </tr>
                 </tbody>
@@ -160,13 +154,13 @@ function myFunction() {
             </div>
 
             <!-- 戻り値 -->
-            <h4 class="font-semibold mt-6 mb-2">戻り値</h4>
+            <h4 class="mt-6 mb-2 font-semibold">戻り値</h4>
             <div class="overflow-x-auto">
-              <table class="min-w-full border rounded-md">
+              <table class="min-w-full rounded-md border">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="text-left p-3 font-medium">型</th>
-                    <th class="text-left p-3 font-medium">説明</th>
+                    <th class="p-3 text-left font-medium">型</th>
+                    <th class="p-3 text-left font-medium">説明</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,29 +177,27 @@ function myFunction() {
     </div>
 
     <!-- サイドバー（右カラム） -->
-    <aside class="lg:col-span-3 mt-8 lg:mt-0">
+    <aside class="mt-8 lg:col-span-3 lg:mt-0">
       <div class="sticky top-24 space-y-6">
         <!-- インストールカード -->
-        <div class="border rounded-lg p-4">
-          <h3 class="font-semibold text-gray-800 mb-3">インストール</h3>
-          <label for="script-id" class="text-sm font-medium text-gray-600"
-            >スクリプトID</label
-          >
-          <div class="flex items-center mt-1">
+        <div class="rounded-lg border p-4">
+          <h3 class="mb-3 font-semibold text-gray-800">インストール</h3>
+          <label for="script-id" class="text-sm font-medium text-gray-600">スクリプトID</label>
+          <div class="mt-1 flex items-center">
             <input
               id="script-id"
               type="text"
               readonly
               value={library.scriptId}
-              class="w-full p-2 border rounded-l-md bg-gray-50 text-xs"
+              class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
             />
             <button
               on:click={() => copyToClipboard('script-id')}
               aria-label="スクリプトIDをコピー"
-              class="bg-gray-200 hover:bg-gray-300 p-2 border-t border-b border-r rounded-r-md"
+              class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
             >
               <svg
-                class="w-5 h-5 text-gray-600"
+                class="h-5 w-5 text-gray-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -220,26 +212,24 @@ function myFunction() {
             </button>
           </div>
 
-          <label
-            for="library-url"
-            class="text-sm font-medium text-gray-600 mt-4 block"
+          <label for="library-url" class="mt-4 block text-sm font-medium text-gray-600"
             >ライブラリURL</label
           >
-          <div class="flex items-center mt-1">
+          <div class="mt-1 flex items-center">
             <input
               id="library-url"
               type="text"
               readonly
               value={library.libraryUrl}
-              class="w-full p-2 border rounded-l-md bg-gray-50 text-xs"
+              class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
             />
             <button
               on:click={() => copyToClipboard('library-url')}
               aria-label="ライブラリURLをコピー"
-              class="bg-gray-200 hover:bg-gray-300 p-2 border-t border-b border-r rounded-r-md"
+              class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
             >
               <svg
-                class="w-5 h-5 text-gray-600"
+                class="h-5 w-5 text-gray-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -256,7 +246,7 @@ function myFunction() {
         </div>
 
         <!-- Aboutカード -->
-        <div class="border rounded-lg p-4">
+        <div class="rounded-lg border p-4">
           <dl>
             <dt class="font-semibold text-gray-800">スクリプトIDコピー数</dt>
             <dd class="mb-3">
@@ -264,11 +254,10 @@ function myFunction() {
             </dd>
             <dt class="font-semibold text-gray-800">作者</dt>
             <dd class="mb-3">
-              <a
-                href="/users/{library.author}"
-                class="text-blue-600 hover:underline">{library.author}</a
+              <a href="/users/{library.author}" class="text-blue-600 hover:underline"
+                >{library.author}</a
               >
-              <div class="text-sm text-gray-500 mt-1">
+              <div class="mt-1 text-sm text-gray-500">
                 Copyright (c) 2025 {library.author}
               </div>
             </dd>
@@ -278,16 +267,12 @@ function myFunction() {
 
             <dt class="font-semibold text-gray-800">リポジトリ</dt>
             <dd class="mb-3">
-              <a href={library.repository} class="text-blue-600 hover:underline"
-                >GitHub</a
-              >
+              <a href={library.repository} class="text-blue-600 hover:underline">GitHub</a>
             </dd>
 
             <dt class="font-semibold text-gray-800">Homepage</dt>
             <dd class="mb-3">
-              <a href={library.homepage} class="text-blue-600 hover:underline"
-                >example.com</a
-              >
+              <a href={library.homepage} class="text-blue-600 hover:underline">example.com</a>
             </dd>
 
             <dt class="font-semibold text-gray-800">ライセンス</dt>

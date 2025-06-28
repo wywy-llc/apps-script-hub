@@ -25,7 +25,7 @@
   <!-- ユーザー名ボタン -->
   <button
     on:click={toggleDropdown}
-    class="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1 transition-colors"
+    class="flex items-center space-x-2 rounded-md px-2 py-1 text-sm font-medium text-gray-700 transition-colors hover:text-gray-900 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
   >
     <span>{user.name || user.email}</span>
     <svg
@@ -34,12 +34,7 @@
       viewBox="0 0 24 24"
       stroke="currentColor"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M19 9l-7 7-7-7"
-      />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
     </svg>
   </button>
 
@@ -47,7 +42,7 @@
   {#if isOpen}
     <div
       use:clickOutside={closeDropdown}
-      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+      class="ring-opacity-5 absolute right-0 z-50 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black focus:outline-none"
     >
       <div class="py-1">
         {#if showAdminLink}
@@ -69,7 +64,7 @@
         <hr class="my-1 border-gray-200" />
         <button
           on:click={handleSignOut}
-          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+          class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         >
           ログアウト
         </button>

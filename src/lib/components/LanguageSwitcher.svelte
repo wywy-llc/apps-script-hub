@@ -35,7 +35,7 @@
   <!-- ヘッダー部分 (クリックで開閉) -->
   <button
     type="button"
-    class="flex items-center justify-between bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 cursor-pointer select-none hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+    class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm transition-colors select-none hover:bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
     on:click={toggleDropdown}
     aria-expanded={isOpen}
     aria-haspopup="listbox"
@@ -44,7 +44,7 @@
       <!-- 地球儀アイコン -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-gray-600 mr-2"
+        class="mr-2 h-5 w-5 text-gray-600"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -57,16 +57,14 @@
         />
       </svg>
       <!-- 選択中の言語を表示 -->
-      <span class="font-medium text-gray-800 text-sm">
+      <span class="text-sm font-medium text-gray-800">
         {LANGUAGE_NAMES[currentLocale] || currentLocale}
       </span>
     </div>
     <!-- 開閉を示す矢印アイコン -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-4 w-4 text-gray-600 transition-transform duration-200 {isOpen
-        ? 'rotate-180'
-        : ''}"
+      class="h-4 w-4 text-gray-600 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -79,7 +77,7 @@
   <!-- 言語リスト -->
   {#if isOpen}
     <div
-      class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10 overflow-hidden"
+      class="absolute top-full left-0 z-10 mt-1 w-full overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg"
       role="listbox"
     >
       <ul class="text-gray-700">
@@ -87,9 +85,9 @@
           <li>
             <button
               type="button"
-              class="w-full text-left px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors
+              class="w-full cursor-pointer border-b border-gray-100 px-3 py-2 text-left text-sm transition-colors last:border-b-0 hover:bg-gray-100
                 {currentLocale === locale
-                ? 'bg-blue-600 text-white font-medium hover:bg-blue-700'
+                ? 'bg-blue-600 font-medium text-white hover:bg-blue-700'
                 : ''}"
               on:click={() => switchLanguage(locale)}
               role="option"

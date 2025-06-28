@@ -27,8 +27,7 @@
     })
       .then(async response => {
         if (response.ok) {
-          scrapingMessage =
-            'スクレイピングが完了しました。ページを再読み込みしてください。';
+          scrapingMessage = 'スクレイピングが完了しました。ページを再読み込みしてください。';
           // ページを再読み込み
           setTimeout(() => {
             window.location.reload();
@@ -98,15 +97,12 @@
 
 <svelte:head>
   <title>管理画面 - ライブラリ詳細 - AppsScriptHub</title>
-  <meta
-    name="description"
-    content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能"
-  />
+  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能" />
 </svelte:head>
 
-<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-  <div class="max-w-3xl mx-auto">
-    <div class="flex justify-between items-center mb-8">
+<main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+  <div class="mx-auto max-w-3xl">
+    <div class="mb-8 flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">ライブラリ詳細</h1>
         <div class="mt-2 flex items-center space-x-3">
@@ -121,14 +117,14 @@
           type="button"
           onclick={handleScraping}
           disabled={isScrapingInProgress}
-          class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isScrapingInProgress ? 'スクレイピング中...' : 'スクレイピング実行'}
         </button>
         <button
           type="button"
           onclick={handleEdit}
-          class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
         >
           編集
         </button>
@@ -136,7 +132,7 @@
           <button
             type="button"
             onclick={handlePublish}
-            class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
           >
             公開する
           </button>
@@ -146,14 +142,14 @@
 
     <!-- スクレイピングメッセージ -->
     {#if scrapingMessage}
-      <div class="mb-6 p-4 rounded-md bg-blue-50 text-blue-800">
+      <div class="mb-6 rounded-md bg-blue-50 p-4 text-blue-800">
         {scrapingMessage}
       </div>
     {/if}
 
     <!-- Library Details -->
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">概要</h2>
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <h2 class="mb-6 text-2xl font-bold text-gray-900">概要</h2>
+    <div class="overflow-hidden rounded-lg bg-white shadow-md">
       <div class="px-6 py-8">
         <dl class="space-y-8">
           <div>
@@ -164,20 +160,14 @@
           </div>
           <div>
             <dt class="text-sm font-medium text-gray-500">GAS スクリプトID</dt>
-            <dd class="mt-1 text-base text-gray-900 font-mono break-all">
+            <dd class="mt-1 font-mono text-base break-all text-gray-900">
               {library.scriptId}
             </dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-gray-500">
-              GitHub リポジトリURL
-            </dt>
+            <dt class="text-sm font-medium text-gray-500">GitHub リポジトリURL</dt>
             <dd class="mt-1 text-base text-blue-600 hover:underline">
-              <a
-                href={library.repositoryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={library.repositoryUrl} target="_blank" rel="noopener noreferrer">
                 {library.repositoryUrl}
               </a>
             </dd>
@@ -191,9 +181,7 @@
                 rel="noopener noreferrer"
                 title={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
               >
-                https://script.google.com/macros/library/d/{library.scriptId.slice(
-                  -8
-                )}...
+                https://script.google.com/macros/library/d/{library.scriptId.slice(-8)}...
               </a>
             </dd>
           </div>
@@ -206,9 +194,7 @@
                 rel="noopener noreferrer"
                 title={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
               >
-                https://script.google.com/projects/{library.scriptId.slice(
-                  -8
-                )}...
+                https://script.google.com/projects/{library.scriptId.slice(-8)}...
               </a>
             </dd>
           </div>
@@ -262,18 +248,16 @@
 
     <!-- Scraping Results -->
     <div class="mt-12">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">詳細</h2>
-      <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <h2 class="mb-6 text-2xl font-bold text-gray-900">詳細</h2>
+      <div class="overflow-hidden rounded-lg bg-white shadow-md">
         <div class="px-6">
           <!-- README Section -->
           {#if library.readmeContent}
             <MarkdownRenderer content={library.readmeContent} />
           {:else}
-            <div class="text-gray-500 text-center py-8">
+            <div class="py-8 text-center text-gray-500">
               <p>README が見つかりませんでした。</p>
-              <p class="text-sm mt-2">
-                スクレイピングを実行してREADMEを取得してください。
-              </p>
+              <p class="mt-2 text-sm">スクレイピングを実行してREADMEを取得してください。</p>
             </div>
           {/if}
         </div>
@@ -282,8 +266,8 @@
   </div>
 
   <!-- Footer -->
-  <footer class="bg-gray-50 border-t border-gray-200 mt-12">
-    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
+    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div class="text-center text-sm text-gray-500">
         &copy; 2025 wywy LLC. All rights reserved.
       </div>

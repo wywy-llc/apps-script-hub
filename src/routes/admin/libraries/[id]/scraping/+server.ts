@@ -20,8 +20,7 @@ export const POST: RequestHandler = async ({ params }) => {
   } catch (err) {
     console.error('スクレイピングエラー:', err);
     throw error(500, {
-      message:
-        err instanceof Error ? err.message : 'スクレイピングに失敗しました。',
+      message: err instanceof Error ? err.message : 'スクレイピングに失敗しました。',
     });
   }
 };

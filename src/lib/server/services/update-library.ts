@@ -12,11 +12,7 @@ export class UpdateLibraryFromGithubService {
    */
   static async call(libraryId: string) {
     // ライブラリを取得
-    const result = await db
-      .select()
-      .from(library)
-      .where(eq(library.id, libraryId))
-      .limit(1);
+    const result = await db.select().from(library).where(eq(library.id, libraryId)).limit(1);
 
     if (result.length === 0) {
       throw new Error('ライブラリが見つかりません。');
@@ -31,9 +27,7 @@ export class UpdateLibraryFromGithubService {
     }
 
     // GitHub リポジトリ情報を取得
-    const repoResponse = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}`
-    );
+    const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
 
     if (!repoResponse.ok) {
       if (repoResponse.status === 404) {
@@ -47,15 +41,11 @@ export class UpdateLibraryFromGithubService {
     // README を取得
     let readmeContent = '';
     try {
-      const readmeResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/readme`
-      );
+      const readmeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`);
 
       if (readmeResponse.ok) {
         const readmeData = await readmeResponse.json();
-        readmeContent = Buffer.from(readmeData.content, 'base64').toString(
-          'utf-8'
-        );
+        readmeContent = Buffer.from(readmeData.content, 'base64').toString('utf-8');
       }
     } catch (err) {
       console.warn('README 取得エラー:', err);

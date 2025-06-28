@@ -15,12 +15,10 @@ export default defineConfig({
     command: 'npm run build && npm run preview',
     port: 4173,
     env: {
-      DATABASE_URL:
-        process.env.DATABASE_TEST_URL || process.env.DATABASE_URL || '',
+      DATABASE_URL: process.env.DATABASE_TEST_URL || process.env.DATABASE_URL || '',
       POSTGRES_USER: process.env.POSTGRES_USER || '',
       POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD || '',
-      POSTGRES_DB:
-        process.env.POSTGRES_TEST_DB || process.env.POSTGRES_DB || '',
+      POSTGRES_DB: process.env.POSTGRES_TEST_DB || process.env.POSTGRES_DB || '',
       NODE_ENV: 'test',
       GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
     },

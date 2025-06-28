@@ -13,7 +13,7 @@
   let isLoggedIn = $derived(session && user);
 </script>
 
-<div class="min-h-screen flex flex-col">
+<div class="flex min-h-screen flex-col">
   {#if isLoggedIn}
     <UserHeader {user} showAdminLink={false} />
   {:else}

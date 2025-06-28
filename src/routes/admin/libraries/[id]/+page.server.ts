@@ -12,11 +12,7 @@ export const load: PageServerLoad = async ({ params }) => {
   }
 
   try {
-    const result = await db
-      .select()
-      .from(library)
-      .where(eq(library.id, libraryId))
-      .limit(1);
+    const result = await db.select().from(library).where(eq(library.id, libraryId)).limit(1);
 
     if (result.length === 0) {
       throw error(404, 'ライブラリが見つかりません。');

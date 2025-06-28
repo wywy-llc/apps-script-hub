@@ -15,8 +15,8 @@ export function isAdminUser(email: string): boolean {
   // カンマ区切りで複数のメールアドレスをサポート
   const adminEmailList = adminEmails
     .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter((email) => email.length > 0);
+    .map(email => email.trim().toLowerCase())
+    .filter(email => email.length > 0);
 
   return adminEmailList.includes(email.toLowerCase());
 }
@@ -34,6 +34,6 @@ export function getAdminEmails(): string[] {
 
   return adminEmails
     .split(',')
-    .map((email) => email.trim())
-    .filter((email) => email.length > 0);
+    .map(email => email.trim())
+    .filter(email => email.length > 0);
 }

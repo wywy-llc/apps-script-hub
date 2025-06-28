@@ -30,10 +30,7 @@ export class FetchGithubRepoService {
     }
     headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}`,
-      { headers }
-    );
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -86,19 +83,16 @@ export class FetchGithubReadmeService {
       }
       headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 
-      const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/readme`,
-        { headers }
-      );
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
+        headers,
+      });
 
       if (!response.ok) {
         return ''; // README が見つからない場合は空文字を返す
       }
 
       const readmeData = await response.json();
-      const readmeContent = Buffer.from(readmeData.content, 'base64').toString(
-        'utf-8'
-      );
+      const readmeContent = Buffer.from(readmeData.content, 'base64').toString('utf-8');
 
       return readmeContent;
     } catch (err) {

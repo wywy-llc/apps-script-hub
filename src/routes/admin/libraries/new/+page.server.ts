@@ -36,10 +36,7 @@ export const actions: Actions = {
       };
     } catch (err) {
       return fail(500, {
-        message:
-          err instanceof Error
-            ? err.message
-            : 'ライブラリの作成に失敗しました。',
+        message: err instanceof Error ? err.message : 'ライブラリの作成に失敗しました。',
       });
     }
   },

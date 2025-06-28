@@ -149,21 +149,21 @@ MIT License
 
 <!-- Basic Example -->
 <Story name="Basic Example" args={{ content: basicMarkdown }}>
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <MarkdownRenderer content={basicMarkdown} />
   </div>
 </Story>
 
 <!-- README Example -->
 <Story name="README Example" args={{ content: readmeExample }}>
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <MarkdownRenderer content={readmeExample} />
   </div>
 </Story>
 
 <!-- Simple Text -->
 <Story name="Simple Text">
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <MarkdownRenderer
       content={`# シンプルなテキスト
 
@@ -179,7 +179,7 @@ MIT License
 
 <!-- Code Highlighting -->
 <Story name="Code Highlighting">
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <MarkdownRenderer
       content={`# コードハイライトのテスト
 
@@ -233,12 +233,12 @@ npm run build
 
 <!-- Custom Class -->
 <Story name="Custom Class">
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <MarkdownRenderer
       content="# カスタムクラス付きの例
 
 この例では追加のCSSクラスが適用されています。"
-      class="border border-gray-300 rounded-lg shadow-sm"
+      class="rounded-lg border border-gray-300 shadow-sm"
     />
   </div>
 </Story>

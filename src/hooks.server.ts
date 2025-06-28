@@ -122,10 +122,7 @@ const { handle: authHandle } = SvelteKitAuth({
     },
     async session({ session, token }) {
       if (token?.email) {
-        const [user] = await db
-          .select()
-          .from(table.user)
-          .where(eq(table.user.email, token.email));
+        const [user] = await db.select().from(table.user).where(eq(table.user.email, token.email));
 
         if (user) {
           session.user = {

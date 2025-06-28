@@ -40,10 +40,9 @@ export const LibraryTestDataFactory = Factory.define<LibraryTestData>(() => ({
  * 異なるライブラリ用のファクトリ
  * 複数のテストパターンを簡単に生成するためのプリセット
  */
-export const AlternativeLibraryTestDataFactory =
-  Factory.define<LibraryTestData>(() => ({
-    scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
-    repoUrl: 'example/sample-library',
-    expectedName: 'sample-library',
-    expectedAuthor: 'example',
-  }));
+export const AlternativeLibraryTestDataFactory = Factory.define<LibraryTestData>(() => ({
+  scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
+  repoUrl: 'example/sample-library',
+  expectedName: 'sample-library',
+  expectedAuthor: 'example',
+}));

@@ -18,7 +18,7 @@ const config: StorybookConfig = {
   docs: {
     defaultName: 'Docs',
   },
-  viteFinal: async (config) => {
+  viteFinal: async config => {
     // Tailwind CSSの設定を確実に読み込む
     return config;
   },
