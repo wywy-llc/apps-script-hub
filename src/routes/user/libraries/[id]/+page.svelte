@@ -15,8 +15,58 @@
   // スクリプトIDのコピー数を管理
   let scriptIdCopyCount = $state(0);
 
+  // localStorageのキー
+  const COPY_COUNT_KEY = `script-copy-count-${library.scriptId}`;
+  const COPIED_SCRIPTS_KEY = 'copied-script-ids';
+
   // ライブラリURLを生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
+
+  // コンポーネント初期化時にlocalStorageからコピー回数を読み込み
+  function initializeCopyCount() {
+    if (typeof window !== 'undefined') {
+      const savedCount = localStorage.getItem(COPY_COUNT_KEY);
+      if (savedCount) {
+        scriptIdCopyCount = parseInt(savedCount, 10) || 0;
+      }
+    }
+  }
+
+  // このスクリプトIDが既にコピーされているかチェック
+  function hasBeenCopiedBefore(): boolean {
+    if (typeof window === 'undefined') return false;
+
+    const copiedScripts = localStorage.getItem(COPIED_SCRIPTS_KEY);
+    if (!copiedScripts) return false;
+
+    try {
+      const copiedScriptIds: string[] = JSON.parse(copiedScripts);
+      return copiedScriptIds.includes(library.scriptId);
+    } catch {
+      return false;
+    }
+  }
+
+  // コピー済みスクリプトIDとしてマーク
+  function markAsCopied() {
+    if (typeof window === 'undefined') return;
+
+    const copiedScripts = localStorage.getItem(COPIED_SCRIPTS_KEY);
+    let copiedScriptIds: string[] = [];
+
+    if (copiedScripts) {
+      try {
+        copiedScriptIds = JSON.parse(copiedScripts);
+      } catch {
+        copiedScriptIds = [];
+      }
+    }
+
+    if (!copiedScriptIds.includes(library.scriptId)) {
+      copiedScriptIds.push(library.scriptId);
+      localStorage.setItem(COPIED_SCRIPTS_KEY, JSON.stringify(copiedScriptIds));
+    }
+  }
 
   async function copyToClipboard(elementId: string) {
     const input = document.getElementById(elementId) as HTMLInputElement;
@@ -26,9 +76,16 @@
         await navigator.clipboard.writeText(input.value);
         console.log('Copied!');
 
-        // スクリプトIDがコピーされた場合はカウントを増加
+        // スクリプトIDがコピーされた場合はカウントを管理
         if (elementId === 'script-id') {
-          scriptIdCopyCount++;
+          const alreadyCopied = hasBeenCopiedBefore();
+
+          if (!alreadyCopied) {
+            // 初回コピー時のみカウントを増加
+            scriptIdCopyCount++;
+            localStorage.setItem(COPY_COUNT_KEY, scriptIdCopyCount.toString());
+            markAsCopied();
+          }
         }
       } catch (err) {
         console.error('Copy failed', err);
@@ -39,6 +96,11 @@
       }
     }
   }
+
+  // コンポーネントマウント時にコピー回数を初期化
+  $effect(() => {
+    initializeCopyCount();
+  });
 
   // 作成日時の表示用フォーマット
   function formatDate(date: Date): string {
