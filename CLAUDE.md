@@ -137,6 +137,71 @@ await db.execute(sql`DELETE FROM "library"`); // 既存テーブルも保持
 - 厳密チェック付きTypeScript
 - コード品質用ESLint + Prettier
 
+## 🔢 マジックナンバー・定数管理
+
+### 必須ルール: 定数化とオブジェクトリテラル
+
+**🚨 重要**: マジックナンバー、文字列リテラル、設定値は必ず定数化してください。
+
+#### 定数ファイルの配置
+
+- **場所**: `/src/lib/constants/` ディレクトリ
+- **命名**: 機能別にファイルを分割（例: `library-status.ts`, `pagination.ts`, `ui-config.ts`）
+- **フォーマット**: オブジェクトリテラルを使用したconst assertionパターン
+
+#### 実装パターン
+
+```typescript
+// ✅ 正しい例: src/lib/constants/example.ts
+export const EXAMPLE_CONFIG = {
+  MAX_ITEMS: 50,
+  DEFAULT_PAGE: 1,
+  STATUS_ACTIVE: 'active',
+  STATUS_INACTIVE: 'inactive',
+} as const;
+
+export type ExampleStatus = (typeof EXAMPLE_CONFIG)[keyof typeof EXAMPLE_CONFIG];
+
+// ✅ 表示テキストも定数化
+export const EXAMPLE_MESSAGES = {
+  [EXAMPLE_CONFIG.STATUS_ACTIVE]: 'アクティブ',
+  [EXAMPLE_CONFIG.STATUS_INACTIVE]: '非アクティブ',
+} as const;
+```
+
+#### 対象となるマジックナンバー・文字列
+
+1. **ステータス値**: `'pending'`, `'published'`, `'rejected'`
+2. **数値設定**: ページネーション数、タイムアウト値、制限値
+3. **UI設定**: CSSクラス名の組み合わせ、カラーコード
+4. **メッセージ**: エラーメッセージ、確認ダイアログのテキスト
+5. **設定値**: API エンドポイント、デフォルト値
+
+#### 使用時のルール
+
+- ✅ `LIBRARY_STATUS.PENDING` を使用
+- ❌ `'pending'` を直接使用
+- ✅ `CONFIG.MAX_ITEMS` を使用  
+- ❌ `50` を直接使用
+
+#### 型安全性の確保
+
+```typescript
+// ✅ 型も併せて export
+export const STATUS = { ACTIVE: 'active', INACTIVE: 'inactive' } as const;
+export type Status = (typeof STATUS)[keyof typeof STATUS];
+
+// ✅ 関数の引数や戻り値で型を使用
+function updateStatus(newStatus: Status) { /* ... */ }
+```
+
+**💡 メリット:**
+- 型安全性の向上
+- 保守性の向上（値変更時は1箇所だけ修正）
+- 一貫性の確保
+- IDEの補完機能が活用可能
+- リファクタリングの容易性
+
 ## Playwright MCP使用ルール
 
 ### 絶対的な禁止事項
