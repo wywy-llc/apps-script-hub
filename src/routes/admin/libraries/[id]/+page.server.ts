@@ -1,3 +1,4 @@
+import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-status.js';
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { error, fail } from '@sveltejs/kit';
@@ -46,7 +47,7 @@ export const actions: Actions = {
     const status = formData.get('status') as string;
 
     // ステータスのバリデーション
-    if (!status || !['published', 'rejected', 'pending'].includes(status)) {
+    if (!status || !Object.values(LIBRARY_STATUS).includes(status as LibraryStatus)) {
       return fail(400, { error: '無効なステータスです。' });
     }
 
@@ -66,21 +67,21 @@ export const actions: Actions = {
       await db
         .update(library)
         .set({
-          status: status as 'pending' | 'published' | 'rejected',
+          status: status as LibraryStatus,
           updatedAt: new Date(),
         })
         .where(eq(library.id, libraryId));
 
       // 成功メッセージを返す
       const statusMessages = {
-        published: 'ライブラリを承認し、公開しました。',
-        rejected: 'ライブラリを拒否しました。',
-        pending: 'ライブラリを承認待ちに戻しました。',
+        [LIBRARY_STATUS.PUBLISHED]: 'ライブラリを承認し、公開しました。',
+        [LIBRARY_STATUS.REJECTED]: 'ライブラリを拒否しました。',
+        [LIBRARY_STATUS.PENDING]: 'ライブラリを承認待ちに戻しました。',
       };
 
       return {
         success: true,
-        message: statusMessages[status as keyof typeof statusMessages],
+        message: statusMessages[status as LibraryStatus],
         newStatus: status,
       };
     } catch (err) {

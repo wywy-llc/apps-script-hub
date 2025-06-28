@@ -2,6 +2,12 @@
   import { enhance } from '$app/forms';
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import {
+    LIBRARY_STATUS,
+    LIBRARY_STATUS_BADGE_CLASS,
+    LIBRARY_STATUS_TEXT,
+    type LibraryStatus,
+  } from '$lib/constants/library-status.js';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
@@ -25,8 +31,11 @@
     if (form?.success) {
       statusMessage = form.message;
       // ライブラリのステータスを更新
-      if (form.newStatus && ['pending', 'published', 'rejected'].includes(form.newStatus)) {
-        library = { ...library, status: form.newStatus as 'pending' | 'published' | 'rejected' };
+      if (
+        form.newStatus &&
+        Object.values(LIBRARY_STATUS).includes(form.newStatus as LibraryStatus)
+      ) {
+        library = { ...library, status: form.newStatus as LibraryStatus };
       }
       // 3秒後にメッセージを消去
       setTimeout(() => {
@@ -79,7 +88,7 @@
   /**
    * ステータス更新アクションのハンドラー
    */
-  function handleStatusUpdate(newStatus: 'published' | 'rejected' | 'pending') {
+  function handleStatusUpdate(newStatus: LibraryStatus) {
     isStatusUpdateInProgress = true;
     // フォームを送信
     const form = document.getElementById(`status-form-${newStatus}`) as HTMLFormElement;
@@ -94,29 +103,14 @@
   }
 
   function getStatusBadge(status: string) {
-    switch (status) {
-      case 'published':
-        return 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800';
-      case 'pending':
-        return 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
-      default:
-        return 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800';
-    }
+    return (
+      LIBRARY_STATUS_BADGE_CLASS[status as LibraryStatus] ||
+      'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'
+    );
   }
 
   function getStatusText(status: string) {
-    switch (status) {
-      case 'published':
-        return '公開中';
-      case 'pending':
-        return '承認待ち';
-      case 'rejected':
-        return '却下';
-      default:
-        return '不明';
-    }
+    return LIBRARY_STATUS_TEXT[status as LibraryStatus] || '不明';
   }
 </script>
 
