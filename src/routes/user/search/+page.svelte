@@ -10,8 +10,8 @@
 
   $: ({ libraries, totalResults, searchQuery, currentPage, itemsPerPage } = data);
 
-  // 検索ボックス用のローカル値
-  let value = searchQuery;
+  // 検索ボックス用のローカル値（将来の拡張用）
+  // let value = searchQuery;
 
   // 結果件数に基づいてページ数を動的に計算
   $: totalPages = Math.ceil(totalResults / itemsPerPage);

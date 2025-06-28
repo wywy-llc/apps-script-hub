@@ -15,10 +15,10 @@
     return num.toString();
   }
 
-  // タグクリック時の検索機能
-  function searchByTag(tag: string) {
-    window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
-  }
+  // タグクリック時の検索機能（将来の拡張用）
+  // function searchByTag(tag: string) {
+  //   window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
+  // }
 </script>
 
 <div
