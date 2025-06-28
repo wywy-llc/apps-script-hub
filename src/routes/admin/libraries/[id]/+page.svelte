@@ -246,8 +246,11 @@
                   href={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
                 >
-                  https://script.google.com/macros/library/d/{library.scriptId}/0
+                  https://script.google.com/macros/library/d/{library.scriptId.slice(
+                    -8
+                  )}...
                 </a>
               </dd>
             </div>
@@ -258,8 +261,11 @@
                   href={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
                 >
-                  https://script.google.com/u/1/home/projects/{library.scriptId}/edit
+                  https://script.google.com/projects/{library.scriptId.slice(
+                    -8
+                  )}...
                 </a>
               </dd>
             </div>
