@@ -1,10 +1,19 @@
 <script lang="ts">
   import { app_title, sign_in, sign_up } from '$lib/paraglide/messages.js';
+  import { page } from '$app/stores';
+  import { signOut } from '@auth/sveltekit/client';
   import Button from './Button.svelte';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
 
-  // ヘッダーナビゲーションコンポーネント
-  // AppsScriptHubのメインヘッダーで、ロゴとサインイン/サインアップボタンを表示
+  // ヘッダーナビゲーションコンポーネント  
+  // AppsScriptHubのメインヘッダーで、ロゴとログイン/ログアウトボタンを表示
+
+  $: session = $page.data.session;
+  $: user = $page.data.user;
+
+  async function handleSignOut() {
+    await signOut({ redirectTo: '/' });
+  }
 </script>
 
 <header
@@ -20,15 +29,28 @@
       <!-- 右側のアクション -->
       <div class="flex items-center space-x-4">
         <LanguageSwitcher />
-        <a
-          href="/signin"
-          class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-        >
-          {sign_in()}
-        </a>
-        <Button variant="primary" size="md" href="/signup">
-          {sign_up()}
-        </Button>
+        {#if session && user}
+          <!-- ログイン済みユーザー -->
+          <div class="flex items-center space-x-3">
+            <span class="text-sm text-gray-700">
+              {user.name || user.email}
+            </span>
+            <a
+              href="/admin"
+              class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              管理画面
+            </a>
+            <Button variant="outline" size="sm" on:click={handleSignOut}>
+              ログアウト
+            </Button>
+          </div>
+        {:else}
+          <!-- 未ログインユーザー -->
+          <Button variant="primary" size="md" href="/auth/login">
+            管理者ログイン
+          </Button>
+        {/if}
       </div>
     </div>
   </div>

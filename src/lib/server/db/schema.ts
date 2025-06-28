@@ -2,7 +2,16 @@ import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
-  age: integer('age'),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  picture: text('picture'),
+  googleId: text('google_id').notNull().unique(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
 });
 
 export const session = pgTable('session', {
