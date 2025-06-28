@@ -1,13 +1,12 @@
 <script>
-  import { page } from '$app/stores';
   import AdminHeader from '$lib/components/AdminHeader.svelte';
 
   // 管理者画面共通レイアウト
   // 管理者専用のスタイルやコンポーネントを定義
 
-  let { children } = $props();
+  let { children, data } = $props();
 
-  let user = $derived($page.data.user);
+  let user = $derived(data.user);
 </script>
 
 <svelte:head>
