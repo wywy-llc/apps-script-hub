@@ -16,16 +16,10 @@ export {
 
 // ライブラリ関連のfactory
 export {
-  AlternativeLibraryTestDataFactory,
   DatabaseLibraryDataFactory,
   LibraryStatusTestDataFactories,
   LibraryTestDataFactories,
-  LibraryTestDataFactory,
-  PendingLibraryFactory,
-  PublishedLibraryFactory,
-  RejectedLibraryFactory,
   type DatabaseLibraryData,
-  type LibraryStatusTestData,
   type LibraryTestData,
 } from './library-test-data.factory';
 
@@ -33,7 +27,6 @@ export {
 export {
   DatabaseUserDataFactory,
   UserTestDataFactories,
-  UserTestDataFactory,
   type DatabaseUserData,
   type UserTestData,
 } from './user-test-data.factory';

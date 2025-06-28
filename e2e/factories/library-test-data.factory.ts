@@ -18,22 +18,8 @@ export type CreateLibraryInput = Omit<
 >;
 
 /**
- * ライブラリテストデータのインターフェース
- */
-export interface LibraryTestData {
-  /** Google Apps Script ID */
-  scriptId: string;
-  /** GitHubリポジトリURL */
-  repoUrl: string;
-  /** 期待されるライブラリ名 */
-  expectedName: string;
-  /** 期待される作成者名 */
-  expectedAuthor: string;
-}
-
-/**
  * データベース作成用のライブラリ情報
- * DDDエンティティのCreateLibraryInputを基盤とし、IDを追加
+ * drizzleスキーマのCreateLibraryInputを基盤とし、IDを追加
  */
 export interface DatabaseLibraryData extends CreateLibraryInput {
   id: string;
@@ -41,37 +27,45 @@ export interface DatabaseLibraryData extends CreateLibraryInput {
 }
 
 /**
- * 検索・ステータス別テスト用のライブラリデータ
- * DDDエンティティのCreateLibraryInputを基盤
+ * テスト用のライブラリデータ（drizzleスキーマベース）
+ * CreateLibraryInputを基盤とし、テストで必要な最小限のデータ構造
  */
-export interface LibraryStatusTestData extends CreateLibraryInput {
-  status: LibraryStatus;
-}
+export type LibraryTestData = CreateLibraryInput;
 
 /**
  * ライブラリテストデータのFactory群
- * プリセットパターンを使用して複数のテストケースを簡単に生成
+ * drizzleスキーマベースで統一されたテストデータを生成
  */
 export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
   default: () => ({
+    name: 'apps-script-oauth2',
     scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-    repoUrl: 'googleworkspace/apps-script-oauth2',
-    expectedName: 'apps-script-oauth2',
-    expectedAuthor: 'googleworkspace',
+    repositoryUrl: 'https://github.com/googleworkspace/apps-script-oauth2',
+    authorUrl: 'https://github.com/googleworkspace',
+    authorName: 'googleworkspace',
+    description: 'OAuth2 library for Google Apps Script',
+    readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
+    starCount: 100,
+    status: LIBRARY_STATUS.PENDING,
   }),
   alternative: () => ({
+    name: 'sample-library',
     scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
-    repoUrl: 'example/sample-library',
-    expectedName: 'sample-library',
-    expectedAuthor: 'example',
+    repositoryUrl: 'https://github.com/example/sample-library',
+    authorUrl: 'https://github.com/example',
+    authorName: 'example',
+    description: 'Sample library for testing',
+    readmeContent: '# Sample Library\n\nA sample library for testing purposes',
+    starCount: 50,
+    status: LIBRARY_STATUS.PENDING,
   }),
 });
 
 /**
  * ステータス別ライブラリテストデータFactory群
- * search-test-data.factoryから統合
+ * drizzleスキーマベース、ステータス別のプリセット
  */
-export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatusTestData>({
+export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestData>({
   published: () => ({
     name: 'GasLogger',
     scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',

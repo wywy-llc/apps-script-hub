@@ -8,18 +8,9 @@ import { createDatabaseFactory, createPresetFactories, generateUniqueId } from '
 export type CreateUserInput = Omit<typeof user.$inferInsert, 'id' | 'createdAt'>;
 
 /**
- * ユーザーテストデータのインターフェース
+ * ユーザーテストデータ（drizzleスキーマベース）
  */
-export interface UserTestData {
-  /** ユーザーID */
-  id: string;
-  /** メールアドレス */
-  email: string;
-  /** 表示名 */
-  name: string;
-  /** プロフィール画像URL */
-  picture?: string;
-}
+export type UserTestData = CreateUserInput;
 
 /**
  * データベース作成用のユーザー情報
@@ -49,22 +40,22 @@ export interface DatabaseUserData extends CreateUserInput {
  */
 export const UserTestDataFactories = createPresetFactories<UserTestData>({
   default: () => ({
-    id: generateUniqueId('user'),
     email: 'test@example.com',
     name: 'Test User',
     picture: 'https://example.com/avatar.jpg',
+    googleId: 'google_test_id',
   }),
   admin: () => ({
-    id: generateUniqueId('admin'),
     email: 'admin@example.com',
     name: 'Admin User',
     picture: 'https://example.com/admin-avatar.jpg',
+    googleId: 'google_admin_id',
   }),
   guest: () => ({
-    id: generateUniqueId('guest'),
     email: 'guest@example.com',
     name: 'Guest User',
     picture: undefined,
+    googleId: 'google_guest_id',
   }),
 });
 
