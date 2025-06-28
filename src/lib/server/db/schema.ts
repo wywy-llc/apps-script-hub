@@ -35,6 +35,7 @@ export const library = pgTable('library', {
   description: text('description').notNull(),
   readmeContent: text('readme_content').notNull(),
   starCount: integer('star_count').default(0).notNull(),
+  copyCount: integer('copy_count').default(0).notNull(),
   status: text('status', { enum: ['pending', 'published', 'rejected'] })
     .notNull()
     .default('pending'),

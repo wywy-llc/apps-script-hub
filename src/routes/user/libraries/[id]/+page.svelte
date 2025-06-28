@@ -12,23 +12,32 @@
   let { data }: Props = $props();
   const { library } = data;
 
-  // スクリプトIDのコピー数を管理
-  let scriptIdCopyCount = $state(0);
+  // データベースのコピー回数を表示用の状態として管理
+  let displayCopyCount = $state(library.copyCount);
 
-  // localStorageのキー
-  const COPY_COUNT_KEY = `script-copy-count-${library.scriptId}`;
+  // localStorageのキー（重複カウント防止用）
   const COPIED_SCRIPTS_KEY = 'copied-script-ids';
 
   // ライブラリURLを生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
 
-  // コンポーネント初期化時にlocalStorageからコピー回数を読み込み
-  function initializeCopyCount() {
-    if (typeof window !== 'undefined') {
-      const savedCount = localStorage.getItem(COPY_COUNT_KEY);
-      if (savedCount) {
-        scriptIdCopyCount = parseInt(savedCount, 10) || 0;
+  // サーバーサイドでコピー回数を増加
+  async function incrementCopyCount() {
+    try {
+      const response = await fetch(`/user/libraries/${library.id}/copy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        displayCopyCount = data.copyCount;
+        markAsCopied();
       }
+    } catch (err) {
+      console.error('コピー回数の更新に失敗しました:', err);
     }
   }
 
@@ -81,10 +90,8 @@
           const alreadyCopied = hasBeenCopiedBefore();
 
           if (!alreadyCopied) {
-            // 初回コピー時のみカウントを増加
-            scriptIdCopyCount++;
-            localStorage.setItem(COPY_COUNT_KEY, scriptIdCopyCount.toString());
-            markAsCopied();
+            // 初回コピー時のみサーバーサイドでカウントを増加
+            await incrementCopyCount();
           }
         }
       } catch (err) {
@@ -96,11 +103,6 @@
       }
     }
   }
-
-  // コンポーネントマウント時にコピー回数を初期化
-  $effect(() => {
-    initializeCopyCount();
-  });
 
   // 作成日時の表示用フォーマット
   function formatDate(date: Date): string {
@@ -215,7 +217,7 @@
           <dl>
             <dt class="font-semibold text-gray-800">スクリプトIDコピー数</dt>
             <dd class="mb-3">
-              {scriptIdCopyCount}回
+              {displayCopyCount}回
             </dd>
 
             <dt class="font-semibold text-gray-800">作者</dt>

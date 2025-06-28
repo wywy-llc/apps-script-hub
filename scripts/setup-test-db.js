@@ -93,6 +93,7 @@ async function setupTestDatabase() {
         "description" text NOT NULL,
         "readme_content" text NOT NULL,
         "star_count" integer DEFAULT 0 NOT NULL,
+        "copy_count" integer DEFAULT 0 NOT NULL,
         "status" text DEFAULT 'pending' NOT NULL,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL
