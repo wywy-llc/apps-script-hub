@@ -42,11 +42,21 @@ jobs:
         run: npm run test:e2e:setup
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/apps_script_hub_test_db
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_TEST_DB: apps_script_hub_test_db
 
       - name: Run tests
         run: npm run test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/apps_script_hub_test_db
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_TEST_DB: apps_script_hub_test_db
 
       - name: Run linting
         run: npm run lint
