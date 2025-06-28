@@ -18,7 +18,7 @@ export class FetchGithubRepoService {
   static async call(owner: string, repo: string) {
     // GitHub API呼び出し用のヘッダー設定
     const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github.v3+json',
+      Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'app-script-hub',
     };
 
@@ -74,7 +74,7 @@ export class FetchGithubReadmeService {
     try {
       // GitHub API呼び出し用のヘッダー設定
       const headers: Record<string, string> = {
-        'Accept': 'application/vnd.github.v3+json',
+        Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'app-script-hub',
       };
 

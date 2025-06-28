@@ -369,7 +369,7 @@
         mobileMenu.classList.toggle('hidden');
       });
 
-      navLinks.forEach(link => {
+      navLinks.forEach((link) => {
         link.addEventListener('click', () => {
           if (!mobileMenu.classList.contains('hidden')) {
             mobileMenu.classList.add('hidden');
@@ -464,7 +464,7 @@
         const contentInner = document.createElement('div');
         contentInner.className = 'p-5 border-t border-slate-200';
 
-        feature.items.forEach(item => {
+        feature.items.forEach((item) => {
           const itemDiv = document.createElement('div');
           itemDiv.className = 'mb-4';
           itemDiv.innerHTML = `
@@ -483,7 +483,7 @@
           const isExpanded =
             content.style.maxHeight && content.style.maxHeight !== '0px';
 
-          document.querySelectorAll('.accordion-content').forEach(el => {
+          document.querySelectorAll('.accordion-content').forEach((el) => {
             if (el !== content) {
               el.style.maxHeight = '0px';
               el.previousElementSibling
