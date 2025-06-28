@@ -1,10 +1,13 @@
 <script lang="ts">
   import { app_title } from '$lib/paraglide/messages.js';
-  import Button from './Button.svelte';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
+  import UserDropdown from './UserDropdown.svelte';
 
-  // 基本ヘッダーコンポーネント
-  // 未ログインユーザー向けのシンプルなヘッダー
+  export let user: any;
+  export let showAdminLink = false;
+
+  // ログインユーザー用ヘッダーコンポーネント
+  // ユーザードロップダウンメニューを含む
 </script>
 
 <header
@@ -20,7 +23,7 @@
       <!-- 右側のアクション -->
       <div class="flex items-center space-x-4">
         <LanguageSwitcher />
-        <Button variant="primary" size="md" href="/auth/login">Login</Button>
+        <UserDropdown {user} {showAdminLink} />
       </div>
     </div>
   </div>

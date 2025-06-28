@@ -1,7 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
-  import AdminHeader from '$lib/components/AdminHeader.svelte';
   import type { ActionData } from './$types';
 
   // 管理者画面 - 新規ライブラリ追加ページ
@@ -70,9 +69,7 @@
   />
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
-  <AdminHeader onSignOut={handleSignOut} />
-
+<div class="bg-gray-50">
   <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <div class="max-w-3xl mx-auto">
       <div class="mb-8">

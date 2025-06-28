@@ -1,5 +1,4 @@
 <script lang="ts">
-  import AdminHeader from '$lib/components/AdminHeader.svelte';
   import hljs from 'highlight.js/lib/core';
   import bash from 'highlight.js/lib/languages/bash';
   import javascript from 'highlight.js/lib/languages/javascript';
@@ -154,192 +153,184 @@
   />
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
-  <AdminHeader onSignOut={handleSignOut} />
-
-  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    <div class="max-w-3xl mx-auto">
-      <div class="flex justify-between items-center mb-8">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">ライブラリ詳細</h1>
-          <div class="mt-2 flex items-center space-x-3">
-            <p class="text-sm text-gray-500">{library.name}</p>
-            <span class={getStatusBadge(library.status)}>
-              {getStatusText(library.status)}
-            </span>
-          </div>
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">ライブラリ詳細</h1>
+        <div class="mt-2 flex items-center space-x-3">
+          <p class="text-sm text-gray-500">{library.name}</p>
+          <span class={getStatusBadge(library.status)}>
+            {getStatusText(library.status)}
+          </span>
         </div>
-        <div class="flex space-x-2">
+      </div>
+      <div class="flex space-x-2">
+        <button
+          type="button"
+          onclick={handleScraping}
+          disabled={isScrapingInProgress}
+          class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isScrapingInProgress ? 'スクレイピング中...' : 'スクレイピング実行'}
+        </button>
+        <button
+          type="button"
+          onclick={handleEdit}
+          class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          編集
+        </button>
+        {#if library.status !== 'published'}
           <button
             type="button"
-            onclick={handleScraping}
-            disabled={isScrapingInProgress}
-            class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            onclick={handlePublish}
+            class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
           >
-            {isScrapingInProgress
-              ? 'スクレイピング中...'
-              : 'スクレイピング実行'}
+            公開する
           </button>
-          <button
-            type="button"
-            onclick={handleEdit}
-            class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            編集
-          </button>
-          {#if library.status !== 'published'}
-            <button
-              type="button"
-              onclick={handlePublish}
-              class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-            >
-              公開する
-            </button>
+        {/if}
+      </div>
+    </div>
+
+    <!-- スクレイピングメッセージ -->
+    {#if scrapingMessage}
+      <div class="mb-6 p-4 rounded-md bg-blue-50 text-blue-800">
+        {scrapingMessage}
+      </div>
+    {/if}
+
+    <!-- Library Details -->
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">概要</h2>
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <div class="px-6 py-8">
+        <dl class="space-y-8">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">ライブラリ名</dt>
+            <dd class="mt-1 text-lg font-semibold text-gray-900">
+              {library.name}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">GAS スクリプトID</dt>
+            <dd class="mt-1 text-base text-gray-900 font-mono break-all">
+              {library.scriptId}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">
+              GitHub リポジトリURL
+            </dt>
+            <dd class="mt-1 text-base text-blue-600 hover:underline">
+              <a
+                href={library.repositoryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {library.repositoryUrl}
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">GASメソッド</dt>
+            <dd class="mt-1 text-base text-blue-600 hover:underline">
+              <a
+                href={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
+              >
+                https://script.google.com/macros/library/d/{library.scriptId.slice(
+                  -8
+                )}...
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">GASプロジェクト</dt>
+            <dd class="mt-1 text-base text-blue-600 hover:underline">
+              <a
+                href={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
+              >
+                https://script.google.com/projects/{library.scriptId.slice(
+                  -8
+                )}...
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
+            <dd class="mt-1 text-base">
+              {#if library.authorName}
+                <a
+                  href={library.authorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                >
+                  {library.authorName}
+                </a>
+              {:else}
+                <a
+                  href={library.authorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                >
+                  {library.authorUrl}
+                </a>
+              {/if}
+            </dd>
+          </div>
+          {#if library.description}
+            <div>
+              <dt class="text-sm font-medium text-gray-500">説明</dt>
+              <dd class="mt-1 text-base text-gray-900">
+                {library.description}
+              </dd>
+            </div>
+          {/if}
+          <div>
+            <dt class="text-sm font-medium text-gray-500">作成日時</dt>
+            <dd class="mt-1 text-base text-gray-900">
+              {new Date(library.createdAt).toLocaleString('ja-JP')}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">更新日時</dt>
+            <dd class="mt-1 text-base text-gray-900">
+              {new Date(library.updatedAt).toLocaleString('ja-JP')}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Scraping Results -->
+    <div class="mt-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">詳細</h2>
+      <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6">
+          <!-- README Section -->
+          {#if library.readmeContent}
+            <article class="markdown-body p-6 bg-white">
+              {@html renderMarkdown(library.readmeContent)}
+            </article>
+          {:else}
+            <div class="text-gray-500 text-center py-8">
+              <p>README が見つかりませんでした。</p>
+              <p class="text-sm mt-2">
+                スクレイピングを実行してREADMEを取得してください。
+              </p>
+            </div>
           {/if}
         </div>
       </div>
-
-      <!-- スクレイピングメッセージ -->
-      {#if scrapingMessage}
-        <div class="mb-6 p-4 rounded-md bg-blue-50 text-blue-800">
-          {scrapingMessage}
-        </div>
-      {/if}
-
-      <!-- Library Details -->
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">概要</h2>
-      <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="px-6 py-8">
-          <dl class="space-y-8">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">ライブラリ名</dt>
-              <dd class="mt-1 text-lg font-semibold text-gray-900">
-                {library.name}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">
-                GAS スクリプトID
-              </dt>
-              <dd class="mt-1 text-base text-gray-900 font-mono break-all">
-                {library.scriptId}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">
-                GitHub リポジトリURL
-              </dt>
-              <dd class="mt-1 text-base text-blue-600 hover:underline">
-                <a
-                  href={library.repositoryUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {library.repositoryUrl}
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">GASメソッド</dt>
-              <dd class="mt-1 text-base text-blue-600 hover:underline">
-                <a
-                  href={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
-                >
-                  https://script.google.com/macros/library/d/{library.scriptId.slice(
-                    -8
-                  )}...
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">GASプロジェクト</dt>
-              <dd class="mt-1 text-base text-blue-600 hover:underline">
-                <a
-                  href={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
-                >
-                  https://script.google.com/projects/{library.scriptId.slice(
-                    -8
-                  )}...
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
-              <dd class="mt-1 text-base">
-                {#if library.authorName}
-                  <a
-                    href={library.authorUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-blue-600 hover:underline"
-                  >
-                    {library.authorName}
-                  </a>
-                {:else}
-                  <a
-                    href={library.authorUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-blue-600 hover:underline"
-                  >
-                    {library.authorUrl}
-                  </a>
-                {/if}
-              </dd>
-            </div>
-            {#if library.description}
-              <div>
-                <dt class="text-sm font-medium text-gray-500">説明</dt>
-                <dd class="mt-1 text-base text-gray-900">
-                  {library.description}
-                </dd>
-              </div>
-            {/if}
-            <div>
-              <dt class="text-sm font-medium text-gray-500">作成日時</dt>
-              <dd class="mt-1 text-base text-gray-900">
-                {new Date(library.createdAt).toLocaleString('ja-JP')}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">更新日時</dt>
-              <dd class="mt-1 text-base text-gray-900">
-                {new Date(library.updatedAt).toLocaleString('ja-JP')}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-
-      <!-- Scraping Results -->
-      <div class="mt-12">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">詳細</h2>
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-          <div class="px-6">
-            <!-- README Section -->
-            {#if library.readmeContent}
-              <article class="markdown-body p-6 bg-white">
-                {@html renderMarkdown(library.readmeContent)}
-              </article>
-            {:else}
-              <div class="text-gray-500 text-center py-8">
-                <p>README が見つかりませんでした。</p>
-                <p class="text-sm mt-2">
-                  スクレイピングを実行してREADMEを取得してください。
-                </p>
-              </div>
-            {/if}
-          </div>
-        </div>
-      </div>
     </div>
-  </main>
+  </div>
 
   <!-- Footer -->
   <footer class="bg-gray-50 border-t border-gray-200 mt-12">
@@ -349,4 +340,4 @@
       </div>
     </div>
   </footer>
-</div>
+</main>

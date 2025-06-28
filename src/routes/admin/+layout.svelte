@@ -1,8 +1,13 @@
 <script>
+  import { page } from '$app/stores';
+  import AdminHeader from '$lib/components/AdminHeader.svelte';
+
   // 管理者画面共通レイアウト
   // 管理者専用のスタイルやコンポーネントを定義
 
   let { children } = $props();
+
+  let user = $derived($page.data.user);
 </script>
 
 <svelte:head>
@@ -88,4 +93,9 @@
   </style>
 </svelte:head>
 
-{@render children()}
+<div class="min-h-screen flex flex-col">
+  <AdminHeader {user} />
+  <main class="flex-1">
+    {@render children()}
+  </main>
+</div>
