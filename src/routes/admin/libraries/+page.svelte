@@ -1,6 +1,6 @@
 <script lang="ts">
   import AdminHeader from '$lib/components/AdminHeader.svelte';
-  import { onMount } from 'svelte';
+  import type { PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
   // 全ライブラリの承認・編集・削除を管理
@@ -9,48 +9,19 @@
     id: string;
     name: string;
     scriptId: string;
-    author: string;
+    authorName: string;
     status: 'published' | 'pending' | 'rejected';
-    lastUpdated: string;
+    updatedAt: Date;
+    starCount: number;
+    description: string;
   }
 
-  let libraries: Library[] = [];
+  export let data: PageData;
+  
+  let libraries: Library[] = data.libraries;
   let currentPage = 1;
-  let totalItems = 12;
+  let totalItems = libraries.length;
   let itemsPerPage = 10;
-
-  // モックデータ（実際の実装では API から取得）
-  const mockLibraries: Library[] = [
-    {
-      id: '1',
-      name: 'GasLogger',
-      scriptId: '1oy...ThHwnbg',
-      author: 'user-name',
-      status: 'published',
-      lastUpdated: '2025/05/28',
-    },
-    {
-      id: '2',
-      name: 'CalendarEventUtil',
-      scriptId: '2abc...ZtYxwvU',
-      author: 'developer-taro',
-      status: 'pending',
-      lastUpdated: '2025/06/18',
-    },
-    {
-      id: '3',
-      name: 'InvalidLib',
-      scriptId: '3def...pOnmlkI',
-      author: 'test-user',
-      status: 'rejected',
-      lastUpdated: '2025/06/15',
-    },
-  ];
-
-  onMount(() => {
-    // 実際の実装では API からライブラリ一覧を取得
-    libraries = mockLibraries;
-  });
 
   function getStatusBadge(status: Library['status']) {
     switch (status) {
@@ -173,10 +144,10 @@
                       {library.name}
                     </a>
                   </div>
-                  <div class="text-sm text-gray-500">{library.scriptId}</div>
+                  <div class="text-sm text-gray-500 truncate max-w-xs" title={library.scriptId}>{library.scriptId}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {library.author}
+                  {library.authorName}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class={getStatusBadge(library.status)}>
@@ -184,7 +155,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {library.lastUpdated}
+                  {new Date(library.updatedAt).toLocaleDateString('ja-JP')}
                 </td>
                 <td
                   class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
