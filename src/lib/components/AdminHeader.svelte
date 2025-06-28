@@ -3,7 +3,7 @@
   import LanguageSwitcher from './LanguageSwitcher.svelte';
   import UserDropdown from './UserDropdown.svelte';
 
-  export let user: any;
+  export let user: { name?: string; email?: string; image?: string };
 
   // 管理者用ヘッダーコンポーネント
   // 管理者専用ナビゲーションとユーザードロップダウンを含む

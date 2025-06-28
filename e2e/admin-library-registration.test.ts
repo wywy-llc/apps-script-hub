@@ -28,7 +28,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     ).toBeVisible();
 
     // 5. 詳細ページへのリダイレクトを待機
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/);
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/);
 
     // 6. 詳細ページの内容確認
     // ページタイトル
@@ -161,7 +161,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     await page.click('button[type="submit"]');
 
     // 詳細ページへのリダイレクトを待機
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/);
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/);
 
     // 管理者ヘッダーのライブラリ一覧リンクをクリック
     await page.click('a[href="/admin/libraries"]');
@@ -195,25 +195,25 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // デバッグ用：フォーム送信後の状態を確認
     await page.waitForLoadState('networkidle');
 
-    // ページのHTMLを確認
-    const pageContent = await page.content();
+    // ページのHTMLを確認（デバッグ用）
+    // const pageContent = await page.content();
 
-    // エラーメッセージ要素を詳細に検索
-    const allTexts = await page.locator('*').allTextContents();
-    const errorTexts = allTexts.filter(
-      text =>
-        text.includes('既に登録') ||
-        text.includes('エラー') ||
-        text.includes('失敗')
-    );
+    // エラーメッセージ要素を詳細に検索（デバッグ用）
+    // const allTexts = await page.locator('*').allTextContents();
+    // const errorTexts = allTexts.filter(
+    //   text =>
+    //     text.includes('既に登録') ||
+    //     text.includes('エラー') ||
+    //     text.includes('失敗')
+    // );
 
-    // 特定のエラーメッセージをチェック
-    const hasScriptIdError = await page
-      .locator('text=このGASスクリプトIDは既に登録されています。')
-      .isVisible();
-    const hasRepoError = await page
-      .locator('text=このリポジトリは既に登録されています。')
-      .isVisible();
+    // 特定のエラーメッセージをチェック（デバッグ用）
+    // const hasScriptIdError = await page
+    //   .locator('text=このGASスクリプトIDは既に登録されています。')
+    //   .isVisible();
+    // const hasRepoError = await page
+    //   .locator('text=このリポジトリは既に登録されています。')
+    //   .isVisible();
 
     // フォームのsubmitMessage要素を確認
     const submitMessage = await page
@@ -247,7 +247,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
       ).toBeVisible({ timeout: 10000 });
     } catch {
       // リダイレクトされた場合は成功とみなす
-      await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 5000 });
+      await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 5000 });
     }
 
     // 2回目の登録（同じrepositoryUrlで失敗）

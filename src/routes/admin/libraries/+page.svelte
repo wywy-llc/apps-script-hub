@@ -66,10 +66,10 @@
     }
   }
 
-  function handleSignOut() {
-    // サインアウト処理
-    console.log('サインアウト');
-  }
+  // function handleSignOut() {
+  //   // サインアウト処理
+  //   console.log('サインアウト');
+  // }
 </script>
 
 <svelte:head>

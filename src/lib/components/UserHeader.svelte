@@ -3,7 +3,7 @@
   import LanguageSwitcher from './LanguageSwitcher.svelte';
   import UserDropdown from './UserDropdown.svelte';
 
-  export let user: any;
+  export let user: { name?: string; email?: string; image?: string };
   export let showAdminLink = false;
 
   // ログインユーザー用ヘッダーコンポーネント

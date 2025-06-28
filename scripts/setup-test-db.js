@@ -38,7 +38,7 @@ async function setupTestDatabase() {
     try {
       await adminClient.query(`DROP DATABASE IF EXISTS "${TEST_DB_NAME}"`);
       console.log(`🗑️  既存のテストDB "${TEST_DB_NAME}" を削除しました`);
-    } catch (error) {
+    } catch {
       console.log('ℹ️  テストDBは存在しませんでした');
     }
 

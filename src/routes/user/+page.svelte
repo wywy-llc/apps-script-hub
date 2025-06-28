@@ -126,7 +126,7 @@
     </div>
 
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {#each featuredLibraries as library}
+      {#each featuredLibraries as library (library.id)}
         <LibraryCard {library} />
       {/each}
     </div>

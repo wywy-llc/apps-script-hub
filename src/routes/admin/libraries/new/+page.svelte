@@ -29,36 +29,36 @@
   });
 
   // バリデーション関数
-  function validateForm(formData: FormData): string | null {
-    const scriptId = formData.get('scriptId')?.toString();
-    const repoUrl = formData.get('repoUrl')?.toString();
+  // function validateForm(formData: FormData): string | null {
+  //   const scriptId = formData.get('scriptId')?.toString();
+  //   const repoUrl = formData.get('repoUrl')?.toString();
 
-    if (!scriptId?.trim()) {
-      return 'GAS スクリプトIDを入力してください。';
-    }
+  //   if (!scriptId?.trim()) {
+  //     return 'GAS スクリプトIDを入力してください。';
+  //   }
 
-    if (!repoUrl?.trim()) {
-      return 'GitHub リポジトリURLを入力してください。';
-    }
+  //   if (!repoUrl?.trim()) {
+  //     return 'GitHub リポジトリURLを入力してください。';
+  //   }
 
-    // GitHub リポジトリURL形式の検証
-    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
-    if (!githubRepoPattern.test(repoUrl)) {
-      return 'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
-    }
+  //   // GitHub リポジトリURL形式の検証
+  //   const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
+  //   if (!githubRepoPattern.test(repoUrl)) {
+  //     return 'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
+  //   }
 
-    return null;
-  }
+  //   return null;
+  // }
 
   function handleCancel() {
     // ライブラリ一覧ページに戻る
     goto('/admin/libraries');
   }
 
-  function handleSignOut() {
-    // サインアウト処理
-    console.log('サインアウト');
-  }
+  // function handleSignOut() {
+  //   // サインアウト処理
+  //   console.log('サインアウト');
+  // }
 </script>
 
 <svelte:head>
@@ -95,7 +95,7 @@
       <form
         method="POST"
         class="space-y-8"
-        use:enhance={({ formData, cancel }) => {
+        use:enhance={() => {
           isSubmitting = true;
           submitMessage = '';
 
@@ -104,7 +104,7 @@
 
             if (result.type === 'failure') {
               submitMessage =
-                (result.data as any)?.message || 'エラーが発生しました。';
+                (result.data as { message?: string })?.message || 'エラーが発生しました。';
             } else if (result.type === 'error') {
               submitMessage = 'サーバーエラーが発生しました。';
             }

@@ -2,7 +2,7 @@
   import { clickOutside } from '$lib/actions/clickOutside';
   import { signOut } from '@auth/sveltekit/client';
 
-  export let user: any;
+  export let user: { name?: string; email?: string; image?: string };
   export let showAdminLink = false;
 
   let isOpen = false;

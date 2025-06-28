@@ -141,7 +141,7 @@
   <!-- ライブラリリスト -->
   {#if displayedLibraries.length > 0}
     <div class="max-w-3xl mx-auto space-y-6">
-      {#each displayedLibraries as library}
+      {#each displayedLibraries as library (library.id)}
         <LibraryCard {library} />
       {/each}
     </div>
@@ -174,7 +174,7 @@
         {/if}
       </div>
       <div class="hidden md:-mt-px md:flex">
-        {#each Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1) as pageNum}
+        {#each Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1) as pageNum (pageNum)}
           {#if pageNum === currentPage}
             <span
               class="inline-flex items-center border-t-2 border-blue-600 px-4 pt-4 text-sm font-medium text-blue-600"

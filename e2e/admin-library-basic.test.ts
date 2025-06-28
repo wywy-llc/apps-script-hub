@@ -31,7 +31,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     ).toBeVisible({ timeout: 10000 });
 
     // 5. 詳細ページへのリダイレクトを待機
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // 6. 詳細ページの重要な情報を確認
     // ライブラリ名
@@ -84,7 +84,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await expect(
       page.locator('text=ライブラリが正常に登録されました')
     ).toBeVisible({ timeout: 10000 });
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // apps-script-oauth2ライブラリの基本情報確認
     await expect(

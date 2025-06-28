@@ -4,7 +4,7 @@
   import { getLocale, locales, setLocale } from '$lib/paraglide/runtime.js';
 
   // 現在のロケールを取得
-  $: currentLocale = getLocale();
+  let currentLocale = getLocale();
 
   // ドロップダウンの開閉状態
   let isOpen = false;
@@ -83,7 +83,7 @@
       role="listbox"
     >
       <ul class="text-gray-700">
-        {#each locales as locale}
+        {#each locales as locale (locale)}
           <li>
             <button
               type="button"

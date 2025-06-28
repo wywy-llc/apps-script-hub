@@ -42,7 +42,7 @@
   </div>
   <div class="mt-4">
     <div class="flex flex-wrap gap-2">
-      {#each library.tags as tag}
+      {#each library.tags as tag (tag)}
         <button
           class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-700/10 hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-800/20 transition-colors cursor-pointer"
           on:click={() => searchByTag(tag)}

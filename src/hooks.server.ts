@@ -14,7 +14,7 @@ import * as table from '$lib/server/db/schema';
 import { nanoid } from 'nanoid';
 import { eq } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
-import { isAdminUser } from '$lib/server/admin';
+// import { isAdminUser } from '$lib/server/admin';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
   // Auth.jsのセッション情報を取得
@@ -101,7 +101,7 @@ const { handle: authHandle } = SvelteKitAuth({
   ],
   secret: env.AUTH_SECRET,
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       if (account?.provider === 'google' && profile?.email && profile.sub) {
         const [existingUser] = await db
           .select()

@@ -64,10 +64,10 @@
     window.location.href = `/admin/libraries/${library.id}/edit`;
   }
 
-  function handleSignOut() {
-    // サインアウト処理
-    console.log('サインアウト');
-  }
+  // function handleSignOut() {
+  //   // サインアウト処理
+  //   console.log('サインアウト');
+  // }
 
   function getStatusBadge(status: string) {
     switch (status) {
