@@ -14,10 +14,7 @@ export class CreateLibraryService {
    * @param params 作成パラメータ
    * @returns 作成されたライブラリのID
    */
-  static async call(params: {
-    scriptId: string;
-    repoUrl: string;
-  }): Promise<string> {
+  static async call(params: { scriptId: string; repoUrl: string }): Promise<string> {
     const [owner, repo] = params.repoUrl.split('/');
 
     if (!owner || !repo) {

@@ -15,8 +15,8 @@ config();
 
 const TEST_DB_NAME = process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db';
 const POSTGRES_CONFIG = {
-  host: 'localhost',
-  port: 5433,
+  host: process.env.POSTGRES_HOST || 'localhost',
+  port: parseInt(process.env.POSTGRES_PORT || '5433', 10),
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
 };
@@ -38,7 +38,7 @@ async function setupTestDatabase() {
     try {
       await adminClient.query(`DROP DATABASE IF EXISTS "${TEST_DB_NAME}"`);
       console.log(`🗑️  既存のテストDB "${TEST_DB_NAME}" を削除しました`);
-    } catch (error) {
+    } catch {
       console.log('ℹ️  テストDBは存在しませんでした');
     }
 

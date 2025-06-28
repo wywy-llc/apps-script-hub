@@ -26,7 +26,7 @@ function runCommand(command, args = [], options = {}) {
         POSTGRES_DB: process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db',
         DATABASE_URL:
           process.env.DATABASE_TEST_URL ||
-          'postgresql://postgres:password@localhost:5433/apps_script_hub_test_db',
+          `postgresql://${process.env.POSTGRES_USER || 'postgres'}:${process.env.POSTGRES_PASSWORD || 'password'}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || '5433'}/${process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db'}`,
         NODE_ENV: 'test',
         GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
       },
@@ -50,9 +50,7 @@ function checkGitHubToken() {
     console.error('❌ GITHUB_TOKEN環境変数が設定されていません。');
     console.error('');
     console.error('🔧 設定手順:');
-    console.error(
-      '1. https://github.com/settings/tokens でPersonal Access Tokenを生成'
-    );
+    console.error('1. https://github.com/settings/tokens でPersonal Access Tokenを生成');
     console.error('2. スコープ: public_repo を選択');
     console.error('3. .envファイルのGITHUB_TOKEN=""に生成されたトークンを設定');
     console.error('');

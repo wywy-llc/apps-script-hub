@@ -66,22 +66,19 @@
     }
   }
 
-  function handleSignOut() {
-    // サインアウト処理
-    console.log('サインアウト');
-  }
+  // function handleSignOut() {
+  //   // サインアウト処理
+  //   console.log('サインアウト');
+  // }
 </script>
 
 <svelte:head>
   <title>管理画面 - ライブラリ一覧 - AppsScriptHub</title>
-  <meta
-    name="description"
-    content="AppsScriptHub管理者画面 - ライブラリの承認・編集・削除を管理"
-  />
+  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの承認・編集・削除を管理" />
 </svelte:head>
 
-<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-  <div class="flex justify-between items-center mb-8">
+<main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+  <div class="mb-8 flex items-center justify-between">
     <h1 class="text-3xl font-bold text-gray-900">ライブラリ管理</h1>
     <a
       href="/admin/libraries/new"
@@ -92,44 +89,44 @@
   </div>
 
   <!-- Library List Table -->
-  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+  <div class="overflow-hidden rounded-lg bg-white shadow-md">
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
               ライブラリ名
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
               作者
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
               ステータス
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
               最終更新日
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
               アクション
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="divide-y divide-gray-200 bg-white">
           {#each libraries as library (library.id)}
             <tr>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -141,7 +138,7 @@
                     {library.name}
                   </a>
                 </div>
-                <div class="text-sm text-gray-500 truncate max-w-xs">
+                <div class="max-w-xs truncate text-sm text-gray-500">
                   <a
                     href={`https://script.google.com/u/1/home/projects/${library.scriptId}`}
                     target="_blank"
@@ -153,7 +150,7 @@
                   </a>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
                 <a
                   href={library.authorUrl}
                   target="_blank"
@@ -168,12 +165,10 @@
                   {getStatusText(library.status)}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
                 {new Date(library.updatedAt).toLocaleDateString('ja-JP')}
               </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-              >
+              <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                 {#if library.status === 'pending'}
                   <button
                     on:click={() => handleApprove(library.id)}
@@ -184,8 +179,7 @@
                 {/if}
                 <button
                   on:click={() => handleEdit(library.id)}
-                  class="text-indigo-600 hover:text-indigo-900 {library.status ===
-                  'pending'
+                  class="text-indigo-600 hover:text-indigo-900 {library.status === 'pending'
                     ? 'ml-4'
                     : ''}"
                 >
@@ -193,7 +187,7 @@
                 </button>
                 <button
                   on:click={() => handleDelete(library.id)}
-                  class="text-red-600 hover:text-red-900 ml-4"
+                  class="ml-4 text-red-600 hover:text-red-900"
                 >
                   削除
                 </button>
@@ -206,43 +200,39 @@
 
     <!-- Pagination -->
     <div
-      class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+      class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6"
     >
-      <div class="flex-1 flex justify-between sm:hidden">
+      <div class="flex flex-1 justify-between sm:hidden">
         <button
-          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           前へ
         </button>
         <button
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           次へ
         </button>
       </div>
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p class="text-sm text-gray-700">
             全
             <span class="font-medium">{totalItems}</span>
             件中
-            <span class="font-medium"
-              >{(currentPage - 1) * itemsPerPage + 1}</span
-            >
+            <span class="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
             -
-            <span class="font-medium"
-              >{Math.min(currentPage * itemsPerPage, totalItems)}</span
-            >
+            <span class="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span>
             件を表示
           </p>
         </div>
         <div>
           <nav
-            class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+            class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm"
             aria-label="Pagination"
           >
             <button
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <span class="sr-only">前へ</span>
               <svg
@@ -261,17 +251,17 @@
             </button>
             <button
               aria-current="page"
-              class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+              class="relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600"
             >
               1
             </button>
             <button
-              class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+              class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               2
             </button>
             <button
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <span class="sr-only">次へ</span>
               <svg
@@ -295,8 +285,8 @@
   </div>
 
   <!-- Footer -->
-  <footer class="bg-gray-50 border-t border-gray-200 mt-12">
-    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
+    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div class="text-center text-sm text-gray-500">
         &copy; 2025 wywy LLC. All rights reserved.
       </div>

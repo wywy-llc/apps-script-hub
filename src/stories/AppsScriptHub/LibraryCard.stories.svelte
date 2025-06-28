@@ -83,26 +83,20 @@
     const tags = canvasElement.querySelectorAll('span');
     const tagTexts = Array.from(tags).map(tag => tag.textContent);
     if (!tagTexts.includes('Date')) throw new Error('Dateタグが見つかりません');
-    if (!tagTexts.includes('Utility'))
-      throw new Error('Utilityタグが見つかりません');
-    if (!tagTexts.includes('Format'))
-      throw new Error('Formatタグが見つかりません');
+    if (!tagTexts.includes('Utility')) throw new Error('Utilityタグが見つかりません');
+    if (!tagTexts.includes('Format')) throw new Error('Formatタグが見つかりません');
 
     // 作成者情報が表示されることを確認
     const authorLinks = canvasElement.querySelectorAll('a');
-    const authorLink = Array.from(authorLinks).find(
-      link => link.textContent === 'user-name'
-    );
+    const authorLink = Array.from(authorLinks).find(link => link.textContent === 'user-name');
     if (!authorLink) throw new Error('作成者リンクが見つかりません');
     if (authorLink.getAttribute('href') !== '/users/user-name')
       throw new Error('作成者リンクが正しくありません');
 
     // バージョン情報と最終更新日が表示されることを確認
     const textContent = canvasElement.textContent || '';
-    if (!textContent.includes('v1.2.0'))
-      throw new Error('バージョン情報が見つかりません');
-    if (!textContent.includes('最終更新: 3日前'))
-      throw new Error('最終更新日が見つかりません');
+    if (!textContent.includes('v1.2.0')) throw new Error('バージョン情報が見つかりません');
+    if (!textContent.includes('最終更新: 3日前')) throw new Error('最終更新日が見つかりません');
   }}
 />
 
@@ -116,10 +110,7 @@
     // 長いライブラリ名が表示されることを確認
     const libraryName = canvasElement.querySelector('h2 a');
     if (!libraryName) throw new Error('ライブラリ名が見つかりません');
-    if (
-      libraryName.textContent !==
-      'SuperLongLibraryNameThatMightWrapToMultipleLines'
-    )
+    if (libraryName.textContent !== 'SuperLongLibraryNameThatMightWrapToMultipleLines')
       throw new Error('長いライブラリ名が正しく表示されていません');
 
     // 長い説明文が表示されることを確認
@@ -133,8 +124,7 @@
     const tagTexts = Array.from(tags).map(tag => tag.textContent);
     const expectedTags = ['Test', 'LongText', 'Layout', 'UI', 'Responsive'];
     expectedTags.forEach(tag => {
-      if (!tagTexts.includes(tag))
-        throw new Error(`${tag}タグが見つかりません`);
+      if (!tagTexts.includes(tag)) throw new Error(`${tag}タグが見つかりません`);
     });
   }}
 />
@@ -158,10 +148,8 @@
       throw new Error('説明文が正しく表示されていません');
 
     const textContent = canvasElement.textContent || '';
-    if (!textContent.includes('Simple'))
-      throw new Error('Simpleタグが見つかりません');
-    if (!textContent.includes('dev'))
-      throw new Error('作成者情報が見つかりません');
+    if (!textContent.includes('Simple')) throw new Error('Simpleタグが見つかりません');
+    if (!textContent.includes('dev')) throw new Error('作成者情報が見つかりません');
   }}
 />
 
@@ -174,8 +162,7 @@
   play={async ({ canvasElement, step }) => {
     await step('ライブラリ名のリンク動作確認', async () => {
       const libraryNameLink = canvasElement.querySelector('h2 a');
-      if (!libraryNameLink)
-        throw new Error('ライブラリ名リンクが見つかりません');
+      if (!libraryNameLink) throw new Error('ライブラリ名リンクが見つかりません');
       if (libraryNameLink.textContent !== 'GasDateFormatter')
         throw new Error('ライブラリ名が正しく表示されていません');
       if (libraryNameLink.getAttribute('href') !== '/libraries/1')
@@ -184,9 +171,7 @@
 
     await step('作成者のリンク動作確認', async () => {
       const authorLinks = canvasElement.querySelectorAll('a');
-      const authorLink = Array.from(authorLinks).find(
-        link => link.textContent === 'user-name'
-      );
+      const authorLink = Array.from(authorLinks).find(link => link.textContent === 'user-name');
       if (!authorLink) throw new Error('作成者リンクが見つかりません');
       if (authorLink.getAttribute('href') !== '/users/user-name')
         throw new Error('作成者リンク先が正しくありません');
@@ -212,8 +197,7 @@
     library: {
       id: 4,
       name: 'CalendarEventUtil',
-      description:
-        'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。',
+      description: 'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。',
       tags: ['Calendar', 'Date', 'Japan', 'Holiday'],
       author: 'calendar-master',
       version: 'v2.1.0',
@@ -227,15 +211,13 @@
 
     const expectedTags = ['Calendar', 'Date', 'Japan', 'Holiday'];
     expectedTags.forEach(tag => {
-      if (!tagTexts.includes(tag))
-        throw new Error(`${tag}タグが見つかりません`);
+      if (!tagTexts.includes(tag)) throw new Error(`${tag}タグが見つかりません`);
     });
 
     // タグがspan要素で表示されることを確認
     if (tags.length === 0) throw new Error('タグが表示されていません');
     tags.forEach(tag => {
-      if (tag.tagName !== 'SPAN')
-        throw new Error('タグがSPAN要素ではありません');
+      if (tag.tagName !== 'SPAN') throw new Error('タグがSPAN要素ではありません');
     });
   }}
 />

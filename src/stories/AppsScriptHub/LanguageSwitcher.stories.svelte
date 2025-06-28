@@ -11,10 +11,11 @@
     parameters: {
       docs: {
         description: {
-          component: '多言語対応の言語切り替えコンポーネント。ドロップダウン形式で言語を選択できます。'
-        }
-      }
-    }
+          component:
+            '多言語対応の言語切り替えコンポーネント。ドロップダウン形式で言語を選択できます。',
+        },
+      },
+    },
   });
 </script>
 
@@ -27,13 +28,15 @@
 
 <!-- In Header Context -->
 <Story name="In Header">
-  <div class="bg-white border-b border-gray-200 p-4">
+  <div class="border-b border-gray-200 bg-white p-4">
     <div class="flex items-center justify-between">
       <div class="text-xl font-bold text-gray-900">Apps Script Hub</div>
       <div class="flex items-center space-x-4">
         <LanguageSwitcher />
         <button class="text-sm font-medium text-gray-600">Sign in</button>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">Sign up</button>
+        <button class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white"
+          >Sign up</button
+        >
       </div>
     </div>
   </div>
@@ -48,7 +51,7 @@
 
 <!-- Compact Layout -->
 <Story name="Compact Layout">
-  <div class="max-w-md p-4 border border-gray-200 rounded-lg">
+  <div class="max-w-md rounded-lg border border-gray-200 p-4">
     <div class="flex items-center justify-between">
       <span class="text-sm text-gray-600">Language:</span>
       <LanguageSwitcher />

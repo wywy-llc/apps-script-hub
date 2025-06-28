@@ -33,51 +33,27 @@
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800">
-    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
-      <nav
-        class="container mx-auto px-6 py-3 flex justify-between items-center"
-      >
-        <a href="#hero" class="text-xl font-bold text-slate-900">
-          🚀 AppsScriptHub
-        </a>
-        <div class="hidden lg:flex space-x-8">
-          <a
-            href="#problem"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
-            >課題</a
-          >
-          <a
-            href="#value"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
-            >提供価値</a
-          >
-          <a
-            href="#features"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
-            >機能</a
-          >
-          <a
-            href="#roadmap"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
+    <header class="sticky top-0 z-50 bg-white/80 shadow-sm backdrop-blur-lg">
+      <nav class="container mx-auto flex items-center justify-between px-6 py-3">
+        <a href="#hero" class="text-xl font-bold text-slate-900"> 🚀 AppsScriptHub </a>
+        <div class="hidden space-x-8 lg:flex">
+          <a href="#problem" class="text-slate-600 transition-colors hover:text-sky-600">課題</a>
+          <a href="#value" class="text-slate-600 transition-colors hover:text-sky-600">提供価値</a>
+          <a href="#features" class="text-slate-600 transition-colors hover:text-sky-600">機能</a>
+          <a href="#roadmap" class="text-slate-600 transition-colors hover:text-sky-600"
             >ロードマップ</a
           >
-          <a
-            href="#users"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
+          <a href="#users" class="text-slate-600 transition-colors hover:text-sky-600"
             >ターゲット</a
           >
-          <a
-            href="#future"
-            class="text-slate-600 hover:text-sky-600 transition-colors"
-            >展望</a
-          >
+          <a href="#future" class="text-slate-600 transition-colors hover:text-sky-600">展望</a>
         </div>
         <button
           id="mobile-menu-button"
-          class="lg:hidden text-slate-600 hover:text-sky-600 focus:outline-none"
+          class="text-slate-600 hover:text-sky-600 focus:outline-none lg:hidden"
         >
           <svg
-            class="w-6 h-6"
+            class="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -92,80 +68,59 @@
           </svg>
         </button>
       </nav>
-      <div id="mobile-menu" class="hidden lg:hidden bg-white">
-        <a
-          href="#problem"
-          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >課題</a
-        >
-        <a href="#value" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >提供価値</a
-        >
-        <a
-          href="#features"
-          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >機能</a
-        >
-        <a
-          href="#roadmap"
-          class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >ロードマップ</a
-        >
-        <a href="#users" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >ターゲット</a
-        >
-        <a href="#future" class="block py-2 px-6 text-slate-600 hover:bg-sky-50"
-          >展望</a
-        >
+      <div id="mobile-menu" class="hidden bg-white lg:hidden">
+        <a href="#problem" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">課題</a>
+        <a href="#value" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">提供価値</a>
+        <a href="#features" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">機能</a>
+        <a href="#roadmap" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">ロードマップ</a>
+        <a href="#users" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">ターゲット</a>
+        <a href="#future" class="block px-6 py-2 text-slate-600 hover:bg-sky-50">展望</a>
       </div>
     </header>
 
     <main class="container mx-auto px-6 py-8 md:py-12">
-      <section id="hero" class="text-center py-16 md:py-24">
-        <h1 class="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">
+      <section id="hero" class="py-16 text-center md:py-24">
+        <h1 class="text-4xl leading-tight font-bold text-slate-900 md:text-6xl">
           Apps Script Hub 開発プロジェクト
         </h1>
-        <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+        <p class="mx-auto mt-6 max-w-3xl text-lg text-slate-600 md:text-xl">
           GAS(Google Apps
-          Script)のライブラリを誰もが簡単に検索・共有・評価できるプラットフォーム「Apps
-          Script Hub」
+          Script)のライブラリを誰もが簡単に検索・共有・評価できるプラットフォーム「Apps Script Hub」
           を通じて、GASエコシステム活性化と開発者の生産性向上を目指します。
         </p>
       </section>
 
       <section id="problem" class="py-16 md:py-24">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
-            GAS開発者が直面する課題
-          </h2>
-          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+        <div class="mb-12 text-center">
+          <h2 class="text-3xl font-bold text-slate-900 md:text-4xl">GAS開発者が直面する課題</h2>
+          <p class="mx-auto mt-4 max-w-2xl text-slate-600">
             GASは便利ですが、標準的なライブラリ共有の仕組みがなく、開発者は非効率と不安を抱えています。我々はこれらの根深い課題を解決します。
           </p>
         </div>
-        <div class="grid md:grid-cols-3 gap-8">
+        <div class="grid gap-8 md:grid-cols-3">
           <div
-            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+            class="transform rounded-xl bg-white p-8 shadow-lg transition-shadow hover:-translate-y-1 hover:shadow-xl"
           >
-            <div class="text-4xl mb-4">🔍</div>
-            <h3 class="text-xl font-bold mb-2">発見性の欠如</h3>
+            <div class="mb-4 text-4xl">🔍</div>
+            <h3 class="mb-2 text-xl font-bold">発見性の欠如</h3>
             <p class="text-slate-600">
               有用なライブラリが個人のブログ等に点在し、効率的な検索手段が存在しません。目的のライブラリを見つけるだけで多大な時間を要します。
             </p>
           </div>
           <div
-            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+            class="transform rounded-xl bg-white p-8 shadow-lg transition-shadow hover:-translate-y-1 hover:shadow-xl"
           >
-            <div class="text-4xl mb-4">🛡️</div>
-            <h3 class="text-xl font-bold mb-2">信頼性の不安</h3>
+            <div class="mb-4 text-4xl">🛡️</div>
+            <h3 class="mb-2 text-xl font-bold">信頼性の不安</h3>
             <p class="text-slate-600">
               発見したライブラリが「いつ作られたか」「誰が作ったか」が不明瞭。情報が古く、本番環境で利用するにはリスクが伴います。
             </p>
           </div>
           <div
-            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1"
+            class="transform rounded-xl bg-white p-8 shadow-lg transition-shadow hover:-translate-y-1 hover:shadow-xl"
           >
-            <div class="text-4xl mb-4">⚙️</div>
-            <h3 class="text-xl font-bold mb-2">開発効率の低下</h3>
+            <div class="mb-4 text-4xl">⚙️</div>
+            <h3 class="mb-2 text-xl font-bold">開発効率の低下</h3>
             <p class="text-slate-600">
               結果として、多くの開発者が「車輪の再発明」を余儀なくされ、エコシステム全体の大きな機会損失に繋がっています。
             </p>
@@ -173,20 +128,20 @@
         </div>
       </section>
 
-      <section id="value" class="py-16 md:py-24 bg-white rounded-2xl">
-        <div class="text-center mb-12 px-6">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
+      <section id="value" class="rounded-2xl bg-white py-16 md:py-24">
+        <div class="mb-12 px-6 text-center">
+          <h2 class="text-3xl font-bold text-slate-900 md:text-4xl">
             Apps Script Hubが提供する価値
           </h2>
-          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+          <p class="mx-auto mt-4 max-w-2xl text-slate-600">
             Apps Script
             Hubは、ライブラリの利用者と提供者の双方に明確なメリットをもたらし、GASエコシステム全体の成長を促進します。
           </p>
         </div>
-        <div class="grid md:grid-cols-2 gap-8 px-6">
-          <div class="bg-slate-100 p-8 rounded-xl">
-            <h3 class="text-2xl font-bold mb-4">ライブラリ利用者へ</h3>
-            <ul class="space-y-3 text-slate-700 list-disc list-inside">
+        <div class="grid gap-8 px-6 md:grid-cols-2">
+          <div class="rounded-xl bg-slate-100 p-8">
+            <h3 class="mb-4 text-2xl font-bold">ライブラリ利用者へ</h3>
+            <ul class="list-inside list-disc space-y-3 text-slate-700">
               <li>
                 <span class="font-semibold">開発効率の向上:</span>
                 信頼できるライブラリの活用で開発時間を短縮。
@@ -201,9 +156,9 @@
               </li>
             </ul>
           </div>
-          <div class="bg-slate-100 p-8 rounded-xl">
-            <h3 class="text-2xl font-bold mb-4">ライブラリ提供者へ</h3>
-            <ul class="space-y-3 text-slate-700 list-disc list-inside">
+          <div class="rounded-xl bg-slate-100 p-8">
+            <h3 class="mb-4 text-2xl font-bold">ライブラリ提供者へ</h3>
+            <ul class="list-inside list-disc space-y-3 text-slate-700">
               <li>
                 <span class="font-semibold">貢献の可視化:</span>
                 自身のコードへのフィードバックで評価と知名度を向上。
@@ -218,27 +173,23 @@
       </section>
 
       <section id="features" class="py-16 md:py-24">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
-            サービス機能一覧
-          </h2>
-          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+        <div class="mb-12 text-center">
+          <h2 class="text-3xl font-bold text-slate-900 md:text-4xl">サービス機能一覧</h2>
+          <p class="mx-auto mt-4 max-w-2xl text-slate-600">
             ユーザー認証からライブラリ管理、コミュニティ機能まで、AppsScriptHubはGAS開発を支えるための豊富な機能を提供します。
           </p>
         </div>
-        <div id="accordion-container" class="max-w-4xl mx-auto space-y-4"></div>
+        <div id="accordion-container" class="mx-auto max-w-4xl space-y-4"></div>
       </section>
 
       <section id="roadmap" class="py-16 md:py-24">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
-            開発スケジュール
-          </h2>
-          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+        <div class="mb-12 text-center">
+          <h2 class="text-3xl font-bold text-slate-900 md:text-4xl">開発スケジュール</h2>
+          <p class="mx-auto mt-4 max-w-2xl text-slate-600">
             段階的な開発アプローチにより、着実に価値を提供します。各フェーズの目標と主な開発項目を以下に示します。
           </p>
         </div>
-        <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+        <div class="overflow-x-auto rounded-xl bg-white shadow-lg">
           <table class="w-full text-left">
             <thead class="bg-slate-100">
               <tr>
@@ -250,12 +201,10 @@
             </thead>
             <tbody class="divide-y divide-slate-200">
               <tr>
-                <td class="p-4 font-bold text-sky-700 align-top">
-                  フェーズ1<br />(基盤開発)
-                </td>
+                <td class="p-4 align-top font-bold text-sky-700">フェーズ1<br />(基盤開発)</td>
                 <td class="p-4 align-top">1.5ヶ月</td>
                 <td class="p-4 align-top text-slate-600">
-                  <ul class="list-disc list-inside space-y-1">
+                  <ul class="list-inside list-disc space-y-1">
                     <li>開発環境構築、技術選定</li>
                     <li>DB設計</li>
                     <li>ユーザー認証 (GitHub連携)</li>
@@ -267,12 +216,10 @@
                 </td>
               </tr>
               <tr>
-                <td class="p-4 font-bold text-sky-700 align-top">
-                  フェーズ2<br />(体験向上)
-                </td>
+                <td class="p-4 align-top font-bold text-sky-700">フェーズ2<br />(体験向上)</td>
                 <td class="p-4 align-top">1ヶ月</td>
                 <td class="p-4 align-top text-slate-600">
-                  <ul class="list-disc list-inside space-y-1">
+                  <ul class="list-inside list-disc space-y-1">
                     <li>検索・絞り込み機能</li>
                     <li>スター評価機能</li>
                     <li>ユーザープロフィール作成</li>
@@ -284,12 +231,12 @@
                 </td>
               </tr>
               <tr>
-                <td class="p-4 font-bold text-sky-700 align-top">
+                <td class="p-4 align-top font-bold text-sky-700">
                   フェーズ3<br />(コミュニティ活性化)
                 </td>
                 <td class="p-4 align-top">1.5ヶ月</td>
                 <td class="p-4 align-top text-slate-600">
-                  <ul class="list-disc list-inside space-y-1">
+                  <ul class="list-inside list-disc space-y-1">
                     <li>レビュー (コメント) 機能</li>
                     <li>管理機能 (通報など)</li>
                     <li>UI/UXの改善</li>
@@ -300,9 +247,7 @@
                 </td>
               </tr>
               <tr class="bg-slate-50">
-                <td class="p-4 font-bold text-slate-700 align-top">
-                  正式リリース
-                </td>
+                <td class="p-4 align-top font-bold text-slate-700">正式リリース</td>
                 <td class="p-4 align-top">-</td>
                 <td class="p-4 align-top">-</td>
                 <td class="p-4 align-top">-</td>
@@ -312,48 +257,44 @@
         </div>
       </section>
 
-      <section id="users" class="py-16 md:py-24 bg-white rounded-2xl">
-        <div class="text-center mb-12 px-6">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
-            ターゲットユーザー
-          </h2>
-          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+      <section id="users" class="rounded-2xl bg-white py-16 md:py-24">
+        <div class="mb-12 px-6 text-center">
+          <h2 class="text-3xl font-bold text-slate-900 md:text-4xl">ターゲットユーザー</h2>
+          <p class="mx-auto mt-4 max-w-2xl text-slate-600">
             本サービスは、GASに関わる全ての立場の人々を対象とし、それぞれのニーズに応えます。
           </p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
-          <div class="bg-slate-100 p-6 rounded-xl text-center">
-            <div class="text-4xl mb-4">🏢</div>
+        <div class="grid grid-cols-1 gap-8 px-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-xl bg-slate-100 p-6 text-center">
+            <div class="mb-4 text-4xl">🏢</div>
             <h3 class="text-lg font-bold">企業の情シス・DX担当者</h3>
-            <p class="text-slate-600 text-sm mt-2">
+            <p class="mt-2 text-sm text-slate-600">
               定型業務の自動化スクリプトを効率的に開発したい
             </p>
           </div>
-          <div class="bg-slate-100 p-6 rounded-xl text-center">
-            <div class="text-4xl mb-4">💻</div>
+          <div class="rounded-xl bg-slate-100 p-6 text-center">
+            <div class="mb-4 text-4xl">💻</div>
             <h3 class="text-lg font-bold">Webデベロッパー</h3>
-            <p class="text-slate-600 text-sm mt-2">
+            <p class="mt-2 text-sm text-slate-600">
               クライアントワークでGASを扱う際に工数を削減したい
             </p>
           </div>
-          <div class="bg-slate-100 p-6 rounded-xl text-center">
-            <div class="text-4xl mb-4">🎓</div>
+          <div class="rounded-xl bg-slate-100 p-6 text-center">
+            <div class="mb-4 text-4xl">🎓</div>
             <h3 class="text-lg font-bold">GAS初学者</h3>
-            <p class="text-slate-600 text-sm mt-2">
-              他者の優れたコードを参考に効率的に学習したい
-            </p>
+            <p class="mt-2 text-sm text-slate-600">他者の優れたコードを参考に効率的に学習したい</p>
           </div>
-          <div class="bg-slate-100 p-6 rounded-xl text-center">
-            <div class="text-4xl mb-4">🌟</div>
+          <div class="rounded-xl bg-slate-100 p-6 text-center">
+            <div class="mb-4 text-4xl">🌟</div>
             <h3 class="text-lg font-bold">GASエキスパート</h3>
-            <p class="text-slate-600 text-sm mt-2">
+            <p class="mt-2 text-sm text-slate-600">
               自作ライブラリを公開しコミュニティに貢献したい
             </p>
           </div>
         </div>
       </section>
 
-      <footer class="text-center py-8 text-slate-500">
+      <footer class="py-8 text-center text-slate-500">
         <p>&copy; 2025 wywy LLC. All rights reserved.</p>
       </footer>
     </main>
@@ -361,9 +302,7 @@
     <script>
       const mobileMenuButton = document.getElementById('mobile-menu-button');
       const mobileMenu = document.getElementById('mobile-menu');
-      const navLinks = document.querySelectorAll(
-        '#mobile-menu a, header nav a'
-      );
+      const navLinks = document.querySelectorAll('#mobile-menu a, header nav a');
 
       mobileMenuButton.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
@@ -480,15 +419,12 @@
         accordionContainer.appendChild(accordionItem);
 
         button.addEventListener('click', () => {
-          const isExpanded =
-            content.style.maxHeight && content.style.maxHeight !== '0px';
+          const isExpanded = content.style.maxHeight && content.style.maxHeight !== '0px';
 
           document.querySelectorAll('.accordion-content').forEach(el => {
             if (el !== content) {
               el.style.maxHeight = '0px';
-              el.previousElementSibling
-                .querySelector('svg')
-                .classList.remove('rotate-180');
+              el.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
             }
           });
 

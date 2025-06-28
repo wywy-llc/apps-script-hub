@@ -50,12 +50,5 @@
       />
     </svg>
   </div>
-  <input
-    type="search"
-    name="q"
-    id="search"
-    class={inputClasses}
-    {placeholder}
-    bind:value
-  />
+  <input type="search" name="q" id="search" class={inputClasses} {placeholder} bind:value />
 </form>

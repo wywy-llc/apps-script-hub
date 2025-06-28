@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "test:unit": "vitest",
-    "test": "npm run test:unit -- --run && npm run test:e2e",
+    "test": "npm run lint && npm run check && npm run test:unit -- --run && npm run test:e2e",
     "test:e2e": "node scripts/run-e2e-tests.js",
     "test:e2e:setup": "node scripts/setup-test-db.js",
     "test:e2e:cleanup": "node scripts/cleanup-test-db.js",
@@ -56,7 +56,7 @@
     "mdsvex": "^0.12.3",
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.11",
+    "prettier-plugin-tailwindcss": "^0.6.13",
     "storybook": "^9.0.9",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
@@ -82,5 +82,10 @@
     "marked": "^15.0.12",
     "nanoid": "^5.1.5",
     "pg": "^8.16.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,svelte,json,md}": [
+      "prettier --write"
+    ]
   }
 }

@@ -25,15 +25,6 @@ export default ts.config(
     },
     rules: {
       'no-undef': 'off',
-      '@typescript-eslint/ban-types': [
-        'error',
-        {
-          types: {
-            '{}': false,
-          },
-          extendDefaults: true,
-        },
-      ],
     },
   },
   {
@@ -48,7 +39,15 @@ export default ts.config(
     },
   },
   {
-    ignores: ['.svelte-kit/**/*'],
+    ignores: [
+      '.svelte-kit/**/*',
+      'src/lib/paraglide/**/*',
+      '.claude/**/*',
+      'build/**/*',
+      'dist/**/*',
+      'storybook-static/**/*',
+      'node_modules/**/*',
+    ],
   },
   storybook.configs['flat/recommended']
 );

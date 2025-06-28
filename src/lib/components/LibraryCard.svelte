@@ -1,6 +1,6 @@
 <script lang="ts">
   import { last_updated, search_by_tag } from '$lib/paraglide/messages.js';
-  
+
   // ライブラリ情報を表示するカードコンポーネント
   // 検索結果やライブラリ一覧で使用される
 
@@ -30,23 +30,23 @@
 </script>
 
 <div
-  class="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-gray-300 transition-all flex flex-col"
+  class="flex flex-col rounded-lg border border-gray-200 p-6 transition-all hover:border-gray-300 hover:shadow-lg"
 >
   <div class="flex-grow">
     <h3 class="text-xl font-semibold text-blue-600 hover:underline">
       <a href="/user/libraries/{library.id}">{library.name}</a>
     </h3>
-    <p class="mt-2 text-gray-600 text-sm">
+    <p class="mt-2 text-sm text-gray-600">
       {library.description}
     </p>
   </div>
   <div class="mt-4">
     <div class="flex flex-wrap gap-2">
-      {#each library.tags as tag}
+      {#each library.tags as tag (tag)}
         <button
-          class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-700/10 hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-800/20 transition-colors cursor-pointer"
+          class="inline-flex cursor-pointer items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-700/10 transition-colors ring-inset hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-800/20"
           on:click={() => searchByTag(tag)}
-          title="{search_by_tag({ tag })}"
+          title={search_by_tag({ tag })}
         >
           {tag}
         </button>
@@ -55,7 +55,7 @@
     <div class="mt-4 space-y-2">
       <div class="flex items-center text-xs text-gray-500">
         <svg
-          class="h-3 w-3 mr-1"
+          class="mr-1 h-3 w-3"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -68,9 +68,8 @@
             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           ></path>
         </svg>
-        <a
-          href="/users/{library.author}"
-          class="hover:underline hover:text-gray-700">{library.author}</a
+        <a href="/users/{library.author}" class="hover:text-gray-700 hover:underline"
+          >{library.author}</a
         >
       </div>
       <div class="flex items-center justify-between text-xs text-gray-500">

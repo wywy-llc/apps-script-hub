@@ -30,7 +30,7 @@
   // marked.jsの設定
   marked.use({
     renderer: {
-      code(token: any) {
+      code(token: { text: string; lang?: string }) {
         const code = token.text;
         const lang = token.lang || 'plaintext';
 
@@ -72,6 +72,7 @@
   />
 </svelte:head>
 
-<article class="markdown-body p-6 bg-white {className}">
+<article class="markdown-body bg-white p-6 {className}">
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   {@html renderMarkdown(content)}
 </article>

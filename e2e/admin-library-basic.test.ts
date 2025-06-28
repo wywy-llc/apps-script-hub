@@ -2,9 +2,7 @@ import { expect, test } from '@playwright/test';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ機能（基本）', () => {
-  test('今回のケース: googleworkspace/apps-script-oauth2の登録テスト', async ({
-    page,
-  }) => {
+  test('今回のケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
     await clearTestDataBeforeTest();
     // 実際に報告されたケースと同じデータでテスト
     const testData = {
@@ -26,12 +24,12 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await page.click('button[type="submit"]');
 
     // 4. 成功メッセージの確認
-    await expect(
-      page.locator('text=ライブラリが正常に登録されました')
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=ライブラリが正常に登録されました')).toBeVisible({
+      timeout: 10000,
+    });
 
     // 5. 詳細ページへのリダイレクトを待機
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // 6. 詳細ページの重要な情報を確認
     // ライブラリ名
@@ -41,17 +39,11 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     ).toBeVisible();
 
     // GAS スクリプトID（長いIDなので部分一致で確認）
-    await expect(
-      page.locator(`text=${testData.scriptId.substring(0, 20)}`).first()
-    ).toBeVisible();
+    await expect(page.locator(`text=${testData.scriptId.substring(0, 20)}`).first()).toBeVisible();
 
     // GitHub情報
-    await expect(
-      page.locator(`text=${testData.expectedAuthor}`).first()
-    ).toBeVisible();
-    await expect(
-      page.locator(`text=${testData.expectedDescription}`).first()
-    ).toBeVisible();
+    await expect(page.locator(`text=${testData.expectedAuthor}`).first()).toBeVisible();
+    await expect(page.locator(`text=${testData.expectedDescription}`).first()).toBeVisible();
 
     // ステータス
     await expect(page.locator('text=承認待ち')).toBeVisible();
@@ -60,16 +52,12 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await expect(page.locator('.markdown-body')).toBeVisible();
 
     // 8. 管理者機能ボタンの確認
-    await expect(
-      page.locator('button:has-text("スクレイピング実行")')
-    ).toBeVisible();
+    await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();
     await expect(page.locator('button:has-text("編集")')).toBeVisible();
     await expect(page.locator('button:has-text("公開する")')).toBeVisible();
   });
 
-  test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({
-    page,
-  }) => {
+  test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
     await clearTestDataBeforeTest();
     const testData = {
       scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
@@ -81,10 +69,10 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await page.fill('input[name="repoUrl"]', testData.repoUrl);
     await page.click('button[type="submit"]');
 
-    await expect(
-      page.locator('text=ライブラリが正常に登録されました')
-    ).toBeVisible({ timeout: 10000 });
-    await page.waitForURL(/\/admin\/libraries\/[^\/]+$/, { timeout: 15000 });
+    await expect(page.locator('text=ライブラリが正常に登録されました')).toBeVisible({
+      timeout: 10000,
+    });
+    await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // apps-script-oauth2ライブラリの基本情報確認
     await expect(

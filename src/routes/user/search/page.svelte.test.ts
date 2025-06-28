@@ -22,9 +22,7 @@ describe('SearchPage', () => {
     const { container } = render(SearchPage);
 
     // 基本要素の確認（DOM存在確認）
-    expect(
-      container.querySelector('input[placeholder="GASライブラリを検索"]')
-    ).toBeTruthy();
+    expect(container.querySelector('input[placeholder="GASライブラリを検索"]')).toBeTruthy();
     expect(container.querySelector('h1')).toBeTruthy();
     // 検索クエリがない場合は「すべてのライブラリ」が表示される
     expect(screen.getByText(/すべてのライブラリ/)).toBeDefined();
@@ -51,9 +49,7 @@ describe('SearchPage', () => {
 
     expect(searchForm).toBeTruthy();
     expect(searchInput).toBeTruthy();
-    expect(searchInput?.getAttribute('placeholder')).toBe(
-      'GASライブラリを検索'
-    );
+    expect(searchInput?.getAttribute('placeholder')).toBe('GASライブラリを検索');
   });
 
   // コンポーネントの基本構造確認

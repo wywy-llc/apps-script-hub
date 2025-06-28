@@ -113,9 +113,7 @@ describe('filterLibraries', () => {
       expect(result).toHaveLength(5); // GasDateFormatter, GasLogger, GasHtml, GasTest, JapaneseDate(gas-master含む)
       expect(
         result.some(
-          lib =>
-            lib.name.toLowerCase().includes('gas') ||
-            lib.author.toLowerCase().includes('gas')
+          lib => lib.name.toLowerCase().includes('gas') || lib.author.toLowerCase().includes('gas')
         )
       ).toBe(true);
     });
@@ -151,11 +149,9 @@ describe('filterLibraries', () => {
     it('タグで検索できる', () => {
       const result = filterLibraries('Date');
       expect(result).toHaveLength(3); // GasDateFormatter, CalendarEventUtil, JapaneseDate
-      expect(
-        result.every(lib =>
-          lib.tags.some(tag => tag.toLowerCase().includes('date'))
-        )
-      ).toBe(true);
+      expect(result.every(lib => lib.tags.some(tag => tag.toLowerCase().includes('date')))).toBe(
+        true
+      );
     });
 
     it('Utilityタグで複数ライブラリを検索できる', () => {

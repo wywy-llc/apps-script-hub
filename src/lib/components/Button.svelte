@@ -14,12 +14,9 @@
 
   // バリアント別のスタイル定義
   const variantStyles = {
-    primary:
-      'bg-blue-600 text-white border-transparent hover:bg-blue-700 focus:ring-blue-500',
-    secondary:
-      'bg-gray-600 text-white border-transparent hover:bg-gray-700 focus:ring-gray-500',
-    outline:
-      'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500',
+    primary: 'bg-blue-600 text-white border-transparent hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-gray-600 text-white border-transparent hover:bg-gray-700 focus:ring-gray-500',
+    outline: 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500',
   };
 
   // サイズ別のスタイル定義
@@ -46,12 +43,7 @@
 </script>
 
 {#if href}
-  <a
-    {href}
-    class={buttonClasses}
-    class:pointer-events-none={disabled}
-    {...$$restProps}
-  >
+  <a {href} class={buttonClasses} class:pointer-events-none={disabled} {...$$restProps}>
     <slot />
   </a>
 {:else}

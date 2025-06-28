@@ -88,35 +88,30 @@
 
 <svelte:head>
   <title>GASライブラリ検索 - {app_title()}</title>
-  <meta
-    name="description"
-    content="Google Apps Scriptライブラリの検索とダウンロード"
-  />
+  <meta name="description" content="Google Apps Scriptライブラリの検索とダウンロード" />
 </svelte:head>
 
 <!-- GASライブラリ検索ヘッダー -->
-<section class="py-12 bg-gray-50">
+<section class="bg-gray-50 py-12">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900">
-        GASライブラリ検索
-      </h1>
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900">GASライブラリ検索</h1>
       {#if data.session?.user}
         <p class="mt-4 text-lg text-gray-600">
           ようこそ、{data.session.user.name || data.session.user.email}さん
         </p>
       {/if}
     </div>
-    <div class="mt-8 max-w-xl mx-auto">
+    <div class="mx-auto mt-8 max-w-xl">
       <SearchBox />
     </div>
   </div>
 </section>
 
 <!-- 注目のライブラリセクション -->
-<section class="py-16 sm:py-24 bg-white">
+<section class="bg-white py-16 sm:py-24">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-12">
+    <div class="mb-12 text-center">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
         {featured_libraries()}
       </h2>
@@ -126,7 +121,7 @@
     </div>
 
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {#each featuredLibraries as library}
+      {#each featuredLibraries as library (library.id)}
         <LibraryCard {library} />
       {/each}
     </div>
@@ -141,20 +136,14 @@
 
 <!-- ユーザーアクションセクション -->
 <section class="bg-gray-50">
-  <div
-    class="container mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 text-center"
-  >
-    <h2 class="text-3xl font-bold tracking-tight text-gray-900">
-      何をしますか？
-    </h2>
-    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+  <div class="container mx-auto px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-24">
+    <h2 class="text-3xl font-bold tracking-tight text-gray-900">何をしますか？</h2>
+    <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
       ライブラリの検索や、あなたの作品を共有してください
     </p>
     <div class="mt-8 flex justify-center space-x-4">
       <Button variant="primary" size="lg" href="/user/search">詳細検索</Button>
-      <Button variant="outline" size="lg" href="/contribute">
-        ライブラリを共有
-      </Button>
+      <Button variant="outline" size="lg" href="/contribute">ライブラリを共有</Button>
     </div>
   </div>
 </section>
