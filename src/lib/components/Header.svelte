@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { app_title, sign_in, sign_up } from '$lib/paraglide/messages.js';
+  import { app_title } from '$lib/paraglide/messages.js';
   import Button from './Button.svelte';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
 
-  // ヘッダーナビゲーションコンポーネント
-  // AppsScriptHubのメインヘッダーで、ロゴとサインイン/サインアップボタンを表示
+  // 基本ヘッダーコンポーネント
+  // 未ログインユーザー向けのシンプルなヘッダー
 </script>
 
 <header
@@ -20,15 +20,7 @@
       <!-- 右側のアクション -->
       <div class="flex items-center space-x-4">
         <LanguageSwitcher />
-        <a
-          href="/signin"
-          class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-        >
-          {sign_in()}
-        </a>
-        <Button variant="primary" size="md" href="/signup">
-          {sign_up()}
-        </Button>
+        <Button variant="primary" size="md" href="/auth/login">Login</Button>
       </div>
     </div>
   </div>

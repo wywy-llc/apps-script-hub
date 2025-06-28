@@ -1,30 +1,64 @@
-import * as auth from '$lib/server/auth';
-import { sequence } from '@sveltejs/kit/hooks';
-import type { Handle } from '@sveltejs/kit';
-import { extractLocaleFromRequest } from '$lib/paraglide/runtime.js';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { overwriteServerAsyncLocalStorage } from '$lib/paraglide/runtime.js';
 import type { Locale } from '$lib';
+import {
+  extractLocaleFromRequest,
+  overwriteServerAsyncLocalStorage,
+} from '$lib/paraglide/runtime.js';
+import * as auth from '$lib/server/auth';
+import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { SvelteKitAuth } from '@auth/sveltekit';
+import Google from '@auth/sveltekit/providers/google';
+import { db } from '$lib/server/db';
+import * as table from '$lib/server/db/schema';
+import { nanoid } from 'nanoid';
+import { eq } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
+import { isAdminUser } from '$lib/server/admin';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-  const sessionToken = event.cookies.get(auth.sessionCookieName);
+  // Auth.jsのセッション情報を取得
+  const authSession = await event.locals.auth();
 
-  if (!sessionToken) {
-    event.locals.user = null;
-    event.locals.session = null;
-    return resolve(event);
-  }
+  if (authSession?.user?.email) {
+    // Auth.jsセッションが存在する場合、ユーザー情報を設定
+    const [user] = await db
+      .select()
+      .from(table.user)
+      .where(eq(table.user.email, authSession.user.email));
 
-  const { session, user } = await auth.validateSessionToken(sessionToken);
-
-  if (session) {
-    auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+    if (user) {
+      event.locals.user = user;
+      event.locals.session = {
+        id: 'auth-js-session',
+        userId: user.id,
+        expiresAt: new Date(),
+      };
+    } else {
+      event.locals.user = null;
+      event.locals.session = null;
+    }
   } else {
-    auth.deleteSessionTokenCookie(event);
+    // カスタムセッションもチェック（後方互換性のため）
+    const sessionToken = event.cookies.get(auth.sessionCookieName);
+
+    if (sessionToken) {
+      const { session, user } = await auth.validateSessionToken(sessionToken);
+
+      if (session) {
+        auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+      } else {
+        auth.deleteSessionTokenCookie(event);
+      }
+
+      event.locals.user = user;
+      event.locals.session = session;
+    } else {
+      event.locals.user = null;
+      event.locals.session = null;
+    }
   }
 
-  event.locals.user = user;
-  event.locals.session = session;
   return resolve(event);
 };
 
@@ -48,12 +82,74 @@ const handleI18n: Handle = async ({ event, resolve }) => {
       origin,
       messageCalls: new Set(),
     },
-    () => resolve(event, {
-      transformPageChunk: ({ html }) => {
-        return html.replace('%lang%', locale);
-      }
-    })
+    () =>
+      resolve(event, {
+        transformPageChunk: ({ html }) => {
+          return html.replace('%lang%', locale);
+        },
+      })
   );
 };
 
-export const handle: Handle = sequence(handleI18n, handleAuth);
+// Auth.jsのハンドラー設定
+const { handle: authHandle } = SvelteKitAuth({
+  providers: [
+    Google({
+      clientId: env.GOOGLE_CLIENT_ID || '',
+      clientSecret: env.GOOGLE_CLIENT_SECRET || '',
+    }),
+  ],
+  secret: env.AUTH_SECRET,
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google' && profile?.email && profile.sub) {
+        const [existingUser] = await db
+          .select()
+          .from(table.user)
+          .where(eq(table.user.googleId, profile.sub));
+
+        if (!existingUser) {
+          await db.insert(table.user).values({
+            id: nanoid(),
+            email: profile.email,
+            name: profile.name || '',
+            picture: profile.picture || null,
+            googleId: profile.sub,
+          });
+        }
+      }
+      return true;
+    },
+    async session({ session, token }) {
+      if (token?.email) {
+        const [user] = await db
+          .select()
+          .from(table.user)
+          .where(eq(table.user.email, token.email));
+
+        if (user) {
+          session.user = {
+            ...session.user,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
+        }
+      }
+      return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // ログイン成功後のリダイレクト先を決定
+      if (url.startsWith(baseUrl)) {
+        const urlObj = new URL(url);
+        if (urlObj.pathname === '/auth/callback/google') {
+          // Google OAuth コールバック後は適切なページにリダイレクト
+          return `${baseUrl}/auth/success`;
+        }
+      }
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+  },
+});
+
+export const handle: Handle = sequence(handleI18n, authHandle, handleAuth);

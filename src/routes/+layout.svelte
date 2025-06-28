@@ -1,15 +1,10 @@
 <script lang="ts">
-  import Footer from '$lib/components/Footer.svelte';
-  import Header from '$lib/components/Header.svelte';
   import '../app.css';
+
+  // ルートレイアウト - 最小限の設定のみ
+  // 各サブディレクトリで独自のレイアウトを定義
 
   let { children } = $props();
 </script>
 
-<div class="min-h-screen flex flex-col">
-  <Header />
-  <main class="flex-1">
-    {@render children()}
-  </main>
-  <Footer />
-</div>
+{@render children()}

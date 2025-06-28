@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
+  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import { onMount } from 'svelte';
 
   // ライブラリ詳細ページコンポーネント
@@ -18,6 +19,9 @@
     scriptId: '',
     libraryUrl: '',
   };
+
+  // スクリプトIDのコピー数を管理
+  let scriptIdCopyCount = 0;
 
   // モックデータ（実際の実装では API から取得）
   const mockLibraries = {
@@ -69,7 +73,7 @@ function myFunction() {
 	`;
 
   onMount(() => {
-    libraryId = $page.params.id;
+    libraryId = page.params.id;
     // 実際の実装では API からライブラリ情報を取得
     library = mockLibraries[libraryId as keyof typeof mockLibraries] || library;
   });
@@ -82,104 +86,21 @@ function myFunction() {
       try {
         document.execCommand('copy');
         console.log('Copied!');
+
+        // スクリプトIDがコピーされた場合はカウントを増加
+        if (elementId === 'script-id') {
+          scriptIdCopyCount++;
+        }
       } catch (err) {
         console.error('Copy failed', err);
       }
     }
-  }
-
-  // Markdown をプレーンテキストとして表示（実際の実装では marked.js などを使用）
-  function renderMarkdown(content: string): string {
-    return content
-      .replace(/```javascript\n([\s\S]*?)\n```/g, '<pre><code>$1</code></pre>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/\n/g, '<br>');
   }
 </script>
 
 <svelte:head>
   <title>{library.name} - AppsScriptHub</title>
   <meta name="description" content={library.description} />
-  <style>
-    .markdown-body h1,
-    .markdown-body h2,
-    .markdown-body h3 {
-      font-weight: 600;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 0.3em;
-      margin-top: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .markdown-body h1 {
-      font-size: 2em;
-    }
-    .markdown-body h2 {
-      font-size: 1.5em;
-    }
-    .markdown-body h3 {
-      font-size: 1.25em;
-    }
-    .markdown-body p {
-      margin-bottom: 1rem;
-      line-height: 1.7;
-    }
-    .markdown-body ul {
-      list-style-type: disc;
-      margin-left: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .markdown-body ol {
-      list-style-type: decimal;
-      margin-left: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .markdown-body li {
-      margin-bottom: 0.25rem;
-    }
-    .markdown-body pre {
-      background-color: #f7fafc;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      margin-bottom: 1rem;
-    }
-    .markdown-body code {
-      background-color: #edf2f7;
-      padding: 0.2em 0.4em;
-      margin: 0;
-      font-size: 85%;
-      border-radius: 3px;
-    }
-    .markdown-body pre code {
-      background-color: transparent;
-      padding: 0;
-      margin: 0;
-      font-size: 100%;
-      border-radius: 0;
-    }
-    .markdown-body a {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-    .markdown-body table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    .markdown-body th,
-    .markdown-body td {
-      border: 1px solid #e2e8f0;
-      padding: 0.5rem 1rem;
-    }
-    .markdown-body th {
-      background-color: #f7fafc;
-    }
-  </style>
 </svelte:head>
 
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -194,9 +115,7 @@ function myFunction() {
       </div>
 
       <!-- README セクション -->
-      <article class="markdown-body">
-        {@html renderMarkdown(readmeContent)}
-      </article>
+      <MarkdownRenderer content={readmeContent} class="!p-0" />
 
       <!-- メソッドセクション -->
       <div class="mt-12">
@@ -339,6 +258,10 @@ function myFunction() {
         <!-- Aboutカード -->
         <div class="border rounded-lg p-4">
           <dl>
+            <dt class="font-semibold text-gray-800">スクリプトIDコピー数</dt>
+            <dd class="mb-3">
+              {scriptIdCopyCount}回
+            </dd>
             <dt class="font-semibold text-gray-800">作者</dt>
             <dd class="mb-3">
               <a

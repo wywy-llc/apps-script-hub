@@ -26,7 +26,8 @@ describe('SearchPage', () => {
       container.querySelector('input[placeholder="GASライブラリを検索"]')
     ).toBeTruthy();
     expect(container.querySelector('h1')).toBeTruthy();
-    expect(screen.getByText('ライブラリを検索')).toBeDefined();
+    // 検索クエリがない場合は「すべてのライブラリ」が表示される
+    expect(screen.getByText(/すべてのライブラリ/)).toBeDefined();
   });
 
   // 検索フォームの存在確認

@@ -58,6 +58,31 @@
 
 **注意**: `npm run test`は`npm run test:unit -- --run && npm run test:e2e`を実行し、ユニットテストを一度だけ実行してからE2Eテストを順次実行します。
 
+#### E2Eテストのデータベース管理
+
+E2Eテストでは専用のテストデータベースを使用し、テスト間のデータ競合を防ぐため自動的にデータクリアが実行されます：
+
+- **テストデータベース**: `apps_script_hub_test_db`（本番DBとは分離）
+- **データクリア**: 各テスト実行前に`scripts/clear-test-data.js`が自動実行
+- **スキーマセットアップ**: `scripts/setup-test-db.js`でテスト用スキーマを自動作成
+
+##### データベーススキーマ変更時の重要な注意事項
+
+**新しいテーブルを追加した場合、必ずテストデータクリア機能を更新してください：**
+
+1. `src/lib/server/db/schema.ts`に新しいテーブルを追加
+2. `scripts/clear-test-data.js`の`clearTestData()`関数に新しいテーブルのDELETE文を追加
+
+```javascript
+// 例：categoryテーブルを追加した場合
+await db.execute(sql`DELETE FROM "category"`);
+await db.execute(sql`DELETE FROM "library"`); // 既存テーブルも保持
+```
+
+**重要**: 外部キー制約がある場合は、子テーブルから先に削除する順序にしてください。
+
+この更新を忘れるとE2Eテストでデータ重複エラーが発生し、テストが不安定になります。
+
 ### 環境変数管理
 
 - **開発環境**: `.env`（チーム共有設定、Docker PostgreSQL）
@@ -69,3 +94,24 @@
 - SvelteでのMarkdownサポート用MDSvex（マークダウン処理）
 - 厳密チェック付きTypeScript
 - コード品質用ESLint + Prettier
+
+## Playwright MCP使用ルール
+
+### 絶対的な禁止事項
+
+1. **いかなる形式のコード実行も禁止**
+
+   - Python、JavaScript、Bash等でのブラウザ操作
+   - MCPツールを調査するためのコード実行
+   - subprocessやコマンド実行によるアプローチ
+
+2. **利用可能なのはMCPツールの直接呼び出しのみ**
+
+   - playwright:browser_navigate
+   - playwright:browser_screenshot
+   - 他のPlaywright MCPツール
+
+3. **エラー時は即座に報告**
+   - 回避策を探さない
+   - 代替手段を実行しない
+   - エラーメッセージをそのまま伝える
