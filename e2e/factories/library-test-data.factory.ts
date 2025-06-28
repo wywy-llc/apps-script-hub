@@ -32,23 +32,24 @@ export interface DatabaseLibraryData {
 }
 
 /**
+ * 検索・ステータス別テスト用のライブラリデータ
+ * search-test-data.factoryから統合
+ */
+export interface LibraryStatusTestData {
+  name: string;
+  scriptId: string;
+  repositoryUrl: string;
+  authorUrl: string;
+  authorName: string;
+  description: string;
+  readmeContent: string;
+  starCount: number;
+  status: 'pending' | 'published' | 'rejected';
+}
+
+/**
  * ライブラリテストデータのFactory群
  * プリセットパターンを使用して複数のテストケースを簡単に生成
- *
- * 使用例:
- * ```typescript
- * // デフォルトの正常系データを生成
- * const testData = LibraryTestDataFactories.default.build();
- *
- * // 代替ライブラリデータを生成
- * const altData = LibraryTestDataFactories.alternative.build();
- *
- * // 特定の値を上書きして生成
- * const customTestData = LibraryTestDataFactories.default.build({
- *   scriptId: 'custom-script-id',
- *   expectedName: 'custom-name'
- * });
- * ```
  */
 export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
   default: () => ({
@@ -65,9 +66,76 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
   }),
 });
 
+/**
+ * ステータス別ライブラリテストデータFactory群
+ * search-test-data.factoryから統合
+ */
+export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatusTestData>({
+  published: () => ({
+    name: 'GasLogger',
+    scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+    repositoryUrl: 'https://github.com/gas-developer/GasLogger',
+    authorUrl: 'https://github.com/gas-developer',
+    authorName: 'gas-developer',
+    description: 'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。',
+    readmeContent: '# GasLogger\n\nGoogle Apps Script用のロギングライブラリです。',
+    starCount: 847,
+    status: 'published',
+  }),
+  pending: () => ({
+    name: 'PendingLibrary',
+    scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
+    repositoryUrl: 'https://github.com/test-user/PendingLibrary',
+    authorUrl: 'https://github.com/test-user',
+    authorName: 'test-user',
+    description: '承認待ちのライブラリです。検索結果には表示されません。',
+    readmeContent: '# PendingLibrary\n\n承認待ちのライブラリです。',
+    starCount: 10,
+    status: 'pending',
+  }),
+  rejected: () => ({
+    name: 'RejectedLibrary',
+    scriptId: '1ZyXwVuTsRqPoNmLkJiHgFeDcBa0987654321',
+    repositoryUrl: 'https://github.com/bad-user/RejectedLibrary',
+    authorUrl: 'https://github.com/bad-user',
+    authorName: 'bad-user',
+    description: '拒否されたライブラリです。検索結果には表示されません。',
+    readmeContent: '# RejectedLibrary\n\n拒否されたライブラリです。',
+    starCount: 5,
+    status: 'rejected',
+  }),
+  gasDateFormatter: () => ({
+    name: 'GasDateFormatter',
+    scriptId: '1DaTeFoRmAtTeR1234567890AbCdEfGhIjKlMnOpQrStUvWxYz',
+    repositoryUrl: 'https://github.com/date-wizard/GasDateFormatter',
+    authorUrl: 'https://github.com/date-wizard',
+    authorName: 'date-wizard',
+    description: 'Moment.jsライクな日時フォーマットライブラリ',
+    readmeContent: '# GasDateFormatter\n\n日時フォーマットライブラリです。',
+    starCount: 234,
+    status: 'published',
+  }),
+  gasCalendarSync: () => ({
+    name: 'GasCalendarSync',
+    scriptId: '1CaLeNdArSyNc1234567890AbCdEfGhIjKlMnOpQrStUvWxYz',
+    repositoryUrl: 'https://github.com/sync-expert/GasCalendarSync',
+    authorUrl: 'https://github.com/sync-expert',
+    authorName: 'sync-expert',
+    description: 'Googleカレンダー同期ライブラリ',
+    readmeContent: '# GasCalendarSync\n\nカレンダー同期ライブラリです。',
+    starCount: 456,
+    status: 'published',
+  }),
+});
+
 // 後方互換性のため古いファクトリ名をエクスポート
 export const LibraryTestDataFactory = LibraryTestDataFactories.default;
 export const AlternativeLibraryTestDataFactory = LibraryTestDataFactories.alternative;
+
+// search-test-data.factoryからの後方互換性
+export const PublishedLibraryFactory = LibraryStatusTestDataFactories.published;
+export const PendingLibraryFactory = LibraryStatusTestDataFactories.pending;
+export const RejectedLibraryFactory = LibraryStatusTestDataFactories.rejected;
 
 /**
  * データベース作成用のライブラリデータFactory

@@ -18,9 +18,14 @@ export {
 export {
   AlternativeLibraryTestDataFactory,
   DatabaseLibraryDataFactory,
+  LibraryStatusTestDataFactories,
   LibraryTestDataFactories,
   LibraryTestDataFactory,
+  PendingLibraryFactory,
+  PublishedLibraryFactory,
+  RejectedLibraryFactory,
   type DatabaseLibraryData,
+  type LibraryStatusTestData,
   type LibraryTestData,
 } from './library-test-data.factory';
 
