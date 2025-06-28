@@ -25,7 +25,6 @@
 
   let { data }: Props = $props();
   let library = data.library;
-  let methods = data.methods || [];
 
   let isScrapingInProgress = $state(false);
   let scrapingMessage = $state('');
@@ -307,90 +306,6 @@
               </div>
             {/if}
 
-            <!-- Methods Section -->
-            <div class="mt-12">
-              <h2 class="text-2xl font-semibold border-b pb-2 mb-6">
-                メソッド
-              </h2>
-
-              {#if methods.length > 0}
-                {#each methods as method (method.id)}
-                  <!-- Method Detail Card -->
-                  <div
-                    id={method.name}
-                    class="border border-gray-200 rounded-lg overflow-hidden mb-8"
-                  >
-                    <div class="bg-gray-50 p-4 border-b">
-                      <h3 class="text-xl font-mono font-semibold">
-                        {method.name}({method.parameters
-                          .map((p: { name: any }) => p.name)
-                          .join(', ')})
-                      </h3>
-                    </div>
-                    <div class="p-6">
-                      <p class="mb-6 text-gray-700">
-                        {method.description}
-                      </p>
-
-                      {#if method.parameters.length > 0}
-                        <!-- Parameters -->
-                        <h4 class="font-semibold mb-2">引数</h4>
-                        <div class="overflow-x-auto">
-                          <table class="min-w-full border rounded-md">
-                            <thead class="bg-gray-50">
-                              <tr>
-                                <th class="text-left p-3 font-medium">名前</th>
-                                <th class="text-left p-3 font-medium">型</th>
-                                <th class="text-left p-3 font-medium">説明</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {#each method.parameters as param}
-                                <tr class="border-t">
-                                  <td class="p-3 font-mono">{param.name}</td>
-                                  <td class="p-3 font-mono text-purple-600"
-                                    >{param.type}</td
-                                  >
-                                  <td class="p-3">{param.description}</td>
-                                </tr>
-                              {/each}
-                            </tbody>
-                          </table>
-                        </div>
-                      {/if}
-
-                      <!-- Return Value -->
-                      <h4 class="font-semibold mt-6 mb-2">戻り値</h4>
-                      <div class="overflow-x-auto">
-                        <table class="min-w-full border rounded-md">
-                          <thead class="bg-gray-50">
-                            <tr>
-                              <th class="text-left p-3 font-medium">型</th>
-                              <th class="text-left p-3 font-medium">説明</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr class="border-t">
-                              <td class="p-3 font-mono text-purple-600"
-                                >{method.returnType}</td
-                              >
-                              <td class="p-3">{method.returnDescription}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                {/each}
-              {:else}
-                <div class="text-gray-500 text-center py-8">
-                  <p>メソッド情報が見つかりませんでした。</p>
-                  <p class="text-sm mt-2">
-                    スクレイピングを実行してメソッド情報を取得してください。
-                  </p>
-                </div>
-              {/if}
-            </div>
           </div>
         </div>
       </div>
