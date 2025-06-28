@@ -60,17 +60,3 @@
     </div>
   </div>
 </section>
-
-<!-- ユーザーアクションセクション -->
-<section class="bg-gray-50">
-  <div class="container mx-auto px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-24">
-    <h2 class="text-3xl font-bold tracking-tight text-gray-900">何をしますか？</h2>
-    <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-      ライブラリの検索や、あなたの作品を共有してください
-    </p>
-    <div class="mt-8 flex justify-center space-x-4">
-      <Button variant="primary" size="lg" href="/user/search">詳細検索</Button>
-      <Button variant="outline" size="lg" href="/contribute">ライブラリを共有</Button>
-    </div>
-  </div>
-</section>
