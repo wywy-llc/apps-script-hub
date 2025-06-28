@@ -1,19 +1,6 @@
 <script lang="ts">
-  import hljs from 'highlight.js/lib/core';
-  import bash from 'highlight.js/lib/languages/bash';
-  import javascript from 'highlight.js/lib/languages/javascript';
-  import json from 'highlight.js/lib/languages/json';
-  import plaintext from 'highlight.js/lib/languages/plaintext';
-  import typescript from 'highlight.js/lib/languages/typescript';
-  import { marked } from 'marked';
+  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import type { PageData } from './$types';
-
-  // highlight.jsの言語を登録
-  hljs.registerLanguage('javascript', javascript);
-  hljs.registerLanguage('json', json);
-  hljs.registerLanguage('typescript', typescript);
-  hljs.registerLanguage('bash', bash);
-  hljs.registerLanguage('plaintext', plaintext);
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -107,32 +94,6 @@
         return '不明';
     }
   }
-
-  // marked.jsの設定とmarkdownレンダリング関数
-  marked.use({
-    renderer: {
-      code(token: any) {
-        const code = token.text;
-        const lang = token.lang || 'plaintext';
-
-        try {
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          const highlighted = hljs.highlight(code, { language }).value;
-          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-        } catch (error) {
-          console.warn('Highlight.js error:', error);
-          // エラーの場合はプレーンテキストとして表示
-          return `<pre><code class="hljs">${code}</code></pre>`;
-        }
-      },
-    },
-    breaks: true,
-    gfm: true,
-  });
-
-  function renderMarkdown(content: string): string {
-    return marked.parse(content) as string;
-  }
 </script>
 
 <svelte:head>
@@ -140,16 +101,6 @@
   <meta
     name="description"
     content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能"
-  />
-  <!-- GitHub風マークダウンスタイル -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css"
-  />
-  <!-- highlight.jsのスタイル（GitHub風） -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
   />
 </svelte:head>
 
@@ -316,9 +267,7 @@
         <div class="px-6">
           <!-- README Section -->
           {#if library.readmeContent}
-            <article class="markdown-body p-6 bg-white">
-              {@html renderMarkdown(library.readmeContent)}
-            </article>
+            <MarkdownRenderer content={library.readmeContent} />
           {:else}
             <div class="text-gray-500 text-center py-8">
               <p>README が見つかりませんでした。</p>

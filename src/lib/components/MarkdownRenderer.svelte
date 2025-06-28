@@ -1,0 +1,77 @@
+<script lang="ts">
+  import hljs from 'highlight.js/lib/core';
+  import bash from 'highlight.js/lib/languages/bash';
+  import javascript from 'highlight.js/lib/languages/javascript';
+  import json from 'highlight.js/lib/languages/json';
+  import plaintext from 'highlight.js/lib/languages/plaintext';
+  import typescript from 'highlight.js/lib/languages/typescript';
+  import { marked } from 'marked';
+
+  // マークダウンレンダリング共通コンポーネント
+  // marked.js と highlight.js を使用した高機能なマークダウンレンダリング
+  // 使用例:
+  // <MarkdownRenderer content={markdownContent} />
+  // <MarkdownRenderer content={markdownContent} class="custom-class" />
+
+  interface Props {
+    content: string;
+    class?: string;
+  }
+
+  let { content, class: className = '' }: Props = $props();
+
+  // highlight.jsの言語を登録
+  hljs.registerLanguage('javascript', javascript);
+  hljs.registerLanguage('json', json);
+  hljs.registerLanguage('typescript', typescript);
+  hljs.registerLanguage('bash', bash);
+  hljs.registerLanguage('plaintext', plaintext);
+
+  // marked.jsの設定
+  marked.use({
+    renderer: {
+      code(token: any) {
+        const code = token.text;
+        const lang = token.lang || 'plaintext';
+
+        try {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          const highlighted = hljs.highlight(code, { language }).value;
+          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        } catch (error) {
+          console.warn('Highlight.js error:', error);
+          // エラーの場合はプレーンテキストとして表示
+          return `<pre><code class="hljs">${code}</code></pre>`;
+        }
+      },
+    },
+    breaks: true,
+    gfm: true,
+  });
+
+  /**
+   * マークダウンコンテンツをHTMLに変換
+   * @param content - マークダウンテキスト
+   * @returns HTMLとしてレンダリングされた文字列
+   */
+  function renderMarkdown(content: string): string {
+    return marked.parse(content) as string;
+  }
+</script>
+
+<svelte:head>
+  <!-- GitHub風マークダウンスタイル -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css"
+  />
+  <!-- highlight.jsのスタイル（GitHub風） -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
+  />
+</svelte:head>
+
+<article class="markdown-body p-6 bg-white {className}">
+  {@html renderMarkdown(content)}
+</article>
