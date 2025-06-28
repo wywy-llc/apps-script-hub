@@ -22,6 +22,7 @@
 </script>
 
 <div
+  data-testid="library-card"
   class="flex flex-col rounded-lg border border-gray-200 p-6 transition-all hover:border-gray-300 hover:shadow-lg"
 >
   <div class="flex-grow">
