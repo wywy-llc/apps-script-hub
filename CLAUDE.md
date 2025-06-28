@@ -6,6 +6,22 @@
 
 このプロジェクトで利用可能なnpmコマンドは@package.jsonを参照
 
+### 🚨 重要：コード変更時の必須手順
+
+**コードの実装・修正・追加を行った場合は、必ず以下を実行してください：**
+
+```bash
+npm run test
+```
+
+これにより以下が順次実行されます：
+1. `npm run lint` - コードフォーマットとESLintチェック
+2. `npm run check` - TypeScript型チェック
+3. `npm run test:unit -- --run` - ユニットテスト
+4. `npm run test:e2e` - E2Eテスト
+
+**全てのテストがパスすることを確認してから作業を完了してください。** エラーが発生した場合は、必ず修正してください。
+
 ## 🏗️ アーキテクチャ
 
 ### コアスタック
@@ -51,12 +67,19 @@
 
 #### テスト実行コマンド
 
-- `npm run test` - 全テスト実行（ユニットテスト + E2Eテスト）
+- `npm run test` - **🚨 全テスト実行（コード変更時は必須）**
 - `npm run test:unit` - ユニットテストのみ実行（Vitest）
 - `npm run test:e2e` - E2Eテストのみ実行（Playwright）
 - `npm run storybook` - Storybookコンポーネントテスト用サーバー起動
 
-**注意**: `npm run test`は`npm run test:unit -- --run && npm run test:e2e`を実行し、ユニットテストを一度だけ実行してからE2Eテストを順次実行します。
+**注意**: `npm run test`は`npm run lint && npm run check && npm run test:unit -- --run && npm run test:e2e`を実行し、リント、型チェック、ユニットテスト、E2Eテストを順次実行します。
+
+**💡 開発ワークフロー**:
+
+1. コード修正・実装
+2. `npm run test`を実行
+3. 全てがパスすることを確認
+4. 全てのテストがパスしたら完了と判断
 
 #### E2Eテストのデータベース管理
 
