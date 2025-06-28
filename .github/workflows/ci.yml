@@ -52,6 +52,15 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit -- --run
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Setup test database
+        run: npm run test:e2e:setup
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
       - name: Run linting
         run: npm run lint
 
