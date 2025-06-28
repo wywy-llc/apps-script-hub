@@ -11,7 +11,7 @@
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
-  
+
   // GASライブラリ検索ページコンポーネント
   // ログイン済みユーザー向けのライブラリ検索ページ
 
@@ -88,7 +88,10 @@
 
 <svelte:head>
   <title>GASライブラリ検索 - {app_title()}</title>
-  <meta name="description" content="Google Apps Scriptライブラリの検索とダウンロード" />
+  <meta
+    name="description"
+    content="Google Apps Scriptライブラリの検索とダウンロード"
+  />
 </svelte:head>
 
 <!-- GASライブラリ検索ヘッダー -->
@@ -103,9 +106,6 @@
           ようこそ、{data.session.user.name || data.session.user.email}さん
         </p>
       {/if}
-      <p class="mt-6 max-w-2xl mx-auto text-base text-gray-600">
-        Google Apps Scriptのライブラリを検索して、あなたのプロジェクトに簡単に追加できます
-      </p>
     </div>
     <div class="mt-8 max-w-xl mx-auto">
       <SearchBox />
@@ -151,9 +151,7 @@
       ライブラリの検索や、あなたの作品を共有してください
     </p>
     <div class="mt-8 flex justify-center space-x-4">
-      <Button variant="primary" size="lg" href="/user/search">
-        詳細検索
-      </Button>
+      <Button variant="primary" size="lg" href="/user/search">詳細検索</Button>
       <Button variant="outline" size="lg" href="/contribute">
         ライブラリを共有
       </Button>
