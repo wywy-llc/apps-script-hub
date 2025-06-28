@@ -112,6 +112,27 @@ await db.execute(sql`DELETE FROM "category"`);
 await db.execute(sql`DELETE FROM "library"`); // 既存も保持
 ```
 
+### テストデータFactory（E2E）
+
+**🚨 必須**: 全テストデータ生成は`e2e/factories`の共通システム使用
+
+```typescript
+// 使用例
+import { LibraryTestDataFactories, DatabaseLibraryDataFactory } from '@/e2e/factories';
+
+// テストデータ生成
+const data = LibraryTestDataFactories.default.build();
+// DB作成
+const id = await DatabaseLibraryDataFactory.create();
+```
+
+**新Factory作成**:
+
+- `createPresetFactories()` - テストデータ用
+- `createDatabaseFactory()` - DB作成用  
+- `generateUniqueId()` - 一意ID生成
+- 型: `string | undefined`は`undefined`使用（`null`禁止）
+
 ## 🔢 マジックナンバー・定数管理
 
 **🚨 必須ルール**: 全てのマジックナンバー・文字列リテラル・設定値を定数化

@@ -1,0 +1,118 @@
+import { sql } from 'drizzle-orm';
+import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
+
+/**
+ * ユーザーテストデータのインターフェース
+ */
+export interface UserTestData {
+  /** ユーザーID */
+  id: string;
+  /** メールアドレス */
+  email: string;
+  /** 表示名 */
+  name: string;
+  /** プロフィール画像URL */
+  picture?: string;
+}
+
+/**
+ * データベース作成用のユーザー情報
+ */
+export interface DatabaseUserData {
+  id: string;
+  email: string;
+  name: string;
+  picture: string | null;
+  googleId: string;
+}
+
+/**
+ * ユーザーテストデータのFactory群
+ * プリセットパターンを使用して複数のテストケースを簡単に生成
+ *
+ * 使用例:
+ * ```typescript
+ * // デフォルトユーザーデータを生成
+ * const userData = UserTestDataFactories.default.build();
+ *
+ * // 管理者ユーザーデータを生成
+ * const adminData = UserTestDataFactories.admin.build();
+ *
+ * // 特定の値を上書きして生成
+ * const customUserData = UserTestDataFactories.default.build({
+ *   email: 'custom@example.com',
+ *   name: 'Custom User'
+ * });
+ * ```
+ */
+export const UserTestDataFactories = createPresetFactories<UserTestData>({
+  default: () => ({
+    id: generateUniqueId('user'),
+    email: 'test@example.com',
+    name: 'Test User',
+    picture: 'https://example.com/avatar.jpg',
+  }),
+  admin: () => ({
+    id: generateUniqueId('admin'),
+    email: 'admin@example.com',
+    name: 'Admin User',
+    picture: 'https://example.com/admin-avatar.jpg',
+  }),
+  guest: () => ({
+    id: generateUniqueId('guest'),
+    email: 'guest@example.com',
+    name: 'Guest User',
+    picture: undefined,
+  }),
+});
+
+// 後方互換性のため単一ファクトリをエクスポート
+export const UserTestDataFactory = UserTestDataFactories.default;
+
+/**
+ * データベース作成用のユーザーデータFactory
+ * 共通化されたcreateDatabaseFactoryを使用してデータベースに直接ユーザーを作成
+ */
+export const DatabaseUserDataFactory = createDatabaseFactory<DatabaseUserData>(
+  'user',
+  () => {
+    const uniqueId = generateUniqueId('user');
+    const timestamp = Date.now();
+    return {
+      id: uniqueId,
+      email: `test-${timestamp}@example.com`,
+      name: 'Test User',
+      picture: 'https://example.com/avatar.jpg',
+      googleId: `google_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
+    };
+  },
+  async (db, userData) => {
+    await db.execute(sql`
+      INSERT INTO "user" (
+        "id", "email", "name", "picture", "google_id"
+      ) VALUES (
+        ${userData.id}, ${userData.email}, ${userData.name}, 
+        ${userData.picture}, ${userData.googleId}
+      )
+    `);
+    return userData.id;
+  }
+);
+
+/**
+ * DatabaseUserDataFactoryの使用例
+ *
+ * ```typescript
+ * // Fisheryのcreate()メソッドを使用してデータベースにユーザーを直接作成
+ *
+ * // デフォルトユーザーを作成
+ * const userId = await DatabaseUserDataFactory.create();
+ *
+ * // カスタムデータでユーザーを作成
+ * const customUserId = await DatabaseUserDataFactory.create({
+ *   email: 'custom@example.com',
+ *   name: 'Custom User',
+ *   picture: null
+ * });
+ * ```
+ */

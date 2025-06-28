@@ -1,11 +1,5 @@
-import { config } from 'dotenv';
 import { sql } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Factory } from 'fishery';
-import { Client } from 'pg';
-
-// 環境変数を読み込み
-config();
+import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
 
 /**
  * ライブラリテストデータのインターフェース
@@ -38,101 +32,79 @@ export interface DatabaseLibraryData {
 }
 
 /**
- * ライブラリテストデータのFactory
+ * ライブラリテストデータのFactory群
+ * プリセットパターンを使用して複数のテストケースを簡単に生成
  *
  * 使用例:
  * ```typescript
  * // デフォルトの正常系データを生成
- * const testData = LibraryTestDataFactory.build();
+ * const testData = LibraryTestDataFactories.default.build();
+ *
+ * // 代替ライブラリデータを生成
+ * const altData = LibraryTestDataFactories.alternative.build();
  *
  * // 特定の値を上書きして生成
- * const customTestData = LibraryTestDataFactory.build({
+ * const customTestData = LibraryTestDataFactories.default.build({
  *   scriptId: 'custom-script-id',
  *   expectedName: 'custom-name'
  * });
  * ```
  */
-export const LibraryTestDataFactory = Factory.define<LibraryTestData>(() => ({
-  scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-  repoUrl: 'googleworkspace/apps-script-oauth2',
-  expectedName: 'apps-script-oauth2',
-  expectedAuthor: 'googleworkspace',
-}));
+export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
+  default: () => ({
+    scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+    repoUrl: 'googleworkspace/apps-script-oauth2',
+    expectedName: 'apps-script-oauth2',
+    expectedAuthor: 'googleworkspace',
+  }),
+  alternative: () => ({
+    scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
+    repoUrl: 'example/sample-library',
+    expectedName: 'sample-library',
+    expectedAuthor: 'example',
+  }),
+});
 
-/**
- * 異なるライブラリ用のファクトリ
- * 複数のテストパターンを簡単に生成するためのプリセット
- */
-export const AlternativeLibraryTestDataFactory = Factory.define<LibraryTestData>(() => ({
-  scriptId: '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890',
-  repoUrl: 'example/sample-library',
-  expectedName: 'sample-library',
-  expectedAuthor: 'example',
-}));
+// 後方互換性のため古いファクトリ名をエクスポート
+export const LibraryTestDataFactory = LibraryTestDataFactories.default;
+export const AlternativeLibraryTestDataFactory = LibraryTestDataFactories.alternative;
 
 /**
  * データベース作成用のライブラリデータFactory
- * Fisheryのcreate機能を使用してデータベースに直接ライブラリを作成
+ * 共通化されたcreateDatabaseFactoryを使用してデータベースに直接ライブラリを作成
  */
-export const DatabaseLibraryDataFactory = Factory.define<
-  DatabaseLibraryData,
-  Partial<DatabaseLibraryData>,
-  string
->(({ onCreate }) => {
-  // onCreate: データベースに実際にレコードを作成する処理
-  onCreate(async libraryData => {
-    const TEST_DB_NAME = process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db';
-    const POSTGRES_CONFIG = {
-      host: process.env.POSTGRES_HOST || 'localhost',
-      port: parseInt(process.env.POSTGRES_PORT || '5433', 10),
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: TEST_DB_NAME,
+export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryData>(
+  'library',
+  () => {
+    const timestamp = Date.now();
+    return {
+      id: generateUniqueId('lib'),
+      name: 'apps-script-oauth2',
+      scriptId: `1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF_${timestamp}`,
+      repositoryUrl: `https://github.com/googleworkspace/apps-script-oauth2-${timestamp}`,
+      authorUrl: 'https://github.com/googleworkspace',
+      authorName: 'googleworkspace',
+      description: 'A library for OAuth2 in Google Apps Script',
+      readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
+      starCount: 100,
+      status: 'pending' as const,
     };
-
-    const client = new Client(POSTGRES_CONFIG);
-
-    try {
-      await client.connect();
-      const db = drizzle(client);
-
-      await db.execute(sql`
-          INSERT INTO "library" (
-            "id", "name", "script_id", "repository_url", "author_url", 
-            "author_name", "description", "readme_content", "star_count", "status"
-          ) VALUES (
-            ${libraryData.id}, ${libraryData.name}, ${libraryData.scriptId}, 
-            ${libraryData.repositoryUrl}, ${libraryData.authorUrl}, ${libraryData.authorName}, 
-            ${libraryData.description}, ${libraryData.readmeContent}, ${libraryData.starCount}, 
-            ${libraryData.status}
-          )
-        `);
-
-      return libraryData.id;
-    } catch (error) {
-      console.error('❌ ライブラリ作成エラー:', error);
-      throw error;
-    } finally {
-      await client.end();
-    }
-  });
-
-  const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substr(2, 9);
-
-  return {
-    id: `lib_${timestamp}_${randomSuffix}`,
-    name: 'apps-script-oauth2',
-    scriptId: `1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF_${timestamp}`,
-    repositoryUrl: `https://github.com/googleworkspace/apps-script-oauth2-${timestamp}`,
-    authorUrl: 'https://github.com/googleworkspace',
-    authorName: 'googleworkspace',
-    description: 'A library for OAuth2 in Google Apps Script',
-    readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
-    starCount: 100,
-    status: 'pending' as const,
-  };
-});
+  },
+  async (db, libraryData) => {
+    await db.execute(sql`
+      INSERT INTO "library" (
+        "id", "name", "script_id", "repository_url", "author_url", 
+        "author_name", "description", "readme_content", "star_count", "status"
+      ) VALUES (
+        ${libraryData.id}, ${libraryData.name}, ${libraryData.scriptId}, 
+        ${libraryData.repositoryUrl}, ${libraryData.authorUrl}, ${libraryData.authorName}, 
+        ${libraryData.description}, ${libraryData.readmeContent}, ${libraryData.starCount}, 
+        ${libraryData.status}
+      )
+    `);
+    return libraryData.id;
+  }
+);
 
 /**
  * DatabaseLibraryDataFactoryの使用例
