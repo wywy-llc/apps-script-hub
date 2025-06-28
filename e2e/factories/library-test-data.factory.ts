@@ -1,5 +1,21 @@
 import { sql } from 'drizzle-orm';
+import { LIBRARY_STATUS, LibraryStatus } from '../../src/lib/constants/library-status';
+import { library } from '../../src/lib/server/db/schema';
 import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
+
+/**
+ * ライブラリステータス（constants/library-status.tsから使用）
+ */
+export { LIBRARY_STATUS } from '../../src/lib/constants/library-status';
+export type { LibraryStatus } from '../../src/lib/constants/library-status';
+
+/**
+ * ライブラリ作成用入力データ（drizzleスキーマから推論）
+ */
+export type CreateLibraryInput = Omit<
+  typeof library.$inferInsert,
+  'id' | 'createdAt' | 'updatedAt'
+>;
 
 /**
  * ライブラリテストデータのインターフェース
@@ -17,34 +33,19 @@ export interface LibraryTestData {
 
 /**
  * データベース作成用のライブラリ情報
+ * DDDエンティティのCreateLibraryInputを基盤とし、IDを追加
  */
-export interface DatabaseLibraryData {
+export interface DatabaseLibraryData extends CreateLibraryInput {
   id: string;
-  name: string;
-  scriptId: string;
-  repositoryUrl: string;
-  authorUrl: string;
-  authorName: string;
-  description: string;
-  readmeContent: string;
-  starCount: number;
-  status: 'pending' | 'published' | 'rejected';
+  status: LibraryStatus;
 }
 
 /**
  * 検索・ステータス別テスト用のライブラリデータ
- * search-test-data.factoryから統合
+ * DDDエンティティのCreateLibraryInputを基盤
  */
-export interface LibraryStatusTestData {
-  name: string;
-  scriptId: string;
-  repositoryUrl: string;
-  authorUrl: string;
-  authorName: string;
-  description: string;
-  readmeContent: string;
-  starCount: number;
-  status: 'pending' | 'published' | 'rejected';
+export interface LibraryStatusTestData extends CreateLibraryInput {
+  status: LibraryStatus;
 }
 
 /**
@@ -80,7 +81,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatu
     description: 'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。',
     readmeContent: '# GasLogger\n\nGoogle Apps Script用のロギングライブラリです。',
     starCount: 847,
-    status: 'published',
+    status: LIBRARY_STATUS.PUBLISHED,
   }),
   pending: () => ({
     name: 'PendingLibrary',
@@ -91,7 +92,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatu
     description: '承認待ちのライブラリです。検索結果には表示されません。',
     readmeContent: '# PendingLibrary\n\n承認待ちのライブラリです。',
     starCount: 10,
-    status: 'pending',
+    status: LIBRARY_STATUS.PENDING,
   }),
   rejected: () => ({
     name: 'RejectedLibrary',
@@ -102,7 +103,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatu
     description: '拒否されたライブラリです。検索結果には表示されません。',
     readmeContent: '# RejectedLibrary\n\n拒否されたライブラリです。',
     starCount: 5,
-    status: 'rejected',
+    status: LIBRARY_STATUS.REJECTED,
   }),
   gasDateFormatter: () => ({
     name: 'GasDateFormatter',
@@ -113,7 +114,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatu
     description: 'Moment.jsライクな日時フォーマットライブラリ',
     readmeContent: '# GasDateFormatter\n\n日時フォーマットライブラリです。',
     starCount: 234,
-    status: 'published',
+    status: LIBRARY_STATUS.PUBLISHED,
   }),
   gasCalendarSync: () => ({
     name: 'GasCalendarSync',
@@ -124,18 +125,9 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryStatu
     description: 'Googleカレンダー同期ライブラリ',
     readmeContent: '# GasCalendarSync\n\nカレンダー同期ライブラリです。',
     starCount: 456,
-    status: 'published',
+    status: LIBRARY_STATUS.PUBLISHED,
   }),
 });
-
-// 後方互換性のため古いファクトリ名をエクスポート
-export const LibraryTestDataFactory = LibraryTestDataFactories.default;
-export const AlternativeLibraryTestDataFactory = LibraryTestDataFactories.alternative;
-
-// search-test-data.factoryからの後方互換性
-export const PublishedLibraryFactory = LibraryStatusTestDataFactories.published;
-export const PendingLibraryFactory = LibraryStatusTestDataFactories.pending;
-export const RejectedLibraryFactory = LibraryStatusTestDataFactories.rejected;
 
 /**
  * データベース作成用のライブラリデータFactory
@@ -155,7 +147,7 @@ export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryD
       description: 'A library for OAuth2 in Google Apps Script',
       readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
       starCount: 100,
-      status: 'pending' as const,
+      status: LIBRARY_STATUS.PENDING,
     };
   },
   async (db, libraryData) => {

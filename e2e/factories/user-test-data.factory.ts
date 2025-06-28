@@ -1,5 +1,11 @@
 import { sql } from 'drizzle-orm';
+import { user } from '../../src/lib/server/db/schema';
 import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
+
+/**
+ * ユーザー作成用入力データ（drizzleスキーマから推論）
+ */
+export type CreateUserInput = Omit<typeof user.$inferInsert, 'id' | 'createdAt'>;
 
 /**
  * ユーザーテストデータのインターフェース
@@ -18,12 +24,8 @@ export interface UserTestData {
 /**
  * データベース作成用のユーザー情報
  */
-export interface DatabaseUserData {
+export interface DatabaseUserData extends CreateUserInput {
   id: string;
-  email: string;
-  name: string;
-  picture: string | null;
-  googleId: string;
 }
 
 /**
