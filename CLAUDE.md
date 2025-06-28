@@ -2,33 +2,21 @@
 
 このファイルは、このリポジトリでコードを操作する際にClaude Code (claude.ai/code) にガイダンスを提供します。
 
-## 🛠️ 開発コマンド
+## 🚨 必須：コード変更時の手順
 
-このプロジェクトで利用可能なnpmコマンドは@package.jsonを参照
-
-### 🚨 重要：コード変更時の必須手順
-
-**コードの実装・修正・追加を行った場合は、必ず以下を実行してください：**
+**全てのコード変更後に必ず実行：**
 
 ```bash
 npm run test
 ```
 
-これにより以下が順次実行されます：
+**🔴 絶対ルール：**
 
-1. `npm run lint` - コードフォーマットとESLintチェック
-2. `npm run check` - TypeScript型チェック
-3. `npm run test:unit -- --run` - ユニットテスト
-4. `npm run test:e2e` - E2Eテスト
+- **全てのテストがパスするまで作業完了禁止**
+- **修正内容に関係なく、エラーが発生したら必ず修正**
+- **エラーが残った状態での作業終了は絶対禁止**
 
-**🔴 重要なルール：**
-
-- **全てのテストがパスするまで作業を完了してはいけません**
-- **修正したコードに直接関係がなくても、`npm run test`でエラーが発生した場合は必ず修正してください**
-- lint、型チェック、テストエラーは全て修正が必要です
-- エラーが残ったまま作業を終了することは禁止されています
-
-**💡 エラー修正の優先順位：**
+**エラー修正の優先順位：**
 
 1. lint エラー（コードフォーマット・ESLint）
 2. TypeScript型エラー
@@ -43,182 +31,105 @@ npm run test
 - **データベース**: PostgreSQL + Drizzle ORM
 - **認証**: @oslo/cryptoを使用したカスタムセッションベース認証
 - **スタイリング**: Tailwind CSS v4
-- **テスト**: Vitest (ユニット) + Playwright (e2e) + Storybook
+- **テスト**: Vitest (ユニット) + Playwright (E2E) + Storybook
 - **デプロイ**: Vercelアダプター
+- **ビルド**: Vite + TypeScript + ESLint + Prettier
 
 ### プロジェクト構成
 
 - `src/lib/` - 共有ユーティリティとコンポーネント
-- `src/lib/server/` - サーバーサイド専用コード (認証、データベース)
-  - `db/schema.ts` - Drizzleデータベーススキーマ
-  - `auth.ts` - セッション管理ユーティリティ
+  - `constants/` - 定数定義ファイル
+  - `server/` - サーバーサイド専用コード
+    - `db/schema.ts` - Drizzleデータベーススキーマ
+    - `auth.ts` - セッション管理
 - `src/routes/` - SvelteKitファイルベースルーティング
-- `src/stories/` - Storybookコンポーネントとストーリー
-- `e2e/` - Playwrightエンドツーエンドテスト
+- `src/stories/` - Storybookコンポーネント
+- `e2e/` - Playwrightテスト
+- `scripts/` - データベース管理スクリプト
 
-### データベーススキーマ
+### 認証・データベース
 
-- PostgreSQLとDrizzle ORMを使用
-- スキーマの場所: `src/lib/server/db/schema.ts`
-- `DATABASE_URL`環境変数が必要
+- **認証**: SHA256ハッシュセッション（30日有効、15日更新）、Cookie名: `auth-session`
+- **DB**: PostgreSQL、スキーマ: `src/lib/server/db/schema.ts`、環境変数: `DATABASE_URL`
 
-### 認証システム
+## 🧪 テスト設定
 
-- SHA256ハッシュトークンを使用したセッションベース認証
-- 30日間のセッション有効期限、15日更新ウィンドウ
-- セッション管理関数: `src/lib/server/auth.ts`
-- Cookie名: `auth-session`
+### コマンド
 
-### テスト設定
+- `npm run test` - **🚨 全テスト実行（必須）**
+- `npm run test:unit` - ユニットテストのみ
+- `npm run test:e2e` - E2Eテストのみ
+- `npm run storybook` - Storybookサーバー起動
 
-- **ユニットテスト**: クライアント/サーバー分離構成のVitest
-  - クライアントテスト: `*.svelte.{test,spec}.{js,ts}` (jsdom環境)
-  - サーバーテスト: `*.{test,spec}.{js,ts}` (node環境)
-- **E2Eテスト**: 本番ビルドテスト用Playwright
-- **コンポーネントテスト**: addon-vitest統合Storybook
-  - play 関数を使用し、コンポーネントが期待通りの動作をすることを検証してください
+### テスト構成
 
-#### テスト実行コマンド
+- **ユニット**: Vitest（クライアント: jsdom、サーバー: node）
+- **E2E**: Playwright（本番ビルドテスト）
+- **コンポーネント**: Storybook + addon-vitest（play関数使用）
 
-- `npm run test` - **🚨 全テスト実行（コード変更時は必須）**
-- `npm run test:unit` - ユニットテストのみ実行（Vitest）
-- `npm run test:e2e` - E2Eテストのみ実行（Playwright）
-- `npm run storybook` - Storybookコンポーネントテスト用サーバー起動
+### E2Eデータベース管理
 
-**注意**: `npm run test`は`npm run lint && npm run check && npm run test:unit -- --run && npm run test:e2e`を実行し、リント、型チェック、ユニットテスト、E2Eテストを順次実行します。
+**自動管理**:
 
-**💡 開発ワークフロー**:
+- テストDB: `apps_script_hub_test_db`（本番DBと分離）
+- データクリア: `scripts/clear-test-data.js`（テスト前自動実行）
+- スキーマ作成: `scripts/setup-test-db.js`
 
-1. **コード修正・実装**
-2. **`npm run test`を実行**
-3. **🔴 エラーがある場合は必ず修正**（修正内容と関係なくても）
-   - lintエラー → コードフォーマットやESLintルール違反を修正
-   - 型エラー → TypeScript型定義を修正
-   - テストエラー → テストコードまたは実装を修正
-4. **全てのテストがパスするまで手順2-3を繰り返す**
-5. **🟢 全てのテストがパスしたら作業完了**
-
-**⚠️ 警告**: エラーが残っている状態で作業を終了することは絶対に禁止されています。
-
-#### E2Eテストのデータベース管理
-
-E2Eテストでは専用のテストデータベースを使用し、テスト間のデータ競合を防ぐため自動的にデータクリアが実行されます：
-
-- **テストデータベース**: `apps_script_hub_test_db`（本番DBとは分離）
-- **データクリア**: 各テスト実行前に`scripts/clear-test-data.js`が自動実行
-- **スキーマセットアップ**: `scripts/setup-test-db.js`でテスト用スキーマを自動作成
-
-##### データベーススキーマ変更時の重要な注意事項
-
-**新しいテーブルを追加した場合、必ずテストデータクリア機能を更新してください：**
-
-1. `src/lib/server/db/schema.ts`に新しいテーブルを追加
-2. `scripts/clear-test-data.js`の`clearTestData()`関数に新しいテーブルのDELETE文を追加
+**⚠️ スキーマ変更時の必須作業**:
+新テーブル追加時は`scripts/clear-test-data.js`のDELETE文も追加（外部キー制約順序に注意）
 
 ```javascript
-// 例：categoryテーブルを追加した場合
+// 例：categoryテーブル追加時
 await db.execute(sql`DELETE FROM "category"`);
-await db.execute(sql`DELETE FROM "library"`); // 既存テーブルも保持
+await db.execute(sql`DELETE FROM "library"`); // 既存も保持
 ```
-
-**重要**: 外部キー制約がある場合は、子テーブルから先に削除する順序にしてください。
-
-この更新を忘れるとE2Eテストでデータ重複エラーが発生し、テストが不安定になります。
-
-### 環境変数管理
-
-- **開発環境**: `.env`（チーム共有設定、Docker PostgreSQL）
-- **新規セットアップ**: `.env.example`を`.env`にコピー
-
-### ビルド構成
-
-- Viteベースビルドシステム
-- SvelteでのMarkdownサポート用MDSvex（マークダウン処理）
-- 厳密チェック付きTypeScript
-- コード品質用ESLint + Prettier
 
 ## 🔢 マジックナンバー・定数管理
 
-### 必須ルール: 定数化とオブジェクトリテラル
+**🚨 必須ルール**: 全てのマジックナンバー・文字列リテラル・設定値を定数化
 
-**🚨 重要**: マジックナンバー、文字列リテラル、設定値は必ず定数化してください。
-
-#### 定数ファイルの配置
-
-- **場所**: `/src/lib/constants/` ディレクトリ
-- **命名**: 機能別にファイルを分割（例: `library-status.ts`, `pagination.ts`, `ui-config.ts`）
-- **フォーマット**: オブジェクトリテラルを使用したconst assertionパターン
-
-#### 実装パターン
+### 実装パターン
 
 ```typescript
-// ✅ 正しい例: src/lib/constants/example.ts
+// src/lib/constants/example.ts
 export const EXAMPLE_CONFIG = {
   MAX_ITEMS: 50,
-  DEFAULT_PAGE: 1,
   STATUS_ACTIVE: 'active',
   STATUS_INACTIVE: 'inactive',
 } as const;
 
 export type ExampleStatus = (typeof EXAMPLE_CONFIG)[keyof typeof EXAMPLE_CONFIG];
 
-// ✅ 表示テキストも定数化
 export const EXAMPLE_MESSAGES = {
   [EXAMPLE_CONFIG.STATUS_ACTIVE]: 'アクティブ',
   [EXAMPLE_CONFIG.STATUS_INACTIVE]: '非アクティブ',
 } as const;
 ```
 
-#### 対象となるマジックナンバー・文字列
+### 対象
 
-1. **ステータス値**: `'pending'`, `'published'`, `'rejected'`
-2. **数値設定**: ページネーション数、タイムアウト値、制限値
-3. **UI設定**: CSSクラス名の組み合わせ、カラーコード
-4. **メッセージ**: エラーメッセージ、確認ダイアログのテキスト
-5. **設定値**: API エンドポイント、デフォルト値
+1. ステータス値（`'pending'`, `'published'`, `'rejected'`）
+2. 数値設定（ページネーション、タイムアウト、制限値）
+3. UI設定（CSSクラス、カラーコード）
+4. メッセージ（エラー、確認ダイアログ）
+5. 設定値（APIエンドポイント、デフォルト値）
 
-#### 使用時のルール
+### 使用ルール
 
-- ✅ `LIBRARY_STATUS.PENDING` を使用
-- ❌ `'pending'` を直接使用
-- ✅ `CONFIG.MAX_ITEMS` を使用  
-- ❌ `50` を直接使用
+- ✅ `LIBRARY_STATUS.PENDING`
+- ❌ `'pending'`
+- ✅ `CONFIG.MAX_ITEMS`
+- ❌ `50`
 
-#### 型安全性の確保
+## 🎭 Playwright MCP使用ルール
 
-```typescript
-// ✅ 型も併せて export
-export const STATUS = { ACTIVE: 'active', INACTIVE: 'inactive' } as const;
-export type Status = (typeof STATUS)[keyof typeof STATUS];
+### 絶対禁止
 
-// ✅ 関数の引数や戻り値で型を使用
-function updateStatus(newStatus: Status) { /* ... */ }
-```
+1. **コード実行禁止**: Python、JavaScript、Bash等でのブラウザ操作
+2. **直接呼び出しのみ**: MCPツール（browser_navigate、browser_screenshot等）のみ使用
+3. **エラー時即報告**: 回避策禁止、エラーメッセージをそのまま伝達
 
-**💡 メリット:**
-- 型安全性の向上
-- 保守性の向上（値変更時は1箇所だけ修正）
-- 一貫性の確保
-- IDEの補完機能が活用可能
-- リファクタリングの容易性
+### 環境設定
 
-## Playwright MCP使用ルール
-
-### 絶対的な禁止事項
-
-1. **いかなる形式のコード実行も禁止**
-
-   - Python、JavaScript、Bash等でのブラウザ操作
-   - MCPツールを調査するためのコード実行
-   - subprocessやコマンド実行によるアプローチ
-
-2. **利用可能なのはMCPツールの直接呼び出しのみ**
-
-   - playwright:browser_navigate
-   - playwright:browser_screenshot
-   - 他のPlaywright MCPツール
-
-3. **エラー時は即座に報告**
-   - 回避策を探さない
-   - 代替手段を実行しない
-   - エラーメッセージをそのまま伝える
+- **開発**: `.env`（Docker PostgreSQL設定）
+- **新規**: `.env.example`を`.env`にコピー
