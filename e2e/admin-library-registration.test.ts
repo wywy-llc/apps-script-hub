@@ -175,25 +175,6 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // デバッグ用：フォーム送信後の状態を確認
     await page.waitForLoadState('networkidle');
 
-    // ページのHTMLを確認（デバッグ用）
-    // const pageContent = await page.content();
-
-    // エラーメッセージ要素を詳細に検索（デバッグ用）
-    // const allTexts = await page.locator('*').allTextContents();
-    // const errorTexts = allTexts.filter(
-    //   text =>
-    //     text.includes('既に登録') ||
-    //     text.includes('エラー') ||
-    //     text.includes('失敗')
-    // );
-
-    // 特定のエラーメッセージをチェック（デバッグ用）
-    // const hasScriptIdError = await page
-    //   .locator('text=このGASスクリプトIDは既に登録されています。')
-    //   .isVisible();
-    // const hasRepoError = await page
-    //   .locator('text=このリポジトリは既に登録されています。')
-    //   .isVisible();
 
     // フォームのsubmitMessage要素を確認
     const submitMessage = await page

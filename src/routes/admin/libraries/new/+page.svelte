@@ -27,37 +27,12 @@
     }
   });
 
-  // バリデーション関数
-  // function validateForm(formData: FormData): string | null {
-  //   const scriptId = formData.get('scriptId')?.toString();
-  //   const repoUrl = formData.get('repoUrl')?.toString();
-
-  //   if (!scriptId?.trim()) {
-  //     return 'GAS スクリプトIDを入力してください。';
-  //   }
-
-  //   if (!repoUrl?.trim()) {
-  //     return 'GitHub リポジトリURLを入力してください。';
-  //   }
-
-  //   // GitHub リポジトリURL形式の検証
-  //   const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
-  //   if (!githubRepoPattern.test(repoUrl)) {
-  //     return 'GitHub リポジトリURLの形式が正しくありません。「owner/repo」の形式で入力してください。';
-  //   }
-
-  //   return null;
-  // }
 
   function handleCancel() {
     // ライブラリ一覧ページに戻る
     goto('/admin/libraries');
   }
 
-  // function handleSignOut() {
-  //   // サインアウト処理
-  //   console.log('サインアウト');
-  // }
 </script>
 
 <svelte:head>
