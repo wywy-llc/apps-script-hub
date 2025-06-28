@@ -6,15 +6,19 @@ declare global {
       session: import('$lib/server/auth').SessionValidationResult['session'];
     }
   }
-}
 
-// 環境変数の型定義
-interface ImportMetaEnv {
-  readonly GITHUB_TOKEN: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  namespace NodeJS {
+    interface ProcessEnv {
+      DATABASE_URL: string;
+      POSTGRES_USER: string;
+      POSTGRES_PASSWORD: string;
+      POSTGRES_DB: string;
+      POSTGRES_TEST_DB: string;
+      DATABASE_TEST_URL: string;
+      NODE_ENV: string;
+      GITHUB_TOKEN: string;
+    }
+  }
 }
 
 export {};

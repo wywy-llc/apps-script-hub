@@ -22,10 +22,11 @@ export class FetchGithubRepoService {
       'User-Agent': 'app-script-hub',
     };
 
-    // GitHub API トークンが必須（事前チェックで検証済み想定）
+    // GitHub API トークンが必須
+    if (!GITHUB_TOKEN) {
+      throw new Error('GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。');
+    }
     headers['Authorization'] = `token ${GITHUB_TOKEN}`;
-
-    console.log(`GITHUB_TOKEN: ${GITHUB_TOKEN}`);
 
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}`,
@@ -75,7 +76,10 @@ export class FetchGithubReadmeService {
         'User-Agent': 'app-script-hub',
       };
 
-      // GitHub API トークンが必須（事前チェックで検証済み想定）
+      // GitHub API トークンが必須
+      if (!GITHUB_TOKEN) {
+        throw new Error('GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。');
+      }
       headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 
       const response = await fetch(
