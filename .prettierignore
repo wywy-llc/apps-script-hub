@@ -1,0 +1,17 @@
+# Generated files
+src/lib/paraglide/
+
+# Configuration files
+.claude/
+CLAUDE.md
+
+# Build outputs
+build/
+dist/
+.svelte-kit/
+
+# Dependencies
+node_modules/
+
+# Storybook
+storybook-static/
