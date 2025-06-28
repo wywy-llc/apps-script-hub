@@ -93,7 +93,11 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">
-  <AdminHeader {user} />
+  <AdminHeader
+    user={user && 'name' in user
+      ? { name: user.name, email: user.email, image: user.picture || undefined }
+      : { name: '', email: '', image: '' }}
+  />
   <main class="flex-1">
     {@render children()}
   </main>

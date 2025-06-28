@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "test:unit": "vitest",
-    "test": "npm run test:unit -- --run && npm run test:e2e",
+    "test": "npm run lint && npm run check && npm run test:unit -- --run && npm run test:e2e",
     "test:e2e": "node scripts/run-e2e-tests.js",
     "test:e2e:setup": "node scripts/setup-test-db.js",
     "test:e2e:cleanup": "node scripts/cleanup-test-db.js",

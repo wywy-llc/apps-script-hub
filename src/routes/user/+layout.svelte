@@ -15,7 +15,16 @@
 
 <div class="flex min-h-screen flex-col">
   {#if isLoggedIn}
-    <UserHeader {user} showAdminLink={false} />
+    <UserHeader
+      user={user && 'name' in user && 'email' in user && 'picture' in user
+        ? {
+            name: String(user.name),
+            email: String(user.email),
+            image: typeof user.picture === 'string' ? user.picture : undefined,
+          }
+        : { name: '', email: '', image: '' }}
+      showAdminLink={false}
+    />
   {:else}
     <Header />
   {/if}
