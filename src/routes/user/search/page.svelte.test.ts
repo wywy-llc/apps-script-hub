@@ -11,7 +11,7 @@ describe('SearchPage', () => {
     totalResults: 0,
     searchQuery: '',
     currentPage: 1,
-    itemsPerPage: 10
+    itemsPerPage: 10,
   };
 
   // 基本的なレンダリングテスト

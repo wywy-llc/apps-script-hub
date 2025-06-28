@@ -1,19 +1,44 @@
 <script lang="ts">
+  import { enhance } from '$app/forms';
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-  import type { PageData } from './$types';
+  import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
 
   interface Props {
     data: PageData;
+    form?: ActionData;
   }
 
-  let { data }: Props = $props();
-  let library = data.library;
+  let { data, form }: Props = $props();
+  let library = $state(data.library);
 
   let isScrapingInProgress = $state(false);
   let scrapingMessage = $state('');
+  let isStatusUpdateInProgress = $state(false);
+  let statusMessage = $state('');
+
+  // アクションの結果を処理
+  $effect(() => {
+    if (form?.success) {
+      statusMessage = form.message;
+      // ライブラリのステータスを更新
+      if (form.newStatus && ['pending', 'published', 'rejected'].includes(form.newStatus)) {
+        library = { ...library, status: form.newStatus as 'pending' | 'published' | 'rejected' };
+      }
+      // 3秒後にメッセージを消去
+      setTimeout(() => {
+        statusMessage = '';
+      }, 3000);
+    } else if (form?.error) {
+      statusMessage = form.error;
+      // エラーメッセージは5秒後に消去
+      setTimeout(() => {
+        statusMessage = '';
+      }, 5000);
+    }
+  });
 
   function handleScraping() {
     if (isScrapingInProgress) return;
@@ -50,12 +75,26 @@
       });
   }
 
-  function handlePublish() {
-    if (confirm('このライブラリを公開しますか？')) {
-      library.status = 'published';
-      // 実際の実装では API にPATCHリクエストを送信
-      console.log('ライブラリを公開:', library.id);
-    }
+  /**
+   * ステータス更新アクションのハンドラー
+   */
+  function createStatusUpdateHandler(newStatus: 'published' | 'rejected' | 'pending') {
+    return () => {
+      const confirmMessages = {
+        published: 'このライブラリを承認して公開しますか？',
+        rejected: 'このライブラリを拒否しますか？',
+        pending: 'このライブラリを承認待ちに戻しますか？',
+      };
+
+      if (confirm(confirmMessages[newStatus])) {
+        isStatusUpdateInProgress = true;
+        // フォームを送信
+        const form = document.getElementById(`status-form-${newStatus}`) as HTMLFormElement;
+        if (form) {
+          form.requestSubmit();
+        }
+      }
+    };
   }
 
   function handleEdit() {
@@ -123,13 +162,57 @@
         >
           編集
         </button>
-        {#if library.status !== 'published'}
+        <!-- ステータス更新ボタン -->
+        {#if library.status === 'pending'}
           <button
             type="button"
-            onclick={handlePublish}
-            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+            onclick={createStatusUpdateHandler('published')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            公開する
+            承認・公開
+          </button>
+          <button
+            type="button"
+            onclick={createStatusUpdateHandler('rejected')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            拒否
+          </button>
+        {:else if library.status === 'published'}
+          <button
+            type="button"
+            onclick={createStatusUpdateHandler('rejected')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            拒否に変更
+          </button>
+          <button
+            type="button"
+            onclick={createStatusUpdateHandler('pending')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            承認待ちに戻す
+          </button>
+        {:else if library.status === 'rejected'}
+          <button
+            type="button"
+            onclick={createStatusUpdateHandler('published')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            承認・公開
+          </button>
+          <button
+            type="button"
+            onclick={createStatusUpdateHandler('pending')}
+            disabled={isStatusUpdateInProgress}
+            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            承認待ちに戻す
           </button>
         {/if}
       </div>
@@ -139,6 +222,17 @@
     {#if scrapingMessage}
       <div class="mb-6 rounded-md bg-blue-50 p-4 text-blue-800">
         {scrapingMessage}
+      </div>
+    {/if}
+
+    <!-- ステータス更新メッセージ -->
+    {#if statusMessage}
+      <div
+        class="mb-6 rounded-md p-4 {form?.success
+          ? 'bg-green-50 text-green-800'
+          : 'bg-red-50 text-red-800'}"
+      >
+        {statusMessage}
       </div>
     {/if}
 
@@ -259,6 +353,55 @@
       </div>
     </div>
   </div>
+
+  <!-- 隠しフォーム群（ステータス更新用） -->
+  <form
+    id="status-form-published"
+    method="POST"
+    action="?/updateStatus"
+    use:enhance={() => {
+      isStatusUpdateInProgress = true;
+      return async ({ update }) => {
+        await update();
+        isStatusUpdateInProgress = false;
+      };
+    }}
+    style="display: none;"
+  >
+    <input type="hidden" name="status" value="published" />
+  </form>
+
+  <form
+    id="status-form-rejected"
+    method="POST"
+    action="?/updateStatus"
+    use:enhance={() => {
+      isStatusUpdateInProgress = true;
+      return async ({ update }) => {
+        await update();
+        isStatusUpdateInProgress = false;
+      };
+    }}
+    style="display: none;"
+  >
+    <input type="hidden" name="status" value="rejected" />
+  </form>
+
+  <form
+    id="status-form-pending"
+    method="POST"
+    action="?/updateStatus"
+    use:enhance={() => {
+      isStatusUpdateInProgress = true;
+      return async ({ update }) => {
+        await update();
+        isStatusUpdateInProgress = false;
+      };
+    }}
+    style="display: none;"
+  >
+    <input type="hidden" name="status" value="pending" />
+  </form>
 
   <!-- Footer -->
   <footer class="mt-12 border-t border-gray-200 bg-gray-50">
