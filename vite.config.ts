@@ -13,7 +13,6 @@ export default defineConfig(({ mode }) => {
       'process.env.POSTGRES_USER': JSON.stringify(env.POSTGRES_USER),
       'process.env.POSTGRES_PASSWORD': JSON.stringify(env.POSTGRES_PASSWORD),
       'process.env.POSTGRES_DB': JSON.stringify(env.POSTGRES_DB),
-      'process.env.GITHUB_TOKEN': JSON.stringify(env.GITHUB_TOKEN),
     },
     test: {
       projects: [

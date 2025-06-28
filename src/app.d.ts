@@ -8,4 +8,13 @@ declare global {
   }
 }
 
+// 環境変数の型定義
+interface ImportMetaEnv {
+  readonly GITHUB_TOKEN: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 export {};

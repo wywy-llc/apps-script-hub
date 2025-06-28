@@ -1,3 +1,5 @@
+import { GITHUB_TOKEN } from '$env/static/private';
+
 /**
  * GitHub API サービス
  * GitHubリポジトリ情報とREADMEファイルを取得する
@@ -21,7 +23,9 @@ export class FetchGithubRepoService {
     };
 
     // GitHub API トークンが必須（事前チェックで検証済み想定）
-    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+    headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+
+    console.log(`GITHUB_TOKEN: ${GITHUB_TOKEN}`);
 
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}`,
@@ -72,7 +76,7 @@ export class FetchGithubReadmeService {
       };
 
       // GitHub API トークンが必須（事前チェックで検証済み想定）
-      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/readme`,
