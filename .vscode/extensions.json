@@ -6,7 +6,6 @@
     "bradlc.vscode-tailwindcss",
     "ms-playwright.playwright",
     "vitest.explorer",
-    "ms-vscode.vscode-typescript-next",
     "christian-kohler.path-intellisense",
     "formulahendry.auto-rename-tag",
     "unifiedjs.vscode-mdx"
