@@ -12,8 +12,8 @@
 
   let { data }: { data: PageData } = $props();
   
-  // ユーザーダッシュボードコンポーネント
-  // ログイン済みユーザー向けのダッシュボードページ
+  // GASライブラリ検索ページコンポーネント
+  // ログイン済みユーザー向けのライブラリ検索ページ
 
   // 注目のライブラリサンプルデータ
   const featuredLibraries = [
@@ -87,22 +87,25 @@
 </script>
 
 <svelte:head>
-  <title>ダッシュボード - {app_title()}</title>
-  <meta name="description" content="ユーザーダッシュボード" />
+  <title>GASライブラリ検索 - {app_title()}</title>
+  <meta name="description" content="Google Apps Scriptライブラリの検索とダウンロード" />
 </svelte:head>
 
-<!-- ユーザーダッシュボードヘッダー -->
+<!-- GASライブラリ検索ヘッダー -->
 <section class="py-12 bg-gray-50">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center">
       <h1 class="text-3xl font-bold tracking-tight text-gray-900">
-        ダッシュボード
+        GASライブラリ検索
       </h1>
       {#if data.session?.user}
         <p class="mt-4 text-lg text-gray-600">
           ようこそ、{data.session.user.name || data.session.user.email}さん
         </p>
       {/if}
+      <p class="mt-6 max-w-2xl mx-auto text-base text-gray-600">
+        Google Apps Scriptのライブラリを検索して、あなたのプロジェクトに簡単に追加できます
+      </p>
     </div>
     <div class="mt-8 max-w-xl mx-auto">
       <SearchBox />
@@ -149,7 +152,7 @@
     </p>
     <div class="mt-8 flex justify-center space-x-4">
       <Button variant="primary" size="lg" href="/user/search">
-        ライブラリを検索
+        詳細検索
       </Button>
       <Button variant="outline" size="lg" href="/contribute">
         ライブラリを共有

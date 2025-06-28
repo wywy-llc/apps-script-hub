@@ -60,11 +60,11 @@
           </a>
         {/if}
         <a
-          href="/user"
+          href="/user/search"
           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
           on:click={closeDropdown}
         >
-          ダッシュボード
+          ライブラリ検索
         </a>
         <hr class="my-1 border-gray-200" />
         <button
