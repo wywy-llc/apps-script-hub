@@ -2,7 +2,7 @@ import { clearTestData } from '../scripts/clear-test-data.js';
 
 async function globalSetup() {
   console.log('🔧 E2Eテスト前のセットアップを開始...');
-  
+
   try {
     // テストデータをクリア
     await clearTestData();

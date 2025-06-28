@@ -67,7 +67,9 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await expect(page.locator('button:has-text("公開する")')).toBeVisible();
   });
 
-  test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
+  test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({
+    page,
+  }) => {
     await clearTestDataBeforeTest();
     const testData = {
       scriptId: '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',

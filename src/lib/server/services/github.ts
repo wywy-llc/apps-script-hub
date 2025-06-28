@@ -24,7 +24,9 @@ export class FetchGithubRepoService {
 
     // GitHub API トークンが必須
     if (!GITHUB_TOKEN) {
-      throw new Error('GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。');
+      throw new Error(
+        'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
+      );
     }
     headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 
@@ -78,7 +80,9 @@ export class FetchGithubReadmeService {
 
       // GitHub API トークンが必須
       if (!GITHUB_TOKEN) {
-        throw new Error('GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。');
+        throw new Error(
+          'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
+        );
       }
       headers['Authorization'] = `token ${GITHUB_TOKEN}`;
 

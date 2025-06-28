@@ -36,7 +36,7 @@ export class CreateLibraryService {
       .from(library)
       .where(eq(library.scriptId, params.scriptId))
       .limit(1);
-    
+
     if (existingScriptId.length > 0) {
       throw new Error('このGASスクリプトIDは既に登録されています。');
     }

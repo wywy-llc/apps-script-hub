@@ -240,6 +240,30 @@
               </dd>
             </div>
             <div>
+              <dt class="text-sm font-medium text-gray-500">GASメソッド</dt>
+              <dd class="mt-1 text-base text-blue-600 hover:underline">
+                <a
+                  href={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  https://script.google.com/macros/library/d/{library.scriptId}/0
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">GASプロジェクト</dt>
+              <dd class="mt-1 text-base text-blue-600 hover:underline">
+                <a
+                  href={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  https://script.google.com/u/1/home/projects/{library.scriptId}/edit
+                </a>
+              </dd>
+            </div>
+            <div>
               <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
               <dd class="mt-1 text-base">
                 {#if library.authorName}
@@ -305,7 +329,6 @@
                 </p>
               </div>
             {/if}
-
           </div>
         </div>
       </div>
