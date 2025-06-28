@@ -1,6 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+  import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
@@ -78,23 +79,13 @@
   /**
    * ステータス更新アクションのハンドラー
    */
-  function createStatusUpdateHandler(newStatus: 'published' | 'rejected' | 'pending') {
-    return () => {
-      const confirmMessages = {
-        published: 'このライブラリを承認して公開しますか？',
-        rejected: 'このライブラリを拒否しますか？',
-        pending: 'このライブラリを承認待ちに戻しますか？',
-      };
-
-      if (confirm(confirmMessages[newStatus])) {
-        isStatusUpdateInProgress = true;
-        // フォームを送信
-        const form = document.getElementById(`status-form-${newStatus}`) as HTMLFormElement;
-        if (form) {
-          form.requestSubmit();
-        }
-      }
-    };
+  function handleStatusUpdate(newStatus: 'published' | 'rejected' | 'pending') {
+    isStatusUpdateInProgress = true;
+    // フォームを送信
+    const form = document.getElementById(`status-form-${newStatus}`) as HTMLFormElement;
+    if (form) {
+      form.requestSubmit();
+    }
   }
 
   function handleEdit() {
@@ -151,62 +142,23 @@
           type="button"
           onclick={handleScraping}
           disabled={isScrapingInProgress}
-          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isScrapingInProgress ? 'スクレイピング中...' : 'スクレイピング実行'}
         </button>
         <button
           type="button"
           onclick={handleEdit}
-          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
         >
           編集
         </button>
         <!-- ステータス更新ボタン -->
-        {#if library.status === 'pending'}
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('published')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            承認・公開
-          </button>
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('rejected')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            拒否
-          </button>
-        {:else if library.status === 'published'}
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('rejected')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            拒否に変更
-          </button>
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('pending')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            承認待ちに戻す
-          </button>
-        {:else if library.status === 'rejected'}
-          <button
-            type="button"
-            onclick={createStatusUpdateHandler('published')}
-            disabled={isStatusUpdateInProgress}
-            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            承認・公開
-          </button>
-        {/if}
+        <StatusUpdateButtons
+          {library}
+          {isStatusUpdateInProgress}
+          onStatusUpdate={handleStatusUpdate}
+        />
       </div>
     </div>
 
