@@ -85,9 +85,6 @@
     },
   ];
 
-  // 検索結果またはすべてのライブラリ
-  let displayedLibraries: typeof allLibraries = [];
-
   // 検索クエリに基づいてライブラリをフィルタリング
   function filterLibraries(query: string) {
     if (!query) {
@@ -104,11 +101,13 @@
     );
   }
 
+  // searchQueryが変更されたときに自動的に再フィルタリング
+  $: displayedLibraries = filterLibraries(searchQuery);
+  $: totalResults = displayedLibraries.length;
+
   onMount(() => {
     // URLクエリパラメータから検索キーワードを取得
     searchQuery = page.url.searchParams.get('q') || '';
-    displayedLibraries = filterLibraries(searchQuery);
-    totalResults = displayedLibraries.length;
   });
 </script>
 
