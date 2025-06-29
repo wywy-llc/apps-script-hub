@@ -40,7 +40,7 @@ export {
  *   UserTestDataFactories,
  *   DatabaseLibraryDataFactory,
  *   DatabaseUserDataFactory
- * } from '@/e2e/factories';
+ * } from '@/test/factories';
  *
  * // テストデータ生成
  * const libraryData = LibraryTestDataFactories.default.build();

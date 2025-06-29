@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DatabaseLibraryDataFactory } from './factories/index.js';
+import { DatabaseLibraryDataFactory } from '../test/factories/index.js';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ承認機能', () => {
