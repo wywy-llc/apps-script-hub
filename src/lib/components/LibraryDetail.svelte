@@ -424,9 +424,6 @@
               </a>
             </dd>
 
-            <dt class="font-semibold text-gray-800">公開日</dt>
-            <dd class="mb-3">{formatDate(library.createdAt)}</dd>
-
             <dt class="font-semibold text-gray-800">スクリプト参考</dt>
             <dd class="mb-3">
               <a
@@ -494,10 +491,7 @@
               {/if}
             </dd>
 
-            <dt class="font-semibold text-gray-800">最終更新</dt>
-            <dd class="mb-3">{formatDate(library.updatedAt)}</dd>
-
-            <dt class="font-semibold text-gray-800">最終コミット</dt>
+            <dt class="font-semibold text-gray-800">最終更新日時</dt>
             <dd>{formatDate(library.lastCommitAt)}</dd>
           </dl>
         </div>
