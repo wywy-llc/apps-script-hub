@@ -22,19 +22,27 @@
     statusUpdateInProgress[libraryId] = true;
 
     try {
-      const response = await fetch(`/admin/libraries/${libraryId}`, {
+      // FormDataを使用してSvelteKitのアクションエンドポイントに送信
+      const formData = new FormData();
+      formData.append('status', newStatus);
+
+      const response = await fetch(`/admin/libraries/${libraryId}?/updateStatus`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
+        body: formData,
       });
 
       if (response.ok) {
-        // ライブラリのステータスを更新
-        libraries = libraries.map(lib =>
-          lib.id === libraryId ? { ...lib, status: newStatus } : lib
-        );
+        // レスポンスをJSONとして解析
+        const result = await response.json();
+
+        if (result.type === 'success') {
+          // ライブラリのステータスを更新
+          libraries = libraries.map(lib =>
+            lib.id === libraryId ? { ...lib, status: newStatus } : lib
+          );
+        } else {
+          console.error('ステータス更新に失敗しました:', result.data?.error || '不明なエラー');
+        }
       } else {
         console.error('ステータス更新に失敗しました');
       }
