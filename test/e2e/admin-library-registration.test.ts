@@ -46,20 +46,24 @@ test.describe('管理者画面 - ライブラリ登録', () => {
       testData.scriptId
     );
 
-    // GitHub リポジトリURLを確認
-    await expect(page.locator(`a[href="${testData.repositoryUrl}"]`)).toBeVisible();
+    // GitHub リポジトリURLを確認（特定のセクションのみ）
+    await expect(
+      page.locator(`dt:has-text("GitHub リポジトリURL") + dd a[href="${testData.repositoryUrl}"]`)
+    ).toBeVisible();
 
     // GitHub 作者（概要セクションの特定の要素を選択）
     await expect(page.locator('dt:has-text("GitHub 作者") + dd a')).toBeVisible();
     await expect(page.locator('dt:has-text("GitHub 作者") + dd a')).toHaveText(testData.authorName);
 
-    // ステータス（未公開）
-    await expect(page.locator('text=未公開')).toBeVisible();
+    // ステータス（未公開）（ヘッダー部分のみ）
+    await expect(
+      page.locator('h1:has-text("ライブラリ詳細") + div span.bg-gray-100:has-text("未公開")')
+    ).toBeVisible();
 
     // 管理者向けボタンの存在確認
     await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();
     await expect(page.locator('button:has-text("編集")')).toBeVisible();
-    await expect(page.locator('button:has-text("公開")')).toBeVisible();
+    await expect(page.locator('button.bg-green-600:has-text("公開")')).toBeVisible();
 
     // 7. README情報が表示されているか確認（GitHubから取得されたかの確認）
     await expect(page.locator('.markdown-body')).toBeVisible();
