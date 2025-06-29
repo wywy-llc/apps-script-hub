@@ -6,6 +6,8 @@ import { nanoid } from 'nanoid';
 import { FetchGithubLicenseService } from './fetch-github-license-service';
 import { FetchGithubReadmeService } from './fetch-github-readme-service';
 import { FetchGithubRepoService } from './fetch-github-repo-service';
+import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
+import { SaveLibrarySummaryService } from './save-library-summary-service.js';
 
 /**
  * ライブラリを新規作成するサービス
@@ -92,6 +94,18 @@ export class CreateLibraryService {
       description: repoInfo.description,
       starCount: repoInfo.starCount,
     });
+
+    // 新規ライブラリにAIによる要約を生成してDBに保存
+    try {
+      console.log(`新規ライブラリのAI要約を生成します: ${libraryId}`);
+      const summary = await GenerateLibrarySummaryService.call({
+        githubUrl: repositoryUrl,
+      });
+      await SaveLibrarySummaryService.call(libraryId, summary);
+    } catch (error) {
+      console.warn('新規ライブラリの要約生成に失敗しました:', error);
+      // エラーが発生してもライブラリ作成処理は続行
+    }
 
     return libraryId;
   }
