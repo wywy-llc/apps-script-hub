@@ -198,7 +198,7 @@
         </div>
       {/if}
 
-      <!-- ライブラリ概要セクション -->
+      <!-- AI による要約セクション -->
       {#if librarySummary}
         <div class="mt-8">
           <h2
