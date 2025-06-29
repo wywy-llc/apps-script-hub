@@ -4,6 +4,8 @@
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
+  import { getLocale } from '$lib/paraglide/runtime.js';
+  import type { Locale } from '$lib';
 
   interface LibrarySummary {
     id: string;
@@ -90,8 +92,8 @@
     onCopyScriptId,
   }: Props = $props();
 
-  // 言語設定（今回は日本語固定、将来的に切り替え可能にする）
-  let currentLanguage = $state<'ja' | 'en'>('ja');
+  // Paraglideの現在の言語設定を使用（自動的に更新される）
+  let currentLocale = $derived<Locale>(getLocale());
 
   // ライブラリメソッドを生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
@@ -210,13 +212,13 @@
               <!-- ライブラリ名 -->
               <div class="mb-6">
                 <h3 class="mb-2 text-xl font-bold text-gray-900">
-                  {currentLanguage === 'ja'
+                  {currentLocale === 'ja'
                     ? librarySummary.libraryNameJa || library.name
                     : librarySummary.libraryNameEn || library.name}
                 </h3>
                 {#if librarySummary.purposeJa || librarySummary.purposeEn}
                   <p class="leading-relaxed text-gray-600">
-                    {currentLanguage === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
+                    {currentLocale === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
                   </p>
                 {/if}
               </div>
@@ -226,7 +228,7 @@
                 <div class="mb-6">
                   <h4 class="mb-2 text-lg font-semibold text-gray-800">対象ユーザー</h4>
                   <p class="text-gray-600">
-                    {currentLanguage === 'ja'
+                    {currentLocale === 'ja'
                       ? librarySummary.targetUsersJa
                       : librarySummary.targetUsersEn}
                   </p>
@@ -234,11 +236,11 @@
               {/if}
 
               <!-- タグ -->
-              {#if (currentLanguage === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLanguage === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
+              {#if (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
                 <div class="mb-6">
                   <h4 class="mb-2 text-lg font-semibold text-gray-800">タグ</h4>
                   <div class="flex flex-wrap gap-2">
-                    {#each currentLanguage === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
+                    {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
                       <span
                         class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
                       >
@@ -254,7 +256,7 @@
                 <div class="mb-6">
                   <h4 class="mb-2 text-lg font-semibold text-gray-800">解決する課題</h4>
                   <p class="leading-relaxed text-gray-600">
-                    {currentLanguage === 'ja'
+                    {currentLocale === 'ja'
                       ? librarySummary.coreProblemJa
                       : librarySummary.coreProblemEn}
                   </p>
@@ -269,12 +271,10 @@
                     {#each librarySummary.mainBenefits as benefit, index (index)}
                       <div class="border-l-4 border-blue-500 pl-4">
                         <h5 class="mb-1 font-medium text-gray-900">
-                          {currentLanguage === 'ja' ? benefit.title.ja : benefit.title.en}
+                          {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
                         </h5>
                         <p class="text-sm leading-relaxed text-gray-600">
-                          {currentLanguage === 'ja'
-                            ? benefit.description.ja
-                            : benefit.description.en}
+                          {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
                         </p>
                       </div>
                     {/each}
@@ -282,28 +282,7 @@
                 </div>
               {/if}
 
-              <!-- 言語切り替えボタン -->
-              <div class="mt-6 border-t border-gray-200 pt-4">
-                <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-500">言語:</span>
-                  <button
-                    onclick={() => (currentLanguage = 'ja')}
-                    class="rounded px-3 py-1 text-sm {currentLanguage === 'ja'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
-                  >
-                    日本語
-                  </button>
-                  <button
-                    onclick={() => (currentLanguage = 'en')}
-                    class="rounded px-3 py-1 text-sm {currentLanguage === 'en'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
-                  >
-                    English
-                  </button>
-                </div>
-              </div>
+              <!-- 言語設定はヘッダーのLanguageSwitcherで管理 -->
             </div>
           </div>
         </div>
