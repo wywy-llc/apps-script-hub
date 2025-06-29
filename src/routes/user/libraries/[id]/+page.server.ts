@@ -1,4 +1,4 @@
-import { LIBRARY_STATUS } from '$lib/constants/library-status.js';
+import { LIBRARY_STATUS } from '$lib/constants/library-status';
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { error } from '@sveltejs/kit';
