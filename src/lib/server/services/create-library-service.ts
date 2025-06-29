@@ -3,11 +3,9 @@ import { library } from '$lib/server/db/schema.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
-import {
-  FetchGithubLicenseService,
-  FetchGithubReadmeService,
-  FetchGithubRepoService,
-} from './github.js';
+import { FetchGithubLicenseService } from './fetch-github-license-service';
+import { FetchGithubReadmeService } from './fetch-github-readme-service';
+import { FetchGithubRepoService } from './fetch-github-repo-service';
 
 /**
  * ライブラリを新規作成するサービス

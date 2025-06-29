@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { FetchGithubLicenseService } from './github.js';
+import { FetchGithubLicenseService } from './fetch-github-license-service';
 
 /**
  * GitHub リポジトリ情報を再取得するサービス
