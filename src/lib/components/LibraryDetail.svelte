@@ -378,6 +378,27 @@
               </svg>
             </button>
           </div>
+
+          <!-- ライセンス情報 -->
+          <div class="mt-4 border-t border-gray-200 pt-4">
+            <dt class="mb-1 text-sm font-medium text-gray-600">ライセンス</dt>
+            <dd class="text-sm">
+              {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
+                <a
+                  href={library.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:text-blue-900 hover:underline"
+                >
+                  {library.licenseType || 'ライセンス情報'}
+                </a>
+              {:else}
+                <span class="text-gray-700">
+                  {library.licenseType || '不明'}
+                </span>
+              {/if}
+            </dd>
+          </div>
         </div>
 
         <!-- Aboutカード -->

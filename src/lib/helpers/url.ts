@@ -17,7 +17,7 @@
  * @returns 短縮されたURL
  * @throws エラー: maxLengthが4未満の場合
  */
-export function truncateUrl(url: string, maxLength: number = 30): string {
+export function truncateUrl(url: string, maxLength: number = 25): string {
   // 入力値の検証
   if (typeof url !== 'string') {
     throw new Error('URLは文字列である必要があります');
