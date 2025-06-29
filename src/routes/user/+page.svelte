@@ -41,7 +41,7 @@
 
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {#each data.featuredLibraries as library (library.id)}
-        <LibraryCard {library} />
+        <LibraryCard {library} librarySummary={library.librarySummary} />
       {/each}
     </div>
 

@@ -1,11 +1,20 @@
 <script lang="ts">
   import { last_updated } from '$lib/paraglide/messages.js';
-  // ライブラリ情報を表示するカードコンポーネント
-  // 検索結果やライブラリ一覧で使用される
-
+  import { getLocale } from '$lib/paraglide/runtime.js';
+  // cspell:ignore paraglide
+  import type { Locale } from '$lib';
   import type { Library } from '$lib/server/db/schema.js';
+  import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
-  export let library: Library;
+  interface Props {
+    library: Library;
+    librarySummary?: LibrarySummaryRecord | null;
+  }
+
+  let { library, librarySummary }: Props = $props();
+
+  // Paraglide の現在の言語設定を使用（自動的に更新される） // cspell:ignore Paraglide
+  let currentLocale = $derived<Locale>(getLocale());
 
   // 数値をフォーマットする関数
   function formatNumber(num: number): string {
@@ -27,14 +36,56 @@
 >
   <div class="flex-grow">
     <h3 class="text-xl font-semibold text-blue-600 hover:underline">
-      <a href="/user/libraries/{library.id}">{library.name}</a>
+      <a href="/user/libraries/{library.id}">
+        {librarySummary
+          ? currentLocale === 'ja'
+            ? librarySummary.libraryNameJa || library.name
+            : librarySummary.libraryNameEn || library.name
+          : library.name}
+      </a>
     </h3>
     <p class="mt-2 text-sm text-gray-600">
-      {library.description}
+      {librarySummary
+        ? currentLocale === 'ja'
+          ? librarySummary.purposeJa || library.description
+          : librarySummary.purposeEn || library.description
+        : library.description}
     </p>
+
+    <!-- AI要約 - 主な特徴を表示 -->
+    {#if librarySummary?.mainBenefits && librarySummary.mainBenefits.length > 0}
+      <div class="mt-3">
+        <div class="space-y-2">
+          {#each librarySummary.mainBenefits.slice(0, 2) as benefit, index (index)}
+            <div class="text-xs text-gray-500">
+              <span class="font-medium">
+                {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
+              </span>
+              {#if benefit.description}
+                : {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- タグ -->
+    {#if librarySummary && (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
+      <div class="mt-3">
+        <div class="flex flex-wrap gap-1">
+          {#each (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).slice(0, 3) as tag, index (index)}
+            <span
+              class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+            >
+              {tag}
+            </span>
+          {/each}
+        </div>
+      </div>
+    {/if}
   </div>
   <div class="mt-4">
-    <!-- タグ機能は後で実装予定 -->
     <div class="mt-4 space-y-2">
       <div class="flex items-center text-xs text-gray-500">
         <svg
@@ -56,17 +107,21 @@
         >
       </div>
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>{last_updated()}: {new Date(library.updatedAt).toLocaleDateString('ja-JP')}</span>
+        <span>
+          {last_updated()}: {currentLocale === 'ja'
+            ? new Date(library.updatedAt).toLocaleDateString('ja-JP')
+            : new Date(library.updatedAt).toLocaleDateString('en-US')}
+        </span>
         <div class="flex items-center space-x-3">
           <div class="flex items-center space-x-1">
             <svg
-              class="h-3 w-3"
+              class="h-3 w-3 text-yellow-400"
               fill="currentColor"
               viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.049 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z"
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
               ></path>
             </svg>
             <span>{formatNumber(library.starCount || 0)}</span>
