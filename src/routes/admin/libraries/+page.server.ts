@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
-import { GASLibraryScraper } from '$lib/server/services/gas-library-scraper.js';
+import { BulkGASLibrarySearchService } from '$lib/server/services/bulk-gas-library-search-service.js';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load = (async () => {
@@ -58,7 +58,7 @@ export const actions: Actions = {
       };
 
       // GASタグによる一括スクレイピング実行
-      const result = await GASLibraryScraper.bulkScrapeByTags(maxResults, duplicateChecker);
+      const result = await BulkGASLibrarySearchService.call(maxResults, duplicateChecker);
 
       // 成功したデータをデータベースに保存
       const insertedLibraries = [];

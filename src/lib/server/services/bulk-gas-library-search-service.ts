@@ -1,0 +1,114 @@
+import type { BulkScrapeResult, ScrapeResult, ScraperConfig } from '$lib/types/github-scraper.js';
+import { DEFAULT_SCRAPER_CONFIG } from '$lib/server/constants/scraper-config.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import { GASLibraryScraper } from './gas-library-scraper.js';
+
+/**
+ * GASライブラリ一括検索サービス
+ * GitHubタグによる検索機能とライブラリの一括スクレイピングを提供
+ *
+ * 使用例:
+ * const result = await BulkGASLibrarySearchService.call(10, duplicateChecker);
+ */
+export class BulkGASLibrarySearchService {
+  /**
+   * GASタグでリポジトリを検索し、一括でスクレイピング
+   *
+   * @param maxResults - 検索する最大リポジトリ数（デフォルト: 10）
+   * @param duplicateChecker - 重複チェック関数（省略可）
+   * @param config - スクレイパー設定（省略時はデフォルト設定を使用）
+   * @returns 一括スクレイピング結果
+   */
+  public static async call(
+    maxResults: number = 10,
+    duplicateChecker?: (scriptId: string) => Promise<boolean>,
+    config: ScraperConfig = DEFAULT_SCRAPER_CONFIG
+  ): Promise<BulkScrapeResult> {
+    const results: ScrapeResult[] = [];
+    let duplicateCount = 0;
+
+    try {
+      // GASタグでリポジトリを検索
+      const searchResult = await GitHubApiUtils.searchRepositoriesByTags(config, maxResults);
+
+      if (!searchResult.success) {
+        return {
+          success: false,
+          results: [
+            {
+              success: false,
+              error: searchResult.error || 'GitHub検索に失敗しました',
+            },
+          ],
+          total: 0,
+          successCount: 0,
+          errorCount: 1,
+          duplicateCount: 0,
+        };
+      }
+
+      if (config.verbose) {
+        console.log(
+          `GitHub検索結果: ${searchResult.totalFound}件中${searchResult.processedCount}件を処理`
+        );
+      }
+
+      // 各リポジトリを逐次処理
+      for (const repo of searchResult.repositories) {
+        try {
+          const result = await GASLibraryScraper.call(repo.html_url);
+
+          // 重複チェック
+          if (result.success && result.data && duplicateChecker) {
+            const isDuplicate = await duplicateChecker(result.data.scriptId);
+            if (isDuplicate) {
+              duplicateCount++;
+              results.push({
+                success: false,
+                error: `重複: スクリプトID ${result.data.scriptId} は既に存在します (${repo.name})`,
+              });
+              continue;
+            }
+          }
+
+          results.push(result);
+
+          // GitHub API制限対策: 各リクエスト間に待機
+          await new Promise(resolve => setTimeout(resolve, config.rateLimit.delayBetweenRequests));
+        } catch (error) {
+          results.push({
+            success: false,
+            error: `${repo.name}: ${error instanceof Error ? error.message : 'スクレイピングに失敗しました'}`,
+          });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const errorCount = results.filter(r => !r.success).length;
+
+      return {
+        success: successCount > 0,
+        results,
+        total: searchResult.processedCount,
+        successCount,
+        errorCount,
+        duplicateCount,
+      };
+    } catch (error) {
+      console.error('一括スクレイピングエラー:', error);
+      return {
+        success: false,
+        results: [
+          {
+            success: false,
+            error: error instanceof Error ? error.message : '一括スクレイピングに失敗しました',
+          },
+        ],
+        total: 0,
+        successCount: 0,
+        errorCount: 1,
+        duplicateCount: 0,
+      };
+    }
+  }
+}
