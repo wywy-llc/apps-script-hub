@@ -1,39 +1,11 @@
 <script lang="ts">
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import LibrarySummarySection from '$lib/components/LibrarySummarySection.svelte';
+  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
-  import { getLocale } from '$lib/paraglide/runtime.js';
-  // cspell:ignore paraglide
-  import type { Locale } from '$lib';
-
-  interface LibrarySummary {
-    id: string;
-    libraryId: string;
-    libraryNameJa: string | null;
-    libraryNameEn: string | null;
-    purposeJa: string | null;
-    purposeEn: string | null;
-    targetUsersJa: string | null;
-    targetUsersEn: string | null;
-    tagsJa: string[] | null;
-    tagsEn: string[] | null;
-    coreProblemJa: string | null;
-    coreProblemEn: string | null;
-    mainBenefits: Array<{
-      title: {
-        ja: string;
-        en: string;
-      };
-      description: {
-        ja: string;
-        en: string;
-      };
-    }> | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }
+  import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
   interface Library {
     id: string;
@@ -63,7 +35,7 @@
 
   interface Props {
     library: Library;
-    librarySummary?: LibrarySummary | null;
+    librarySummary?: LibrarySummaryRecord | null;
     isAdminMode?: boolean;
     form?: Form;
     onScraping?: () => void;
@@ -92,9 +64,6 @@
     displayCopyCount = library.copyCount || 0,
     onCopyScriptId,
   }: Props = $props();
-
-  // Paraglide の現在の言語設定を使用（自動的に更新される） // cspell:ignore Paraglide
-  let currentLocale = $derived<Locale>(getLocale());
 
   // ライブラリメソッドを生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
@@ -200,93 +169,7 @@
 
       <!-- AI による要約セクション -->
       {#if librarySummary}
-        <div class="mt-8">
-          <h2
-            class="mb-6 {isAdminMode
-              ? 'text-2xl font-bold'
-              : 'border-b pb-2 text-2xl font-semibold'}"
-          >
-            AI による要約
-          </h2>
-          <div class={isAdminMode ? 'overflow-hidden rounded-lg bg-white shadow-md' : ''}>
-            <div class={isAdminMode ? 'px-6 py-8' : ''}>
-              <!-- ライブラリ名 -->
-              <div class="mb-6">
-                <h3 class="mb-2 text-xl font-bold text-gray-900">
-                  {currentLocale === 'ja'
-                    ? librarySummary.libraryNameJa || library.name
-                    : librarySummary.libraryNameEn || library.name}
-                </h3>
-                {#if librarySummary.purposeJa || librarySummary.purposeEn}
-                  <p class="leading-relaxed text-gray-600">
-                    {currentLocale === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
-                  </p>
-                {/if}
-              </div>
-
-              <!-- 対象ユーザー -->
-              {#if librarySummary.targetUsersJa || librarySummary.targetUsersEn}
-                <div class="mb-6">
-                  <h4 class="mb-2 text-lg font-semibold text-gray-800">対象ユーザー</h4>
-                  <p class="text-gray-600">
-                    {currentLocale === 'ja'
-                      ? librarySummary.targetUsersJa
-                      : librarySummary.targetUsersEn}
-                  </p>
-                </div>
-              {/if}
-
-              <!-- タグ -->
-              {#if (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
-                <div class="mb-6">
-                  <h4 class="mb-2 text-lg font-semibold text-gray-800">タグ</h4>
-                  <div class="flex flex-wrap gap-2">
-                    {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
-                      <span
-                        class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
-                      >
-                        {tag}
-                      </span>
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-
-              <!-- 解決する課題 -->
-              {#if librarySummary.coreProblemJa || librarySummary.coreProblemEn}
-                <div class="mb-6">
-                  <h4 class="mb-2 text-lg font-semibold text-gray-800">解決する課題</h4>
-                  <p class="leading-relaxed text-gray-600">
-                    {currentLocale === 'ja'
-                      ? librarySummary.coreProblemJa
-                      : librarySummary.coreProblemEn}
-                  </p>
-                </div>
-              {/if}
-
-              <!-- 主な利点 -->
-              {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
-                <div class="mb-6">
-                  <h4 class="mb-3 text-lg font-semibold text-gray-800">主な特徴</h4>
-                  <div class="space-y-4">
-                    {#each librarySummary.mainBenefits as benefit, index (index)}
-                      <div class="border-l-4 border-blue-500 pl-4">
-                        <h5 class="mb-1 font-medium text-gray-900">
-                          {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
-                        </h5>
-                        <p class="text-sm leading-relaxed text-gray-600">
-                          {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
-                        </p>
-                      </div>
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-
-              <!-- 言語設定はヘッダーの LanguageSwitcher で管理 -->
-            </div>
-          </div>
-        </div>
+        <LibrarySummarySection {librarySummary} libraryName={library.name} {isAdminMode} />
       {/if}
 
       <!-- README セクション -->
