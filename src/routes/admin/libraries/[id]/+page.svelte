@@ -1,13 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-  import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
-  import {
-    LIBRARY_STATUS,
-    LIBRARY_STATUS_BADGE_CLASS,
-    LIBRARY_STATUS_TEXT,
-    type LibraryStatus,
-  } from '$lib/constants/library-status.js';
+  import LibraryDetail from '$lib/components/LibraryDetail.svelte';
+  import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-status.js';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
@@ -101,17 +95,6 @@
     // 編集ページに遷移
     window.location.href = `/admin/libraries/${library.id}/edit`;
   }
-
-  function getStatusBadge(status: string) {
-    return (
-      LIBRARY_STATUS_BADGE_CLASS[status as LibraryStatus] ||
-      'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'
-    );
-  }
-
-  function getStatusText(status: string) {
-    return LIBRARY_STATUS_TEXT[status as LibraryStatus] || '不明';
-  }
 </script>
 
 <svelte:head>
@@ -119,197 +102,19 @@
   <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能" />
 </svelte:head>
 
-<main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-  <div class="mx-auto max-w-3xl">
-    <div class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">ライブラリ詳細</h1>
-        <div class="mt-2 flex items-center space-x-3">
-          <p class="text-sm text-gray-500">{library.name}</p>
-          <span class={getStatusBadge(library.status)}>
-            {getStatusText(library.status)}
-          </span>
-        </div>
-      </div>
-      <div class="flex space-x-2">
-        <button
-          type="button"
-          onclick={handleScraping}
-          disabled={isScrapingInProgress}
-          class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isScrapingInProgress ? 'スクレイピング中...' : 'スクレイピング実行'}
-        </button>
-        <button
-          type="button"
-          onclick={handleEdit}
-          class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-        >
-          編集
-        </button>
-        <!-- ステータス更新ボタン -->
-        <StatusUpdateButtons
-          {library}
-          {isStatusUpdateInProgress}
-          onStatusUpdate={handleStatusUpdate}
-        />
-      </div>
-    </div>
-
-    <!-- スクレイピングメッセージ -->
-    {#if scrapingMessage}
-      <div class="mb-6 rounded-md bg-blue-50 p-4 text-blue-800">
-        {scrapingMessage}
-      </div>
-    {/if}
-
-    <!-- ステータス更新メッセージ -->
-    {#if statusMessage}
-      <div
-        class="mb-6 rounded-md p-4 {form?.success
-          ? 'bg-green-50 text-green-800'
-          : 'bg-red-50 text-red-800'}"
-      >
-        {statusMessage}
-      </div>
-    {/if}
-
-    <!-- Library Details -->
-    <h2 class="mb-6 text-2xl font-bold text-gray-900">概要</h2>
-    <div class="overflow-hidden rounded-lg bg-white shadow-md">
-      <div class="px-6 py-8">
-        <dl class="space-y-8">
-          <div>
-            <dt class="text-sm font-medium text-gray-500">ライブラリ名</dt>
-            <dd class="mt-1 text-lg font-semibold text-gray-900">
-              {library.name}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">GAS スクリプトID</dt>
-            <dd class="mt-1 font-mono text-base break-all text-gray-900">
-              {library.scriptId}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">GitHub リポジトリURL</dt>
-            <dd class="mt-1 text-base text-blue-600 hover:underline">
-              <a href={library.repositoryUrl} target="_blank" rel="noopener noreferrer">
-                {library.repositoryUrl}
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">GASメソッド</dt>
-            <dd class="mt-1 text-base text-blue-600 hover:underline">
-              <a
-                href={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`https://script.google.com/macros/library/d/${library.scriptId}/0`}
-              >
-                https://script.google.com/macros/library/d/{library.scriptId.slice(-8)}...
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">GASプロジェクト</dt>
-            <dd class="mt-1 text-base text-blue-600 hover:underline">
-              <a
-                href={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`https://script.google.com/u/1/home/projects/${library.scriptId}/edit`}
-              >
-                https://script.google.com/projects/{library.scriptId.slice(-8)}...
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
-            <dd class="mt-1 text-base">
-              {#if library.authorName}
-                <a
-                  href={library.authorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:underline"
-                >
-                  {library.authorName}
-                </a>
-              {:else}
-                <a
-                  href={library.authorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:underline"
-                >
-                  {library.authorUrl}
-                </a>
-              {/if}
-            </dd>
-          </div>
-          {#if library.description}
-            <div>
-              <dt class="text-sm font-medium text-gray-500">説明</dt>
-              <dd class="mt-1 text-base text-gray-900">
-                {library.description}
-              </dd>
-            </div>
-          {/if}
-          <div>
-            <dt class="text-sm font-medium text-gray-500">ライセンス</dt>
-            <dd class="mt-1 text-base">
-              {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
-                <a
-                  href={library.licenseUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:underline"
-                >
-                  {library.licenseType || 'ライセンス情報'}
-                </a>
-              {:else}
-                <span class="text-gray-900">
-                  {library.licenseType || '不明'}
-                </span>
-              {/if}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">作成日時</dt>
-            <dd class="mt-1 text-base text-gray-900">
-              {new Date(library.createdAt).toLocaleString('ja-JP')}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-gray-500">更新日時</dt>
-            <dd class="mt-1 text-base text-gray-900">
-              {new Date(library.updatedAt).toLocaleString('ja-JP')}
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-
-    <!-- Scraping Results -->
-    <div class="mt-12">
-      <h2 class="mb-6 text-2xl font-bold text-gray-900">詳細</h2>
-      <div class="overflow-hidden rounded-lg bg-white shadow-md">
-        <div class="px-6">
-          <!-- README Section -->
-          {#if library.readmeContent}
-            <MarkdownRenderer content={library.readmeContent} />
-          {:else}
-            <div class="py-8 text-center text-gray-500">
-              <p>README が見つかりませんでした。</p>
-              <p class="mt-2 text-sm">スクレイピングを実行してREADMEを取得してください。</p>
-            </div>
-          {/if}
-        </div>
-      </div>
-    </div>
-  </div>
+<main>
+  <LibraryDetail
+    {library}
+    isAdminMode={true}
+    form={form || undefined}
+    onScraping={handleScraping}
+    onEdit={handleEdit}
+    onStatusUpdate={handleStatusUpdate}
+    {isScrapingInProgress}
+    {scrapingMessage}
+    {isStatusUpdateInProgress}
+    {statusMessage}
+  />
 
   <!-- 隠しフォーム群（ステータス更新用） -->
   <form
