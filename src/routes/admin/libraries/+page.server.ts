@@ -1,9 +1,12 @@
 import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import {
+  BulkGASLibrarySearchService,
+  type LibrarySaveCallback,
+} from '$lib/server/services/bulk-gas-library-search-service.js';
 import { fail } from '@sveltejs/kit';
-import { BulkGASLibrarySearchService } from '$lib/server/services/bulk-gas-library-search-service.js';
-import type { PageServerLoad, Actions } from './$types';
+import { desc, eq } from 'drizzle-orm';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async () => {
   // ライブラリ一覧をデータベースから取得
@@ -89,49 +92,51 @@ export const actions: Actions = {
         return existing.length > 0;
       };
 
-      // GASタグによる一括スクレイピング実行（ページ範囲指定）
-      const result = await BulkGASLibrarySearchService.callWithPageRange(
+      // ライブラリ保存コールバック関数（ページごとにDB保存）
+      const saveCallback: LibrarySaveCallback = async libraryData => {
+        try {
+          const [inserted] = await db
+            .insert(library)
+            .values({
+              id: crypto.randomUUID(),
+              name: libraryData.name,
+              scriptId: libraryData.scriptId,
+              repositoryUrl: libraryData.repositoryUrl,
+              authorUrl: libraryData.authorUrl,
+              authorName: libraryData.authorName,
+              description: libraryData.description,
+              readmeContent: libraryData.readmeContent || '',
+              licenseType: libraryData.licenseType || 'unknown',
+              licenseUrl: libraryData.licenseUrl || 'unknown',
+              starCount: libraryData.starCount || 0,
+              status: 'pending',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .returning({ id: library.id });
+
+          return { success: true, id: inserted.id };
+        } catch (error) {
+          console.error('データベース挿入エラー:', error);
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : '不明なエラー',
+          };
+        }
+      };
+
+      // GASタグによる一括スクレイピング実行（ページごとにDB保存）
+      const result = await BulkGASLibrarySearchService.callWithPageRangeAndSave(
         startPage,
         endPage,
         perPage,
-        duplicateChecker
+        duplicateChecker,
+        saveCallback
       );
-
-      // 成功したデータをデータベースに保存
-      const insertedLibraries = [];
-      for (const scrapeResult of result.results) {
-        if (scrapeResult.success && scrapeResult.data) {
-          try {
-            const [inserted] = await db
-              .insert(library)
-              .values({
-                id: crypto.randomUUID(),
-                name: scrapeResult.data.name,
-                scriptId: scrapeResult.data.scriptId,
-                repositoryUrl: scrapeResult.data.repositoryUrl,
-                authorUrl: scrapeResult.data.authorUrl,
-                authorName: scrapeResult.data.authorName,
-                description: scrapeResult.data.description,
-                readmeContent: scrapeResult.data.readmeContent || '',
-                licenseType: scrapeResult.data.licenseType || 'unknown',
-                licenseUrl: scrapeResult.data.licenseUrl || 'unknown',
-                starCount: scrapeResult.data.starCount || 0,
-                status: 'pending',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              })
-              .returning({ id: library.id });
-
-            insertedLibraries.push(inserted);
-          } catch (error) {
-            console.error('データベース挿入エラー:', error);
-          }
-        }
-      }
 
       // 結果メッセージの生成
       const messages = [
-        `自動検索・処理完了: ${result.total}件のリポジトリ中 ${insertedLibraries.length}件を登録しました。`,
+        `自動検索・処理完了: ${result.total}件のリポジトリ中 ${result.successCount}件を登録しました。`,
       ];
 
       if (result.errorCount > 0) {
@@ -147,7 +152,7 @@ export const actions: Actions = {
         message: messages.join(' '),
         details: {
           total: result.total,
-          inserted: insertedLibraries.length,
+          inserted: result.successCount,
           errors: result.errorCount,
           duplicates: result.duplicateCount,
           results: result.results,
