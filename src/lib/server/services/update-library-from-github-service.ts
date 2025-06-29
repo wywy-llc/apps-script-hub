@@ -2,6 +2,8 @@ import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { FetchGithubLicenseService } from './fetch-github-license-service';
+import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
+import { SaveLibrarySummaryService } from './save-library-summary-service.js';
 
 /**
  * GitHub リポジトリ情報を再取得するサービス
@@ -71,5 +73,16 @@ export class UpdateLibraryFromGithubService {
         updatedAt: new Date(),
       })
       .where(eq(library.id, libraryId));
+
+    // AIによるライブラリ要約を生成してDBに保存
+    try {
+      const summary = await GenerateLibrarySummaryService.call({
+        githubUrl: repoData.html_url,
+      });
+      await SaveLibrarySummaryService.call(libraryId, summary);
+    } catch (error) {
+      console.warn('ライブラリ要約生成に失敗しました:', error);
+      // エラーが発生してもライブラリ更新処理は続行
+    }
   }
 }

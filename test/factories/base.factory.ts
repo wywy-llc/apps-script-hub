@@ -44,7 +44,7 @@ export const closeDbConnection = async (client: Client) => {
  */
 export const generateUniqueId = (prefix: string = 'id'): string => {
   const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substr(2, 9);
+  const randomSuffix = Math.random().toString(36).substring(2, 11);
   return `${prefix}_${timestamp}_${randomSuffix}`;
 };
 
