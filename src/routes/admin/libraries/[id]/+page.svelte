@@ -258,6 +258,25 @@
             </div>
           {/if}
           <div>
+            <dt class="text-sm font-medium text-gray-500">ライセンス</dt>
+            <dd class="mt-1 text-base">
+              {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
+                <a
+                  href={library.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                >
+                  {library.licenseType || 'ライセンス情報'}
+                </a>
+              {:else}
+                <span class="text-gray-900">
+                  {library.licenseType || '不明'}
+                </span>
+              {/if}
+            </dd>
+          </div>
+          <div>
             <dt class="text-sm font-medium text-gray-500">作成日時</dt>
             <dd class="mt-1 text-base text-gray-900">
               {new Date(library.createdAt).toLocaleString('ja-JP')}

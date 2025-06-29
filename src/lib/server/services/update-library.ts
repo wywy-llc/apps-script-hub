@@ -1,6 +1,7 @@
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
+import { FetchGithubLicenseService } from './github.js';
 
 /**
  * GitHub リポジトリ情報を再取得するサービス
@@ -51,6 +52,9 @@ export class UpdateLibraryFromGithubService {
       console.warn('README 取得エラー:', err);
     }
 
+    // ライセンス情報を取得
+    const licenseInfo = await FetchGithubLicenseService.call(owner, repo);
+
     // ライブラリを更新
     await db
       .update(library)
@@ -62,6 +66,8 @@ export class UpdateLibraryFromGithubService {
         repositoryUrl: repoData.html_url,
         readmeContent: readmeContent,
         starCount: repoData.stargazers_count || 0,
+        licenseType: licenseInfo.type,
+        licenseUrl: licenseInfo.url,
         updatedAt: new Date(),
       })
       .where(eq(library.id, libraryId));
