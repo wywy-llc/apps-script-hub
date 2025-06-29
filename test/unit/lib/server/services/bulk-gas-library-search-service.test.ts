@@ -334,7 +334,7 @@ describe('BulkGASLibrarySearchService', () => {
       expect(mockedGitHubApiUtils.searchRepositoriesByTags).toHaveBeenCalledWith(
         expect.objectContaining({
           gasTags: expect.arrayContaining(['google-apps-script', 'apps-script']),
-          verbose: false,
+          verbose: true, // DEFAULT_SCRAPER_CONFIGではverbose: trueが設定されている
         }),
         10 // デフォルトのmaxResults
       );

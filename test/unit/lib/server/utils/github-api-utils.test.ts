@@ -58,6 +58,7 @@ describe('GitHubApiUtils', () => {
             Accept: 'application/vnd.github+json',
             Authorization: expect.stringMatching(/^token ghp_/),
             'User-Agent': 'app-script-hub',
+            'X-GitHub-Api-Version': '2022-11-28',
           },
         }
       );
@@ -111,6 +112,7 @@ describe('GitHubApiUtils', () => {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       });
       expect(result).toBe(originalContent);
@@ -219,6 +221,7 @@ describe('GitHubApiUtils', () => {
             Accept: 'application/vnd.github+json',
             Authorization: expect.stringMatching(/^token ghp_/),
             'User-Agent': 'app-script-hub',
+            'X-GitHub-Api-Version': '2022-11-28',
           },
         }
       );
@@ -244,7 +247,7 @@ describe('GitHubApiUtils', () => {
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
       const expectedQuery =
-        'topic:google-apps-script OR topic:apps-script OR topic:gas-library language:javascript';
+        'google-apps-script OR apps-script OR gas-library in:topics language:javascript';
       const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
@@ -252,6 +255,7 @@ describe('GitHubApiUtils', () => {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       });
     });
@@ -276,6 +280,7 @@ describe('GitHubApiUtils', () => {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       });
     });
@@ -297,10 +302,28 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config);
 
+      expect(consoleSpy).toHaveBeenCalledWith('Original gasTags:', [
+        'google-apps-script',
+        'apps-script',
+      ]);
+      expect(consoleSpy).toHaveBeenCalledWith('Tags to use:', [
+        'google-apps-script',
+        'apps-script',
+      ]);
+      expect(consoleSpy).toHaveBeenCalledWith('Valid tags:', ['google-apps-script', 'apps-script']);
+      expect(consoleSpy).toHaveBeenCalledWith('Limited tags:', [
+        'google-apps-script',
+        'apps-script',
+      ]);
       expect(consoleSpy).toHaveBeenCalledWith(
         'GitHub Search Query:',
-        'topic:google-apps-script OR topic:apps-script language:javascript'
+        'google-apps-script OR apps-script in:topics language:javascript'
       );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'GitHub Search URL:',
+        expect.stringContaining('https://api.github.com/search/repositories?q=')
+      );
+      expect(consoleSpy).toHaveBeenCalledTimes(6);
 
       consoleSpy.mockRestore();
     });
@@ -320,7 +343,7 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'topic:google-apps-script OR topic:apps-script language:javascript';
+      const expectedQuery = 'google-apps-script OR apps-script in:topics language:javascript';
       const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
@@ -328,6 +351,7 @@ describe('GitHubApiUtils', () => {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       });
     });
@@ -347,7 +371,7 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'topic:google-apps-script OR topic:apps-script language:javascript';
+      const expectedQuery = 'google-apps-script OR apps-script in:topics language:javascript';
       const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
@@ -355,6 +379,7 @@ describe('GitHubApiUtils', () => {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       });
     });

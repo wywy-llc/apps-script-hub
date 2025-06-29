@@ -22,6 +22,7 @@ export class GitHubApiUtils {
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'app-script-hub',
+      'X-GitHub-Api-Version': '2022-11-28',
     };
 
     if (!GITHUB_TOKEN) {
@@ -87,14 +88,40 @@ export class GitHubApiUtils {
           ? config.gasTags
           : ['google-apps-script', 'apps-script'];
 
-      const searchQueries = tagsToUse.map(tag => `topic:${tag}`);
-      const query = `${searchQueries.join(' OR ')} language:javascript`;
+      // 各タグが有効かチェック
+      const validTags = tagsToUse.filter(tag => tag && tag.trim().length > 0);
+      if (validTags.length === 0) {
+        return {
+          success: false,
+          repositories: [],
+          totalFound: 0,
+          processedCount: 0,
+          error: '有効なGASタグが指定されていません',
+        };
+      }
+
+      // 最初の3つのタグのみを使用してクエリの長さを制限
+      const limitedTags = validTags.slice(0, 3);
+      // GitHub Search APIの正しいOR検索クエリ形式を使用
+      let query: string;
+      if (limitedTags.length === 1) {
+        // 単一タグの場合
+        query = `${limitedTags[0].trim()} in:topics language:javascript`;
+      } else {
+        // 複数タグの場合：OR演算子を使用
+        const tagTerms = limitedTags.map(tag => tag.trim()).join(' OR ');
+        query = `${tagTerms} in:topics language:javascript`;
+      }
 
       const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
         query
       )}&sort=stars&order=desc&per_page=${Math.min(maxResults, 100)}`;
 
       if (config.verbose) {
+        console.log('Original gasTags:', config.gasTags);
+        console.log('Tags to use:', tagsToUse);
+        console.log('Valid tags:', validTags);
+        console.log('Limited tags:', limitedTags);
         console.log('GitHub Search Query:', query);
         console.log('GitHub Search URL:', searchUrl);
       }
@@ -160,7 +187,7 @@ export class GitHubApiUtils {
   ): Promise<TagSearchResult> {
     try {
       // 最もシンプルなクエリを使用
-      const query = 'topic:google-apps-script language:javascript';
+      const query = 'google-apps-script in:topics language:javascript';
       const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
         query
       )}&sort=stars&order=desc&per_page=${Math.min(maxResults, 50)}`; // 件数も制限
