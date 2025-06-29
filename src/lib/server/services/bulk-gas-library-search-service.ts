@@ -1,4 +1,4 @@
-import { DEFAULT_SCRAPER_CONFIG } from '$lib/server/constants/scraper-config.js';
+import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import type {
   BulkScrapeResult,
