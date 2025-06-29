@@ -4,6 +4,16 @@ import { describe, expect, it, vi } from 'vitest';
 
 // 検索結果ページの最低限のテスト
 describe('SearchPage', () => {
+  const mockData = {
+    user: null,
+    session: null,
+    libraries: [],
+    totalResults: 0,
+    searchQuery: '',
+    currentPage: 1,
+    itemsPerPage: 10,
+  };
+
   // 基本的なレンダリングテスト
   it('検索ページが正常にレンダリングされる', async () => {
     // $app/stores をモック
@@ -18,8 +28,10 @@ describe('SearchPage', () => {
     }));
 
     // 動的インポートでコンポーネントを読み込み
-    const { default: SearchPage } = await import('./+page.svelte');
-    const { container } = render(SearchPage);
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
+    const { container } = render(SearchPage, { data: mockData });
 
     // 基本要素の確認（DOM存在確認）
     expect(container.querySelector('input[placeholder="GASライブラリを検索"]')).toBeTruthy();
@@ -40,8 +52,10 @@ describe('SearchPage', () => {
       }),
     }));
 
-    const { default: SearchPage } = await import('./+page.svelte');
-    const { container } = render(SearchPage);
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
+    const { container } = render(SearchPage, { data: mockData });
 
     // フォーム要素の確認
     const searchForm = container.querySelector('form');
@@ -64,8 +78,10 @@ describe('SearchPage', () => {
       }),
     }));
 
-    const { default: SearchPage } = await import('./+page.svelte');
-    const { container } = render(SearchPage);
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
+    const { container } = render(SearchPage, { data: mockData });
 
     // コンテナとフォームの存在確認
     expect(container.querySelector('.container')).toBeTruthy();

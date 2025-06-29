@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { convertRelativeToAbsolute, getReadmeBaseUrl } from '$lib/helpers/link-converter.js';
   import hljs from 'highlight.js/lib/core';
   import bash from 'highlight.js/lib/languages/bash';
   import javascript from 'highlight.js/lib/languages/javascript';
   import json from 'highlight.js/lib/languages/json';
   import plaintext from 'highlight.js/lib/languages/plaintext';
   import typescript from 'highlight.js/lib/languages/typescript';
-  import { marked } from 'marked';
+  import { marked, type Tokens } from 'marked';
 
   // マークダウンレンダリング共通コンポーネント
   // marked.js と highlight.js を使用した高機能なマークダウンレンダリング
@@ -16,9 +17,10 @@
   interface Props {
     content: string;
     class?: string;
+    repositoryUrl?: string;
   }
 
-  let { content, class: className = '' }: Props = $props();
+  let { content, class: className = '', repositoryUrl }: Props = $props();
 
   // highlight.jsの言語を登録
   hljs.registerLanguage('javascript', javascript);
@@ -27,10 +29,12 @@
   hljs.registerLanguage('bash', bash);
   hljs.registerLanguage('plaintext', plaintext);
 
-  // marked.jsの設定
-  marked.use({
-    renderer: {
-      code(token: { text: string; lang?: string }) {
+  // marked.jsの設定を動的に生成
+  function getMarkedRenderer() {
+    const baseUrl = repositoryUrl ? getReadmeBaseUrl(repositoryUrl) : '';
+
+    return {
+      code(token: Tokens.Code) {
         const code = token.text;
         const lang = token.lang || 'plaintext';
 
@@ -44,10 +48,14 @@
           return `<pre><code class="hljs">${code}</code></pre>`;
         }
       },
-    },
-    breaks: true,
-    gfm: true,
-  });
+      link(token: Tokens.Link) {
+        const href = repositoryUrl ? convertRelativeToAbsolute(token.href, baseUrl) : token.href;
+        const title = token.title ? ` title="${token.title}"` : '';
+        const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+        return `<a href="${href}"${title}${target}>${token.text}</a>`;
+      },
+    };
+  }
 
   /**
    * マークダウンコンテンツをHTMLに変換
@@ -55,6 +63,13 @@
    * @returns HTMLとしてレンダリングされた文字列
    */
   function renderMarkdown(content: string): string {
+    // marked.jsの設定を動的に適用
+    marked.use({
+      renderer: getMarkedRenderer(),
+      breaks: true,
+      gfm: true,
+    });
+
     return marked.parse(content) as string;
   }
 </script>

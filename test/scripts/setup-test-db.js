@@ -10,8 +10,8 @@ import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Client } from 'pg';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 const TEST_DB_NAME = process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db';
 const POSTGRES_CONFIG = {
@@ -93,7 +93,11 @@ async function setupTestDatabase() {
         "description" text NOT NULL,
         "readme_content" text NOT NULL,
         "star_count" integer DEFAULT 0 NOT NULL,
-        "status" text DEFAULT 'pending' NOT NULL,
+        "copy_count" integer DEFAULT 0 NOT NULL,
+        "license_type" text NOT NULL,
+        "license_url" text NOT NULL,
+        "last_commit_at" timestamp with time zone NOT NULL,
+        "status" text DEFAULT 'pending' NOT NULL CHECK ("status" IN ('pending', 'published')),
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL
       );

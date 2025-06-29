@@ -1,114 +1,20 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { onMount } from 'svelte';
+  import type { PageData } from './$types.js';
 
   // 検索結果ページコンポーネント
   // GASライブラリの検索結果を表示し、ページネーション機能を提供
 
-  let searchQuery = '';
-  let totalResults = 0;
-  let currentPage = 1;
-  const itemsPerPage = 10;
+  export let data: PageData;
+
+  $: ({ libraries, totalResults, searchQuery, currentPage, itemsPerPage } = data);
+
+  // 検索ボックス用のローカル値（将来の拡張用）
+  // let value = searchQuery;
 
   // 結果件数に基づいてページ数を動的に計算
   $: totalPages = Math.ceil(totalResults / itemsPerPage);
-
-  // 全ライブラリのモックデータ
-  const allLibraries = [
-    {
-      id: 1,
-      name: 'GasDateFormatter',
-      description:
-        'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマットするためのユーティリティライブラリ。タイムゾーンの扱いもサポート。',
-      tags: ['Date', 'Utility', 'Format'],
-      author: 'user-name',
-      lastUpdated: '3日前',
-      stars: 492,
-      downloads: 7300,
-    },
-    {
-      id: 2,
-      name: 'CalendarEventUtil',
-      description:
-        'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。繰り返しイベントの操作や、会議室の予約などを簡略化します。',
-      tags: ['Calendar', 'Date', 'Utility'],
-      author: 'developer-taro',
-      lastUpdated: '2週間前',
-      stars: 876,
-      downloads: 13200,
-    },
-    {
-      id: 3,
-      name: 'JapaneseDate',
-      description:
-        '日本の祝日判定や和暦（元号）の変換機能を提供します。内閣府の祝日CSVデータソースと連携可能です。',
-      tags: ['Date', 'Japan', 'Holiday'],
-      author: 'gas-master',
-      lastUpdated: '1ヶ月前',
-      stars: 325,
-      downloads: 4800,
-    },
-    {
-      id: 4,
-      name: 'GasLogger',
-      description:
-        'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
-      tags: ['Logging', 'Utility'],
-      author: 'gas-developer',
-      lastUpdated: '2025/05/28',
-      stars: 847,
-      downloads: 12500,
-    },
-    {
-      id: 5,
-      name: 'GasHtml',
-      description:
-        'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
-      tags: ['WebApp', 'HTML'],
-      author: 'html-master',
-      lastUpdated: '2025/04/15',
-      stars: 623,
-      downloads: 8900,
-    },
-    {
-      id: 6,
-      name: 'GasTest',
-      description:
-        'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
-      tags: ['Testing', 'Utility'],
-      author: 'test-ninja',
-      lastUpdated: '2025/03/30',
-      stars: 1205,
-      downloads: 15600,
-    },
-  ];
-
-  // 検索クエリに基づいてライブラリをフィルタリング
-  function filterLibraries(query: string) {
-    if (!query) {
-      return allLibraries;
-    }
-
-    const lowerQuery = query.toLowerCase();
-    return allLibraries.filter(
-      library =>
-        library.name.toLowerCase().includes(lowerQuery) ||
-        library.description.toLowerCase().includes(lowerQuery) ||
-        library.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-        library.author.toLowerCase().includes(lowerQuery)
-    );
-  }
-
-  // searchQueryが変更されたときに自動的に再フィルタリング
-  $: displayedLibraries = filterLibraries(searchQuery);
-  $: totalResults = displayedLibraries.length;
-
-  onMount(() => {
-    // URLクエリパラメータから検索キーワードを取得
-    searchQuery = page.url.searchParams.get('q') || '';
-  });
 </script>
 
 <svelte:head>
@@ -137,9 +43,9 @@
   </div>
 
   <!-- ライブラリリスト -->
-  {#if displayedLibraries.length > 0}
+  {#if libraries.length > 0}
     <div class="mx-auto max-w-3xl space-y-6">
-      {#each displayedLibraries as library (library.id)}
+      {#each libraries as library (library.id)}
         <LibraryCard {library} />
       {/each}
     </div>

@@ -1,11 +1,11 @@
 import { defineConfig } from '@playwright/test';
 import { config } from 'dotenv';
 
-// 環境変数を読み込み
-config();
+// 環境変数を読み込み（メッセージ非表示）
+config({ quiet: true });
 
 export default defineConfig({
-  globalSetup: './e2e/global-setup.ts',
+  globalSetup: './test/e2e/global-setup.ts',
   workers: 1, // テストを順次実行してデータ競合を防ぐ
   fullyParallel: false, // 並列実行を無効化
   use: {
@@ -23,5 +23,5 @@ export default defineConfig({
       GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
     },
   },
-  testDir: 'e2e',
+  testDir: 'test/e2e',
 });

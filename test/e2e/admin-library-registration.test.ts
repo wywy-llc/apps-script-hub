@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { LibraryTestDataFactory } from './factories/index.js';
+import { LibraryTestDataFactories } from '../factories/index.js';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ登録', () => {
@@ -7,7 +7,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // テスト前にデータをクリア
     await clearTestDataBeforeTest();
     // テスト用のデータをFactoryから生成
-    const testData = LibraryTestDataFactory.build();
+    const testData = LibraryTestDataFactories.default.build();
 
     // 1. 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
@@ -16,14 +16,18 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     await expect(page).toHaveTitle(/新規ライブラリ追加/);
 
     // 2. フォームに入力
+    // repositoryUrlからowner/repo形式を抽出
+    const repoPath = testData.repositoryUrl.replace('https://github.com/', '');
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
 
     // 3. フォーム送信
     await page.click('button[type="submit"]');
 
-    // 4. 成功メッセージの確認
-    await expect(page.locator('text=ライブラリが正常に登録されました')).toBeVisible();
+    // 4. 成功メッセージの確認（詳細ページ移動の告知メッセージ）
+    await expect(
+      page.locator('text=ライブラリが正常に登録されました。詳細ページに移動します...')
+    ).toBeVisible();
 
     // 5. 詳細ページへのリダイレクトを待機
     await page.waitForURL(/\/admin\/libraries\/[^/]+$/);
@@ -34,9 +38,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
 
     // ライブラリ名（概要セクションの特定の要素を選択）
     await expect(page.locator('dt:has-text("ライブラリ名") + dd')).toBeVisible();
-    await expect(page.locator('dt:has-text("ライブラリ名") + dd')).toHaveText(
-      testData.expectedName
-    );
+    await expect(page.locator('dt:has-text("ライブラリ名") + dd')).toHaveText(testData.name);
 
     // GAS スクリプトID（概要セクションの特定の要素を選択）
     await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toBeVisible();
@@ -44,22 +46,24 @@ test.describe('管理者画面 - ライブラリ登録', () => {
       testData.scriptId
     );
 
-    // GitHub リポジトリURL
-    await expect(page.locator(`a[href="https://github.com/${testData.repoUrl}"]`)).toBeVisible();
+    // GitHub リポジトリURLを確認（特定のセクションのみ）
+    await expect(
+      page.locator(`dt:has-text("GitHub リポジトリURL") + dd a[href="${testData.repositoryUrl}"]`)
+    ).toBeVisible();
 
     // GitHub 作者（概要セクションの特定の要素を選択）
     await expect(page.locator('dt:has-text("GitHub 作者") + dd a')).toBeVisible();
-    await expect(page.locator('dt:has-text("GitHub 作者") + dd a')).toHaveText(
-      testData.expectedAuthor
-    );
+    await expect(page.locator('dt:has-text("GitHub 作者") + dd a')).toHaveText(testData.authorName);
 
-    // ステータス（承認待ち）
-    await expect(page.locator('text=承認待ち')).toBeVisible();
+    // ステータス（未公開）（ヘッダー部分のみ）
+    await expect(
+      page.locator('h1:has-text("ライブラリ詳細") + div span.bg-gray-100:has-text("未公開")')
+    ).toBeVisible();
 
     // 管理者向けボタンの存在確認
     await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();
     await expect(page.locator('button:has-text("編集")')).toBeVisible();
-    await expect(page.locator('button:has-text("公開する")')).toBeVisible();
+    await expect(page.locator('button.bg-green-600:has-text("公開する")')).toBeVisible();
 
     // 7. README情報が表示されているか確認（GitHubから取得されたかの確認）
     await expect(page.locator('.markdown-body')).toBeVisible();
@@ -111,23 +115,24 @@ test.describe('管理者画面 - ライブラリ登録', () => {
 
   test('存在しないGitHubリポジトリのエラーハンドリング', async ({ page }) => {
     await clearTestDataBeforeTest();
-    const testData = LibraryTestDataFactory.build({
+    const testData = LibraryTestDataFactories.default.build({
       scriptId: 'TEST_SCRIPT_ID',
-      repoUrl: 'nonexistent-user-999999/nonexistent-repo-999999',
+      repositoryUrl: 'https://github.com/nonexistent-user-999999/nonexistent-repo-999999',
     });
+    const repoPath = testData.repositoryUrl.replace('https://github.com/', '');
 
     // 新規ライブラリ追加ページにアクセス
     await page.goto('/admin/libraries/new');
 
     // 存在しないリポジトリを入力
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
 
     // フォーム送信
     await page.click('button[type="submit"]');
 
-    // エラーメッセージの確認
-    await expect(page.locator('text=指定されたGitHubリポジトリが見つかりません')).toBeVisible();
+    // エラーメッセージの確認（実際のサービスから返されるメッセージと一致）
+    await expect(page.locator('text=指定されたGitHubリポジトリが見つかりません。')).toBeVisible();
   });
 
   test('詳細ページから管理者ライブラリ一覧への戻り', async ({ page }) => {
@@ -136,10 +141,11 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     await page.goto('/admin/libraries/new');
 
     // テストライブラリを作成
-    const testData = LibraryTestDataFactory.build();
+    const testData = LibraryTestDataFactories.default.build();
+    const repoPath = testData.repositoryUrl.replace('https://github.com/', '');
 
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
     await page.click('button[type="submit"]');
 
     // 詳細ページへのリダイレクトを待機
@@ -155,12 +161,13 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   test('重複データエラーハンドリング - 同じscriptIdでの登録', async ({ page }) => {
     await clearTestDataBeforeTest();
 
-    const testData = LibraryTestDataFactory.build();
+    const testData = LibraryTestDataFactories.default.build();
 
     // 1回目の登録
     await page.goto('/admin/libraries/new');
+    const repoPath = testData.repositoryUrl.replace('https://github.com/', '');
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
     await page.click('button[type="submit"]');
 
     // 結果を待機（成功または失敗）
@@ -169,31 +176,11 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // 2回目の登録（重複エラーを発生させる）
     await page.goto('/admin/libraries/new');
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', testData.repositoryUrl);
     await page.click('button[type="submit"]');
 
-    // デバッグ用：フォーム送信後の状態を確認
+    // フォーム送信後の状態を確認
     await page.waitForLoadState('networkidle');
-
-    // ページのHTMLを確認（デバッグ用）
-    // const pageContent = await page.content();
-
-    // エラーメッセージ要素を詳細に検索（デバッグ用）
-    // const allTexts = await page.locator('*').allTextContents();
-    // const errorTexts = allTexts.filter(
-    //   text =>
-    //     text.includes('既に登録') ||
-    //     text.includes('エラー') ||
-    //     text.includes('失敗')
-    // );
-
-    // 特定のエラーメッセージをチェック（デバッグ用）
-    // const hasScriptIdError = await page
-    //   .locator('text=このGASスクリプトIDは既に登録されています。')
-    //   .isVisible();
-    // const hasRepoError = await page
-    //   .locator('text=このリポジトリは既に登録されています。')
-    //   .isVisible();
 
     // フォームのsubmitMessage要素を確認
     const submitMessage = await page
@@ -210,17 +197,20 @@ test.describe('管理者画面 - ライブラリ登録', () => {
   test('重複データエラーハンドリング - 同じrepositoryUrlでの登録', async ({ page }) => {
     await clearTestDataBeforeTest();
 
-    const testData = LibraryTestDataFactory.build();
+    const testData = LibraryTestDataFactories.default.build();
+    const repoPath = testData.repositoryUrl.replace('https://github.com/', '');
 
     // 1回目の登録（成功）
     await page.goto('/admin/libraries/new');
     await page.fill('input[name="scriptId"]', testData.scriptId);
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
     await page.click('button[type="submit"]');
 
     // 成功メッセージの確認 OR 詳細ページへのリダイレクト確認
     try {
-      await expect(page.locator('text=ライブラリが正常に登録されました')).toBeVisible({
+      await expect(
+        page.locator('text=ライブラリが正常に登録されました。詳細ページに移動します...')
+      ).toBeVisible({
         timeout: 10000,
       });
     } catch {
@@ -231,7 +221,7 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     // 2回目の登録（同じrepositoryUrlで失敗）
     await page.goto('/admin/libraries/new');
     await page.fill('input[name="scriptId"]', 'DIFFERENT_SCRIPT_ID_' + Date.now());
-    await page.fill('input[name="repoUrl"]', testData.repoUrl);
+    await page.fill('input[name="repoUrl"]', repoPath);
     await page.click('button[type="submit"]');
 
     // repositoryUrl重複エラーメッセージの確認

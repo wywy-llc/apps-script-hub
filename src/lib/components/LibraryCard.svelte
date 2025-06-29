@@ -1,19 +1,11 @@
 <script lang="ts">
-  import { last_updated, search_by_tag } from '$lib/paraglide/messages.js';
-
+  import { last_updated } from '$lib/paraglide/messages.js';
   // ライブラリ情報を表示するカードコンポーネント
   // 検索結果やライブラリ一覧で使用される
 
-  export let library: {
-    id: number;
-    name: string;
-    description: string;
-    tags: string[];
-    author: string;
-    lastUpdated: string;
-    stars: number;
-    downloads: number;
-  };
+  import type { Library } from '$lib/server/db/schema.js';
+
+  export let library: Library;
 
   // 数値をフォーマットする関数
   function formatNumber(num: number): string {
@@ -23,13 +15,14 @@
     return num.toString();
   }
 
-  // タグクリック時の検索機能
-  function searchByTag(tag: string) {
-    window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
-  }
+  // タグクリック時の検索機能（将来の拡張用）
+  // function searchByTag(tag: string) {
+  //   window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
+  // }
 </script>
 
 <div
+  data-testid="library-card"
   class="flex flex-col rounded-lg border border-gray-200 p-6 transition-all hover:border-gray-300 hover:shadow-lg"
 >
   <div class="flex-grow">
@@ -41,17 +34,7 @@
     </p>
   </div>
   <div class="mt-4">
-    <div class="flex flex-wrap gap-2">
-      {#each library.tags as tag (tag)}
-        <button
-          class="inline-flex cursor-pointer items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-700/10 transition-colors ring-inset hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-800/20"
-          on:click={() => searchByTag(tag)}
-          title={search_by_tag({ tag })}
-        >
-          {tag}
-        </button>
-      {/each}
-    </div>
+    <!-- タグ機能は後で実装予定 -->
     <div class="mt-4 space-y-2">
       <div class="flex items-center text-xs text-gray-500">
         <svg
@@ -68,12 +51,12 @@
             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           ></path>
         </svg>
-        <a href="/users/{library.author}" class="hover:text-gray-700 hover:underline"
-          >{library.author}</a
+        <a href={library.authorUrl} class="hover:text-gray-700 hover:underline"
+          >{library.authorName}</a
         >
       </div>
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>{last_updated()}: {library.lastUpdated}</span>
+        <span>{last_updated()}: {new Date(library.updatedAt).toLocaleDateString('ja-JP')}</span>
         <div class="flex items-center space-x-3">
           <div class="flex items-center space-x-1">
             <svg
@@ -86,7 +69,7 @@
                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.049 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z"
               ></path>
             </svg>
-            <span>{formatNumber(library.stars)}</span>
+            <span>{formatNumber(library.starCount || 0)}</span>
           </div>
           <div class="flex items-center space-x-1">
             <svg
@@ -103,7 +86,7 @@
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               ></path>
             </svg>
-            <span>{formatNumber(library.downloads)}</span>
+            <span>{formatNumber(library.copyCount || 0)}</span>
           </div>
         </div>
       </div>
