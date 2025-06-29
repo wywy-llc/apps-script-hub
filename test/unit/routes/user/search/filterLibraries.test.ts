@@ -1,73 +1,140 @@
 import { describe, expect, it } from 'vitest';
+import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory';
 
-// テスト用のライブラリデータ
-const testLibraries = [
-  {
-    id: 1,
-    name: 'GasDateFormatter',
-    description:
-      'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマットするためのユーティリティライブラリ。タイムゾーンの扱いもサポート。',
-    tags: ['Date', 'Utility', 'Format'],
-    author: 'user-name',
-    lastUpdated: '3日前',
-    stars: 492,
-    downloads: 7300,
-  },
-  {
-    id: 2,
-    name: 'CalendarEventUtil',
-    description:
-      'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。繰り返しイベントの操作や、会議室の予約などを簡略化します。',
-    tags: ['Calendar', 'Date', 'Utility'],
-    author: 'developer-taro',
-    lastUpdated: '2週間前',
-    stars: 876,
-    downloads: 13200,
-  },
-  {
-    id: 3,
-    name: 'JapaneseDate',
-    description:
-      '日本の祝日判定や和暦（元号）の変換機能を提供します。内閣府の祝日CSVデータソースと連携可能です。',
-    tags: ['Date', 'Japan', 'Holiday'],
-    author: 'gas-master',
-    lastUpdated: '1ヶ月前',
-    stars: 325,
-    downloads: 4800,
-  },
-  {
-    id: 4,
-    name: 'GasLogger',
-    description:
-      'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
-    tags: ['Logging', 'Utility'],
-    author: 'gas-developer',
-    lastUpdated: '2025/05/28',
-    stars: 847,
-    downloads: 12500,
-  },
-  {
-    id: 5,
-    name: 'GasHtml',
-    description:
-      'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
-    tags: ['WebApp', 'HTML'],
-    author: 'html-master',
-    lastUpdated: '2025/04/15',
-    stars: 623,
-    downloads: 8900,
-  },
-  {
-    id: 6,
-    name: 'GasTest',
-    description:
-      'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
-    tags: ['Testing', 'Utility'],
-    author: 'test-ninja',
-    lastUpdated: '2025/03/30',
-    stars: 1205,
-    downloads: 15600,
-  },
+// UI用のライブラリデータ型定義（検索機能テスト用）
+interface UILibraryData {
+  id: number;
+  name: string;
+  description: string;
+  tags: string[];
+  author: string;
+  lastUpdated: string;
+  stars: number;
+  downloads: number;
+}
+
+// ファクトリから基本データを生成する関数
+function createUILibraryFromFactory(
+  id: number,
+  factoryData: ReturnType<typeof LibraryTestDataFactories.default.build>,
+  overrides: Partial<UILibraryData> = {}
+): UILibraryData {
+  return {
+    id,
+    name: factoryData.name,
+    description: factoryData.description,
+    tags: ['Utility'], // デフォルトタグ
+    author: factoryData.authorName,
+    lastUpdated: '1日前', // デフォルト更新日
+    stars: factoryData.starCount ?? 0,
+    downloads: (factoryData.starCount ?? 0) * 10, // スター数から推定
+    ...overrides,
+  };
+}
+
+// ファクトリを使用してテスト用のライブラリデータを生成
+const testLibraries: UILibraryData[] = [
+  // GasDateFormatterはファクトリのカスタムデータを使用
+  createUILibraryFromFactory(
+    1,
+    LibraryTestDataFactories.default.build({
+      name: 'GasDateFormatter',
+      description:
+        'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマットするためのユーティリティライブラリ。タイムゾーンの扱いもサポート。',
+      authorName: 'user-name',
+      starCount: 492,
+    }),
+    {
+      tags: ['Date', 'Utility', 'Format'],
+      lastUpdated: '3日前',
+      downloads: 7300,
+    }
+  ),
+
+  // CalendarEventUtilのカスタムデータ
+  createUILibraryFromFactory(
+    2,
+    LibraryTestDataFactories.alternative.build({
+      name: 'CalendarEventUtil',
+      description:
+        'Googleカレンダーのイベント作成・更新・削除をより直感的に行えるヘルパー集。繰り返しイベントの操作や、会議室の予約などを簡略化します。',
+      authorName: 'developer-taro',
+      starCount: 876,
+    }),
+    {
+      tags: ['Calendar', 'Date', 'Utility'],
+      lastUpdated: '2週間前',
+      downloads: 13200,
+    }
+  ),
+
+  // JapaneseDateのカスタムデータ
+  createUILibraryFromFactory(
+    3,
+    LibraryTestDataFactories.default.build({
+      name: 'JapaneseDate',
+      description:
+        '日本の祝日判定や和暦（元号）の変換機能を提供します。内閣府の祝日CSVデータソースと連携可能です。',
+      authorName: 'gas-master',
+      starCount: 325,
+    }),
+    {
+      tags: ['Date', 'Japan', 'Holiday'],
+      lastUpdated: '1ヶ月前',
+      downloads: 4800,
+    }
+  ),
+
+  // GasLoggerはファクトリの既存プリセットを使用
+  createUILibraryFromFactory(
+    4,
+    LibraryTestDataFactories.default.build({
+      name: 'GasLogger',
+      description:
+        'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。デバッグ効率を飛躍的に向上させます。',
+      authorName: 'gas-developer',
+      starCount: 847,
+    }),
+    {
+      tags: ['Logging', 'Utility'],
+      lastUpdated: '2025/05/28',
+      downloads: 12500,
+    }
+  ),
+
+  // GasHtmlのカスタムデータ
+  createUILibraryFromFactory(
+    5,
+    LibraryTestDataFactories.alternative.build({
+      name: 'GasHtml',
+      description:
+        'HTMLテンプレートエンジン。サーバーサイドで動的にHTMLを生成し、複雑なWebアプリケーションの構築をサポートします。',
+      authorName: 'html-master',
+      starCount: 623,
+    }),
+    {
+      tags: ['WebApp', 'HTML'],
+      lastUpdated: '2025/04/15',
+      downloads: 8900,
+    }
+  ),
+
+  // GasTestのカスタムデータ
+  createUILibraryFromFactory(
+    6,
+    LibraryTestDataFactories.default.build({
+      name: 'GasTest',
+      description:
+        'GASプロジェクトのための軽量なユニットテストフレームワーク。テスト駆動開発(TDD)をGASで実現可能にします。',
+      authorName: 'test-ninja',
+      starCount: 1205,
+    }),
+    {
+      tags: ['Testing', 'Utility'],
+      lastUpdated: '2025/03/30',
+      downloads: 15600,
+    }
+  ),
 ];
 
 // テスト対象の関数（元の関数をコピー + lastUpdatedも検索対象に追加）
