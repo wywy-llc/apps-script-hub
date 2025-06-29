@@ -2,13 +2,14 @@ import { LIBRARY_STATUS_TEXT, type LibraryStatus } from '$lib/constants/library-
 
 /**
  * 日付をフォーマットするヘルパー関数
+ * 日本時間（JST）で表示します
  *
  * 使用例:
  * ```typescript
  * import { formatDate } from '$lib/helpers/format';
  *
  * const date = new Date('2024-01-15T10:30:00Z');
- * const formatted = formatDate(date); // "2024/01/15"
+ * const formatted = formatDate(date); // "2024/01/15" (JST)
  * ```
  */
 export function formatDate(date: Date): string {
@@ -16,6 +17,7 @@ export function formatDate(date: Date): string {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
+    timeZone: 'Asia/Tokyo',
   }).format(date);
 }
 
