@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { LibraryTestDataFactories } from '../test/factories/index.js';
+import { LibraryTestDataFactories } from '../factories/index.js';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
 test.describe('管理者画面 - ライブラリ登録', () => {
