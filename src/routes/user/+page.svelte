@@ -2,12 +2,7 @@
   import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import {
-    app_title,
-    featured_description,
-    featured_libraries,
-    view_all_libraries,
-  } from '$lib/paraglide/messages.js';
+  import { app_title, featured_libraries, view_all_libraries } from '$lib/paraglide/messages.js';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -42,9 +37,6 @@
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
         {featured_libraries()}
       </h2>
-      <p class="mt-4 text-lg text-gray-600">
-        {featured_description()}
-      </p>
     </div>
 
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
