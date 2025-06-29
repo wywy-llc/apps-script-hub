@@ -1,11 +1,8 @@
 <script lang="ts">
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
-  import {
-    LIBRARY_STATUS_BADGE_CLASS,
-    LIBRARY_STATUS_TEXT,
-    type LibraryStatus,
-  } from '$lib/constants/library-status.js';
+  import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
+  import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
 
   interface Library {
@@ -89,24 +86,11 @@
     }
   }
 
-  // 作成日時の表示用フォーマット
-  function formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(date);
-  }
-
   function getStatusBadge(status: string) {
     return (
       LIBRARY_STATUS_BADGE_CLASS[status as LibraryStatus] ||
       'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'
     );
-  }
-
-  function getStatusText(status: string) {
-    return LIBRARY_STATUS_TEXT[status as LibraryStatus] || '不明';
   }
 </script>
 
