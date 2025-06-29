@@ -29,6 +29,8 @@ async function clearTestData() {
     await client.connect();
     const db = drizzle(client);
 
+    // library_summaryテーブルのデータをクリア（外部キー制約があるため先に削除）
+    await db.execute(sql`DELETE FROM "library_summary"`);
     // libraryテーブルのデータをクリア
     await db.execute(sql`DELETE FROM "library"`);
   } catch (error) {

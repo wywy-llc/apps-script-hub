@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -59,8 +59,54 @@ export const library = pgTable('library', {
     .defaultNow(),
 });
 
+export const librarySummary = pgTable('library_summary', {
+  id: text('id').primaryKey(),
+  libraryId: text('library_id')
+    .notNull()
+    .references(() => library.id)
+    .unique(),
+  // basicInfo
+  libraryNameJa: text('library_name_ja'),
+  libraryNameEn: text('library_name_en'),
+  purposeJa: text('purpose_ja'),
+  purposeEn: text('purpose_en'),
+  targetUsersJa: text('target_users_ja'),
+  targetUsersEn: text('target_users_en'),
+  tagsJa: jsonb('tags_ja').$type<string[]>(),
+  tagsEn: jsonb('tags_en').$type<string[]>(),
+  // functionality
+  coreProblemJa: text('core_problem_ja'),
+  coreProblemEn: text('core_problem_en'),
+  mainBenefits: jsonb('main_benefits').$type<
+    Array<{
+      title: {
+        ja: string;
+        en: string;
+      };
+      description: {
+        ja: string;
+        en: string;
+      };
+    }>
+  >(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'date',
+  })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Session = typeof session.$inferSelect;
 
 export type User = typeof user.$inferSelect;
 
 export type Library = typeof library.$inferSelect;
+
+export type LibrarySummaryRecord = typeof librarySummary.$inferSelect;
