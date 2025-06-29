@@ -1,14 +1,14 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { BulkGASLibrarySearchService } from '../../../../../src/lib/server/services/bulk-gas-library-search-service.js';
-import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
 import { GASLibraryScraper } from '../../../../../src/lib/server/services/gas-library-scraper.js';
-import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
+import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
 import type {
   GitHubRepository,
-  TagSearchResult,
   ScrapeResult,
   ScraperConfig,
+  TagSearchResult,
 } from '../../../../../src/lib/types/github-scraper.js';
+import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 
 // モックの設定
 vi.mock('../../../../../src/lib/server/utils/github-api-utils.js');
@@ -99,6 +99,7 @@ describe('BulkGASLibrarySearchService', () => {
           licenseType: testData1.licenseType,
           licenseUrl: testData1.licenseUrl,
           starCount: testData1.starCount,
+          lastCommitAt: new Date('2023-12-01T00:00:00Z'),
           status: 'pending',
         },
       };
@@ -116,6 +117,7 @@ describe('BulkGASLibrarySearchService', () => {
           licenseType: testData2.licenseType,
           licenseUrl: testData2.licenseUrl,
           starCount: testData2.starCount,
+          lastCommitAt: new Date('2023-12-02T00:00:00Z'),
           status: 'pending',
         },
       };
@@ -168,6 +170,7 @@ describe('BulkGASLibrarySearchService', () => {
           authorUrl: testData.authorUrl,
           authorName: testData.authorName,
           description: testData.description || '',
+          lastCommitAt: new Date('2023-01-01T00:00:00Z'),
           status: 'pending',
         },
       };
@@ -212,6 +215,7 @@ describe('BulkGASLibrarySearchService', () => {
           authorUrl: 'https://github.com/test',
           authorName: 'test',
           description: 'test description',
+          lastCommitAt: new Date('2023-01-01T00:00:00Z'),
           status: 'pending',
         },
       };
@@ -300,6 +304,7 @@ describe('BulkGASLibrarySearchService', () => {
           authorUrl: 'https://github.com/test',
           authorName: 'test',
           description: 'test description',
+          lastCommitAt: new Date('2023-01-01T00:00:00Z'),
           status: 'pending',
         },
       };
@@ -360,6 +365,7 @@ describe('BulkGASLibrarySearchService', () => {
           authorUrl: 'https://github.com/test',
           authorName: 'test',
           description: 'test description',
+          lastCommitAt: new Date('2023-01-01T00:00:00Z'),
           status: 'pending',
         },
       };
