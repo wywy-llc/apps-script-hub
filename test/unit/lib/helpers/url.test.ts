@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { truncateUrl } from '../../src/lib/helpers/url';
+import { truncateUrl } from '../../../../src/lib/helpers/url';
 
 describe('truncateUrl', () => {
   describe('正常なケース', () => {

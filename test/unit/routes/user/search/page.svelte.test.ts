@@ -28,7 +28,9 @@ describe('SearchPage', () => {
     }));
 
     // 動的インポートでコンポーネントを読み込み
-    const { default: SearchPage } = await import('./+page.svelte');
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
     const { container } = render(SearchPage, { data: mockData });
 
     // 基本要素の確認（DOM存在確認）
@@ -50,7 +52,9 @@ describe('SearchPage', () => {
       }),
     }));
 
-    const { default: SearchPage } = await import('./+page.svelte');
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
     const { container } = render(SearchPage, { data: mockData });
 
     // フォーム要素の確認
@@ -74,7 +78,9 @@ describe('SearchPage', () => {
       }),
     }));
 
-    const { default: SearchPage } = await import('./+page.svelte');
+    const { default: SearchPage } = await import(
+      '../../../../../src/routes/user/search/+page.svelte'
+    );
     const { container } = render(SearchPage, { data: mockData });
 
     // コンテナとフォームの存在確認
