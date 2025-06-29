@@ -24,14 +24,14 @@
   }
 
   // ボタンのクラスを動的に生成
-  function getButtonClass(color: 'green' | 'red') {
+  function getButtonClass(color: 'green' | 'gray') {
     const baseClass =
       'inline-flex cursor-pointer justify-center rounded-md border border-transparent shadow-sm disabled:cursor-not-allowed disabled:opacity-50';
     const sizeClass = compact ? 'px-3 py-1 text-xs font-medium' : 'px-4 py-2 text-sm font-medium';
 
     const colorClasses = {
       green: 'bg-green-600 text-white hover:bg-green-700',
-      red: 'bg-red-600 text-white hover:bg-red-700',
+      gray: 'bg-gray-600 text-white hover:bg-gray-700',
     };
 
     return `${baseClass} ${sizeClass} ${colorClasses[color]}`;
@@ -46,32 +46,15 @@
     disabled={isStatusUpdateInProgress}
     class={getButtonClass('green')}
   >
-    承認・公開
-  </button>
-  <button
-    type="button"
-    onclick={() => handleStatusUpdate(LIBRARY_STATUS.REJECTED)}
-    disabled={isStatusUpdateInProgress}
-    class={getButtonClass('red')}
-  >
-    拒否
+    公開
   </button>
 {:else if library.status === LIBRARY_STATUS.PUBLISHED}
   <button
     type="button"
-    onclick={() => handleStatusUpdate(LIBRARY_STATUS.REJECTED)}
+    onclick={() => handleStatusUpdate(LIBRARY_STATUS.PENDING)}
     disabled={isStatusUpdateInProgress}
-    class={getButtonClass('red')}
+    class={getButtonClass('gray')}
   >
-    拒否に変更
-  </button>
-{:else if library.status === LIBRARY_STATUS.REJECTED}
-  <button
-    type="button"
-    onclick={() => handleStatusUpdate(LIBRARY_STATUS.PUBLISHED)}
-    disabled={isStatusUpdateInProgress}
-    class={getButtonClass('green')}
-  >
-    承認・公開
+    未公開
   </button>
 {/if}

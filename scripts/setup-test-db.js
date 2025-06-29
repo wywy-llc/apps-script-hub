@@ -96,7 +96,7 @@ async function setupTestDatabase() {
         "copy_count" integer DEFAULT 0 NOT NULL,
         "license_type" text NOT NULL,
         "license_url" text NOT NULL,
-        "status" text DEFAULT 'pending' NOT NULL,
+        "status" text DEFAULT 'pending' NOT NULL CHECK ("status" IN ('pending', 'published')),
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL
       );

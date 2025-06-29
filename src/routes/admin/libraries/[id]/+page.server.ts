@@ -29,7 +29,7 @@ export const actions: Actions = {
   /**
    * ライブラリのステータスを更新する
    * published: 承認して公開
-   * rejected: 拒否
+   * pending: 未公開に戻す
    */
   updateStatus: async ({ params, request }) => {
     const libraryId = params.id;
@@ -68,9 +68,8 @@ export const actions: Actions = {
 
     // 成功メッセージを返す
     const statusMessages = {
-      [LIBRARY_STATUS.PUBLISHED]: 'ライブラリを承認し、公開しました。',
-      [LIBRARY_STATUS.REJECTED]: 'ライブラリを拒否しました。',
-      [LIBRARY_STATUS.PENDING]: 'ライブラリを承認待ちに戻しました。',
+      [LIBRARY_STATUS.PUBLISHED]: 'ライブラリを公開しました。',
+      [LIBRARY_STATUS.PENDING]: 'ライブラリを未公開にしました。',
     };
 
     return {

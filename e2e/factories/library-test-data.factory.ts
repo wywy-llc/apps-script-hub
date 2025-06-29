@@ -89,25 +89,12 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     repositoryUrl: 'https://github.com/test-user/PendingLibrary',
     authorUrl: 'https://github.com/test-user',
     authorName: 'test-user',
-    description: '承認待ちのライブラリです。検索結果には表示されません。',
-    readmeContent: '# PendingLibrary\n\n承認待ちのライブラリです。',
+    description: '未公開のライブラリです。検索結果には表示されません。',
+    readmeContent: '# PendingLibrary\n\n未公開のライブラリです。',
     starCount: 10,
     licenseType: LICENSE_TYPES.APACHE_2_0,
     licenseUrl: 'https://github.com/test-user/PendingLibrary/blob/main/LICENSE',
     status: LIBRARY_STATUS.PENDING,
-  }),
-  rejected: () => ({
-    name: 'RejectedLibrary',
-    scriptId: '1ZyXwVuTsRqPoNmLkJiHgFeDcBa0987654321',
-    repositoryUrl: 'https://github.com/bad-user/RejectedLibrary',
-    authorUrl: 'https://github.com/bad-user',
-    authorName: 'bad-user',
-    description: '拒否されたライブラリです。検索結果には表示されません。',
-    readmeContent: '# RejectedLibrary\n\n拒否されたライブラリです。',
-    starCount: 5,
-    licenseType: LICENSE_TYPES.UNKNOWN,
-    licenseUrl: 'https://github.com/bad-user/RejectedLibrary',
-    status: LIBRARY_STATUS.REJECTED,
   }),
   gasDateFormatter: () => ({
     name: 'GasDateFormatter',
@@ -182,7 +169,7 @@ export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryD
  * const customLibraryId = await DatabaseLibraryDataFactory.create({
  *   scriptId: 'custom-script-id',
  *   name: 'Custom Library',
- *   status: 'rejected'
+ *   status: 'published'
  * });
  * ```
  */

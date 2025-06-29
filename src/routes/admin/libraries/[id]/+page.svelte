@@ -314,26 +314,6 @@
   </form>
 
   <form
-    id="status-form-rejected"
-    method="POST"
-    action="?/updateStatus"
-    use:enhance={() => {
-      isStatusUpdateInProgress = true;
-      return async ({ result, update }) => {
-        await update();
-        // 成功時にライブラリのステータスを即座に更新
-        if (result.type === 'success' && result.data?.success) {
-          library = { ...library, status: 'rejected' };
-        }
-        isStatusUpdateInProgress = false;
-      };
-    }}
-    style="display: none;"
-  >
-    <input type="hidden" name="status" value="rejected" />
-  </form>
-
-  <form
     id="status-form-pending"
     method="POST"
     action="?/updateStatus"

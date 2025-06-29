@@ -38,7 +38,7 @@ export const library = pgTable('library', {
   copyCount: integer('copy_count').default(0).notNull(),
   licenseType: text('license_type').notNull(),
   licenseUrl: text('license_url').notNull(),
-  status: text('status', { enum: ['pending', 'published', 'rejected'] })
+  status: text('status', { enum: ['pending', 'published'] })
     .notNull()
     .default('pending'),
   createdAt: timestamp('created_at', {
