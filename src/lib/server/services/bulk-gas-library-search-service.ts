@@ -1,6 +1,6 @@
-import type { BulkScrapeResult, ScrapeResult, ScraperConfig } from '$lib/types/github-scraper.js';
 import { DEFAULT_SCRAPER_CONFIG } from '$lib/server/constants/scraper-config.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import type { BulkScrapeResult, ScrapeResult, ScraperConfig } from '$lib/types/github-scraper.js';
 import { GASLibraryScraper } from './gas-library-scraper.js';
 
 /**
@@ -85,6 +85,13 @@ export class BulkGASLibrarySearchService {
 
       const successCount = results.filter(r => r.success).length;
       const errorCount = results.filter(r => !r.success).length;
+
+      // 処理完了ログを出力
+      if (config.verbose) {
+        console.log(
+          `GAS一括検索処理が完了しました。成功: ${successCount}件 / 処理済み: ${searchResult.processedCount}件`
+        );
+      }
 
       return {
         success: successCount > 0,
