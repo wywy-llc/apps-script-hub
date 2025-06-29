@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm';
 import { user } from '../../src/lib/server/db/schema';
 import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
 
@@ -61,7 +60,7 @@ export const UserTestDataFactories = createPresetFactories<UserTestData>({
 
 /**
  * データベース作成用のユーザーデータFactory
- * 共通化されたcreateDatabaseFactoryを使用してデータベースに直接ユーザーを作成
+ * Drizzle ORMのベストプラクティスに基づいてdb.insert().values().returning()を使用
  */
 export const DatabaseUserDataFactory = createDatabaseFactory<DatabaseUserData>(
   'user',
@@ -73,19 +72,23 @@ export const DatabaseUserDataFactory = createDatabaseFactory<DatabaseUserData>(
       email: `test-${timestamp}@example.com`,
       name: 'Test User',
       picture: 'https://example.com/avatar.jpg',
-      googleId: `google_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
+      googleId: `google_${timestamp}_${Math.random().toString(36).substring(2, 11)}`,
     };
   },
   async (db, userData) => {
-    await db.execute(sql`
-      INSERT INTO "user" (
-        "id", "email", "name", "picture", "google_id"
-      ) VALUES (
-        ${userData.id}, ${userData.email}, ${userData.name}, 
-        ${userData.picture}, ${userData.googleId}
-      )
-    `);
-    return userData.id;
+    // Drizzle ORMの標準的なinsert APIを使用
+    const result = await db
+      .insert(user)
+      .values({
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        picture: userData.picture,
+        googleId: userData.googleId,
+      })
+      .returning({ id: user.id });
+
+    return result[0].id;
   }
 );
 
