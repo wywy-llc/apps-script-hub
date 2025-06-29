@@ -20,25 +20,28 @@
   let isStatusUpdateInProgress = $state(false);
   let statusMessage = $state('');
 
-  // 前回のformの参照を保持してエフェクトの無限ループを防ぐ
-  let previousForm = $state<ActionData | undefined>(undefined);
+  // メッセージ管理のための状態
+  let messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  // アクションの結果を処理（formが実際に変更された時のみ実行）
+  // formの変更を監視するエフェクト（エフェクト内での状態更新を最小化）
   $effect(() => {
-    // formが実際に変更された場合のみ処理
-    if (form !== previousForm) {
-      previousForm = form;
+    if (form?.success || form?.error) {
+      // 既存のタイムアウトをクリア
+      if (messageTimeoutId) {
+        clearTimeout(messageTimeoutId);
+        messageTimeoutId = null;
+      }
 
-      if (form?.success) {
+      if (form.success) {
         statusMessage = form.message || '';
         // 3秒後にメッセージを消去
-        setTimeout(() => {
+        messageTimeoutId = setTimeout(() => {
           statusMessage = '';
         }, 3000);
-      } else if (form?.error) {
+      } else if (form.error) {
         statusMessage = form.error || '';
         // エラーメッセージは5秒後に消去
-        setTimeout(() => {
+        messageTimeoutId = setTimeout(() => {
           statusMessage = '';
         }, 5000);
       }
