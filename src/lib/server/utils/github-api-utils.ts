@@ -449,4 +449,32 @@ export class GitHubApiUtils {
       return null;
     }
   }
+
+  /**
+   * リポジトリの最終コミット日時を取得
+   */
+  public static async fetchLastCommitDate(owner: string, repo: string): Promise<Date | null> {
+    try {
+      const headers = this.createHeaders();
+
+      // 最新のコミット（最終コミット）を取得
+      const latestResponse = await fetch(
+        `${this.GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=1`,
+        { headers }
+      );
+      if (!latestResponse.ok) {
+        return null;
+      }
+      const latestCommits = await latestResponse.json();
+      if (!latestCommits || latestCommits.length === 0) {
+        return null;
+      }
+      const lastCommitAt = new Date(latestCommits[0].commit.committer.date);
+
+      return lastCommitAt;
+    } catch (error) {
+      console.error('コミット日時取得エラー:', error);
+      return null;
+    }
+  }
 }

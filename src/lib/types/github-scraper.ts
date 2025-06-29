@@ -53,6 +53,7 @@ export interface ScrapedLibraryData {
   licenseType?: string;
   licenseUrl?: string;
   starCount?: number;
+  lastCommitAt: Date;
   status: 'pending';
 }
 

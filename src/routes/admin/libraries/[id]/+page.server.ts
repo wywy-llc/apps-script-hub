@@ -12,7 +12,28 @@ export const load: PageServerLoad = async ({ params }) => {
     throw error(404, 'ライブラリが見つかりません。');
   }
 
-  const result = await db.select().from(library).where(eq(library.id, libraryId)).limit(1);
+  const result = await db
+    .select({
+      id: library.id,
+      name: library.name,
+      scriptId: library.scriptId,
+      repositoryUrl: library.repositoryUrl,
+      authorUrl: library.authorUrl,
+      authorName: library.authorName,
+      description: library.description,
+      readmeContent: library.readmeContent,
+      starCount: library.starCount,
+      copyCount: library.copyCount,
+      licenseType: library.licenseType,
+      licenseUrl: library.licenseUrl,
+      lastCommitAt: library.lastCommitAt,
+      status: library.status,
+      createdAt: library.createdAt,
+      updatedAt: library.updatedAt,
+    })
+    .from(library)
+    .where(eq(library.id, libraryId))
+    .limit(1);
 
   if (result.length === 0) {
     throw error(404, 'ライブラリが見つかりません。');

@@ -38,6 +38,10 @@ export const library = pgTable('library', {
   copyCount: integer('copy_count').default(0).notNull(),
   licenseType: text('license_type').notNull(),
   licenseUrl: text('license_url').notNull(),
+  lastCommitAt: timestamp('last_commit_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
   status: text('status', { enum: ['pending', 'published'] })
     .notNull()
     .default('pending'),

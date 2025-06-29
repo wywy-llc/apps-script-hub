@@ -18,8 +18,8 @@ describe('truncateUrl', () => {
     it('長いURLを正しく短縮する（デフォルト長）', () => {
       const url = 'https://github.com/googleworkspace/apps-script-oauth2';
       const result = truncateUrl(url);
-      expect(result).toBe('https://github.com/googlewo...');
-      expect(result.length).toBe(30);
+      expect(result).toBe('https://github.com/goo...');
+      expect(result.length).toBe(25);
     });
 
     it('長いURLを正しく短縮する（カスタム長）', () => {
@@ -85,8 +85,8 @@ describe('truncateUrl', () => {
       const url = 'https://github.com/googleworkspace/apps-script-oauth2';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = truncateUrl(url, undefined as any);
-      expect(result).toBe('https://github.com/googlewo...');
-      expect(result.length).toBe(30);
+      expect(result).toBe('https://github.com/goo...');
+      expect(result.length).toBe(25);
     });
 
     it('maxLengthが4未満の場合エラーを投げる', () => {

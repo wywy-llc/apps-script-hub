@@ -1,6 +1,6 @@
-import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper.js';
-import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { GASScriptIdExtractor } from '$lib/server/utils/gas-script-id-extractor.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper.js';
 
 /**
  * GAS Library Scraper Service
@@ -29,10 +29,11 @@ export class GASLibraryScraper {
 
       const { owner, repo } = parsed;
 
-      // リポジトリ情報とREADMEを並行取得
-      const [repoInfo, readmeContent] = await Promise.all([
+      // リポジトリ情報、README、最終コミット日時を並行取得
+      const [repoInfo, readmeContent, lastCommitAt] = await Promise.all([
         GitHubApiUtils.fetchRepositoryInfo(owner, repo),
         GitHubApiUtils.fetchReadme(owner, repo),
+        GitHubApiUtils.fetchLastCommitDate(owner, repo),
       ]);
 
       // READMEからスクリプトIDを抽出
@@ -44,6 +45,13 @@ export class GASLibraryScraper {
         return {
           success: false,
           error: 'READMEからGASスクリプトIDが見つかりませんでした',
+        };
+      }
+
+      if (!lastCommitAt) {
+        return {
+          success: false,
+          error: '最終コミット日時の取得に失敗しました',
         };
       }
 
@@ -59,6 +67,7 @@ export class GASLibraryScraper {
         licenseType: repoInfo.license?.name,
         licenseUrl: repoInfo.license?.url,
         starCount: repoInfo.stargazers_count,
+        lastCommitAt: lastCommitAt,
         status: 'pending',
       };
 

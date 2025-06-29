@@ -21,6 +21,7 @@
     licenseUrl?: string;
     starCount?: number;
     copyCount?: number;
+    lastCommitAt: Date;
     status: LibraryStatus;
     createdAt: Date;
     updatedAt: Date;
@@ -494,7 +495,10 @@
             </dd>
 
             <dt class="font-semibold text-gray-800">最終更新</dt>
-            <dd>{formatDate(library.updatedAt)}</dd>
+            <dd class="mb-3">{formatDate(library.updatedAt)}</dd>
+
+            <dt class="font-semibold text-gray-800">最終コミット</dt>
+            <dd>{formatDate(library.lastCommitAt)}</dd>
           </dl>
         </div>
       </div>

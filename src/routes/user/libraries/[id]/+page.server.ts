@@ -14,7 +14,24 @@ export const load: PageServerLoad = async ({ params }) => {
 
   // データベースから公開されているライブラリのみを取得
   const [libraryData] = await db
-    .select()
+    .select({
+      id: library.id,
+      name: library.name,
+      scriptId: library.scriptId,
+      repositoryUrl: library.repositoryUrl,
+      authorUrl: library.authorUrl,
+      authorName: library.authorName,
+      description: library.description,
+      readmeContent: library.readmeContent,
+      starCount: library.starCount,
+      copyCount: library.copyCount,
+      licenseType: library.licenseType,
+      licenseUrl: library.licenseUrl,
+      lastCommitAt: library.lastCommitAt,
+      status: library.status,
+      createdAt: library.createdAt,
+      updatedAt: library.updatedAt,
+    })
     .from(library)
     .where(and(eq(library.id, libraryId), eq(library.status, LIBRARY_STATUS.PUBLISHED)))
     .limit(1);

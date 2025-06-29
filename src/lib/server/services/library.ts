@@ -1,5 +1,6 @@
 import { db, testConnection } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import {
@@ -55,11 +56,16 @@ export class CreateLibraryService {
     }
 
     // GitHub から情報を取得
-    const [repoInfo, readmeContent, licenseInfo] = await Promise.all([
+    const [repoInfo, readmeContent, licenseInfo, lastCommitAt] = await Promise.all([
       FetchGithubRepoService.call(owner, repo),
       FetchGithubReadmeService.call(owner, repo),
       FetchGithubLicenseService.call(owner, repo),
+      GitHubApiUtils.fetchLastCommitDate(owner, repo),
     ]);
+
+    if (!lastCommitAt) {
+      throw new Error('最終コミット日時の取得に失敗しました。');
+    }
 
     // ライブラリを作成
     const libraryId = nanoid();
@@ -77,6 +83,7 @@ export class CreateLibraryService {
       starCount: repoInfo.starCount,
       licenseType: licenseInfo.type,
       licenseUrl: licenseInfo.url,
+      lastCommitAt: lastCommitAt,
       status: 'pending',
     });
 

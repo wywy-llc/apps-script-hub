@@ -21,6 +21,7 @@ export const load = (async () => {
       updatedAt: library.updatedAt,
       starCount: library.starCount,
       description: library.description,
+      lastCommitAt: library.lastCommitAt,
     })
     .from(library)
     .orderBy(desc(library.updatedAt));
@@ -109,6 +110,7 @@ export const actions: Actions = {
               licenseType: libraryData.licenseType || 'unknown',
               licenseUrl: libraryData.licenseUrl || 'unknown',
               starCount: libraryData.starCount || 0,
+              lastCommitAt: libraryData.lastCommitAt,
               status: 'pending',
               createdAt: new Date(),
               updatedAt: new Date(),

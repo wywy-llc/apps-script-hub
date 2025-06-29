@@ -48,6 +48,7 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     starCount: 100,
     licenseType: LICENSE_TYPES.APACHE_2_0,
     licenseUrl: 'https://github.com/googleworkspace/apps-script-oauth2/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-01-15T10:30:00Z'),
     status: LIBRARY_STATUS.PENDING,
   }),
   alternative: () => ({
@@ -61,6 +62,7 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     starCount: 50,
     licenseType: LICENSE_TYPES.MIT,
     licenseUrl: 'https://github.com/example/sample-library/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-02-20T14:45:00Z'),
     status: LIBRARY_STATUS.PENDING,
   }),
 });
@@ -81,6 +83,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     starCount: 847,
     licenseType: LICENSE_TYPES.MIT,
     licenseUrl: 'https://github.com/gas-developer/GasLogger/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-03-10T09:15:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
   }),
   pending: () => ({
@@ -94,6 +97,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     starCount: 10,
     licenseType: LICENSE_TYPES.APACHE_2_0,
     licenseUrl: 'https://github.com/test-user/PendingLibrary/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-04-05T16:20:00Z'),
     status: LIBRARY_STATUS.PENDING,
   }),
   gasDateFormatter: () => ({
@@ -107,6 +111,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     starCount: 234,
     licenseType: LICENSE_TYPES.BSD_3_CLAUSE,
     licenseUrl: 'https://github.com/date-wizard/GasDateFormatter/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-05-12T11:30:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
   }),
   gasCalendarSync: () => ({
@@ -120,6 +125,7 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     starCount: 456,
     licenseType: LICENSE_TYPES.MIT,
     licenseUrl: 'https://github.com/sync-expert/GasCalendarSync/blob/main/LICENSE',
+    lastCommitAt: new Date('2024-06-08T13:45:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
   }),
 });
@@ -144,6 +150,7 @@ export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryD
       starCount: 100,
       licenseType: LICENSE_TYPES.APACHE_2_0,
       licenseUrl: `https://github.com/googleworkspace/apps-script-oauth2-${timestamp}/blob/main/LICENSE`,
+      lastCommitAt: new Date('2024-01-15T10:30:00Z'),
       status: LIBRARY_STATUS.PENDING,
     };
   },
