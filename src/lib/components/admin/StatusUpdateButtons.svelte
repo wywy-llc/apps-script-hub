@@ -4,20 +4,37 @@
     LIBRARY_STATUS_CONFIRM_MESSAGES,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
-  import type { Library } from '$lib/server/db/schema.js';
-
-  interface Props {
-    library: Library;
-    isStatusUpdateInProgress: boolean;
-    onStatusUpdate: (status: LibraryStatus) => void;
+  interface LibraryForStatus {
+    status: LibraryStatus;
   }
 
-  let { library, isStatusUpdateInProgress, onStatusUpdate }: Props = $props();
+  interface Props {
+    library: LibraryForStatus;
+    isStatusUpdateInProgress: boolean;
+    onStatusUpdate: (status: LibraryStatus) => void;
+    compact?: boolean;
+  }
+
+  let { library, isStatusUpdateInProgress, onStatusUpdate, compact = false }: Props = $props();
 
   function handleStatusUpdate(newStatus: LibraryStatus) {
     if (confirm(LIBRARY_STATUS_CONFIRM_MESSAGES[newStatus])) {
       onStatusUpdate(newStatus);
     }
+  }
+
+  // ボタンのクラスを動的に生成
+  function getButtonClass(color: 'green' | 'red') {
+    const baseClass =
+      'inline-flex cursor-pointer justify-center rounded-md border border-transparent shadow-sm disabled:cursor-not-allowed disabled:opacity-50';
+    const sizeClass = compact ? 'px-3 py-1 text-xs font-medium' : 'px-4 py-2 text-sm font-medium';
+
+    const colorClasses = {
+      green: 'bg-green-600 text-white hover:bg-green-700',
+      red: 'bg-red-600 text-white hover:bg-red-700',
+    };
+
+    return `${baseClass} ${sizeClass} ${colorClasses[color]}`;
   }
 </script>
 
@@ -27,7 +44,7 @@
     type="button"
     onclick={() => handleStatusUpdate(LIBRARY_STATUS.PUBLISHED)}
     disabled={isStatusUpdateInProgress}
-    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+    class={getButtonClass('green')}
   >
     承認・公開
   </button>
@@ -35,7 +52,7 @@
     type="button"
     onclick={() => handleStatusUpdate(LIBRARY_STATUS.REJECTED)}
     disabled={isStatusUpdateInProgress}
-    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+    class={getButtonClass('red')}
   >
     拒否
   </button>
@@ -44,7 +61,7 @@
     type="button"
     onclick={() => handleStatusUpdate(LIBRARY_STATUS.REJECTED)}
     disabled={isStatusUpdateInProgress}
-    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+    class={getButtonClass('red')}
   >
     拒否に変更
   </button>
@@ -53,7 +70,7 @@
     type="button"
     onclick={() => handleStatusUpdate(LIBRARY_STATUS.PUBLISHED)}
     disabled={isStatusUpdateInProgress}
-    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+    class={getButtonClass('green')}
   >
     承認・公開
   </button>

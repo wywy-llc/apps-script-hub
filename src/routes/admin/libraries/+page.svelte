@@ -1,62 +1,48 @@
 <script lang="ts">
+  import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import {
+    LIBRARY_STATUS_BADGE_CLASS,
+    LIBRARY_STATUS_TEXT,
+    type LibraryStatus,
+  } from '$lib/constants/library-status.js';
   import type { PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
-  // 全ライブラリの承認・編集・削除を管理
-
-  interface Library {
-    id: string;
-    name: string;
-    scriptId: string;
-    authorName: string;
-    authorUrl: string;
-    status: 'published' | 'pending' | 'rejected';
-    updatedAt: Date;
-    starCount: number;
-    description: string;
-  }
+  // 全ライブラリの承認・削除を管理
 
   export let data: PageData;
 
-  let libraries: Library[] = data.libraries;
+  let libraries = data.libraries;
   let currentPage = 1;
   let totalItems = libraries.length;
   let itemsPerPage = 10;
+  let statusUpdateInProgress: Record<string, boolean> = {};
 
-  function getStatusBadge(status: Library['status']) {
-    switch (status) {
-      case 'published':
-        return 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800';
-      case 'pending':
-        return 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800';
-      default:
-        return 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800';
+  async function handleStatusUpdate(libraryId: string, newStatus: LibraryStatus) {
+    statusUpdateInProgress[libraryId] = true;
+
+    try {
+      const response = await fetch(`/admin/libraries/${libraryId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        // ライブラリのステータスを更新
+        libraries = libraries.map(lib =>
+          lib.id === libraryId ? { ...lib, status: newStatus } : lib
+        );
+      } else {
+        console.error('ステータス更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('ステータス更新エラー:', error);
+    } finally {
+      statusUpdateInProgress[libraryId] = false;
     }
-  }
-
-  function getStatusText(status: Library['status']) {
-    switch (status) {
-      case 'published':
-        return '公開中';
-      case 'pending':
-        return '承認待ち';
-      case 'rejected':
-        return '却下';
-      default:
-        return '不明';
-    }
-  }
-
-  function handleApprove(id: string) {
-    // 承認処理のロジック
-    console.log('承認:', id);
-  }
-
-  function handleEdit(id: string) {
-    // 編集処理のロジック
-    console.log('編集:', id);
   }
 
   function handleDelete(id: string) {
@@ -69,7 +55,7 @@
 
 <svelte:head>
   <title>管理画面 - ライブラリ一覧 - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの承認・編集・削除を管理" />
+  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの承認・削除を管理" />
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -156,36 +142,28 @@
                 </a>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class={getStatusBadge(library.status)}>
-                  {getStatusText(library.status)}
+                <span class={LIBRARY_STATUS_BADGE_CLASS[library.status]}>
+                  {LIBRARY_STATUS_TEXT[library.status]}
                 </span>
               </td>
               <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
                 {new Date(library.updatedAt).toLocaleDateString('ja-JP')}
               </td>
               <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                {#if library.status === 'pending'}
+                <div class="flex items-center justify-end gap-2">
+                  <StatusUpdateButtons
+                    {library}
+                    isStatusUpdateInProgress={statusUpdateInProgress[library.id] || false}
+                    onStatusUpdate={status => handleStatusUpdate(library.id, status)}
+                    compact={true}
+                  />
                   <button
-                    on:click={() => handleApprove(library.id)}
-                    class="text-green-600 hover:text-green-900"
+                    on:click={() => handleDelete(library.id)}
+                    class="ml-2 inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-gray-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    承認
+                    削除
                   </button>
-                {/if}
-                <button
-                  on:click={() => handleEdit(library.id)}
-                  class="text-indigo-600 hover:text-indigo-900 {library.status === 'pending'
-                    ? 'ml-4'
-                    : ''}"
-                >
-                  編集
-                </button>
-                <button
-                  on:click={() => handleDelete(library.id)}
-                  class="ml-4 text-red-600 hover:text-red-900"
-                >
-                  削除
-                </button>
+                </div>
               </td>
             </tr>
           {/each}
