@@ -46,7 +46,7 @@
     disabled={isStatusUpdateInProgress}
     class={getButtonClass('green')}
   >
-    公開
+    公開する
   </button>
 {:else if library.status === LIBRARY_STATUS.PUBLISHED}
   <button
@@ -55,6 +55,6 @@
     disabled={isStatusUpdateInProgress}
     class={getButtonClass('gray')}
   >
-    未公開
+    未公開に戻す
   </button>
 {/if}

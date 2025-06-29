@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
-  import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-status.js';
+  import type { LibraryStatus } from '$lib/constants/library-status.js';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
@@ -20,27 +20,28 @@
   let isStatusUpdateInProgress = $state(false);
   let statusMessage = $state('');
 
-  // アクションの結果を処理
+  // 前回のformの参照を保持してエフェクトの無限ループを防ぐ
+  let previousForm = $state<ActionData | undefined>(undefined);
+
+  // アクションの結果を処理（formが実際に変更された時のみ実行）
   $effect(() => {
-    if (form?.success) {
-      statusMessage = form.message;
-      // ライブラリのステータスを更新
-      if (
-        form.newStatus &&
-        Object.values(LIBRARY_STATUS).includes(form.newStatus as LibraryStatus)
-      ) {
-        library = { ...library, status: form.newStatus as LibraryStatus };
+    // formが実際に変更された場合のみ処理
+    if (form !== previousForm) {
+      previousForm = form;
+
+      if (form?.success) {
+        statusMessage = form.message || '';
+        // 3秒後にメッセージを消去
+        setTimeout(() => {
+          statusMessage = '';
+        }, 3000);
+      } else if (form?.error) {
+        statusMessage = form.error || '';
+        // エラーメッセージは5秒後に消去
+        setTimeout(() => {
+          statusMessage = '';
+        }, 5000);
       }
-      // 3秒後にメッセージを消去
-      setTimeout(() => {
-        statusMessage = '';
-      }, 3000);
-    } else if (form?.error) {
-      statusMessage = form.error;
-      // エラーメッセージは5秒後に消去
-      setTimeout(() => {
-        statusMessage = '';
-      }, 5000);
     }
   });
 
@@ -124,11 +125,14 @@
     use:enhance={() => {
       isStatusUpdateInProgress = true;
       return async ({ result, update }) => {
+        // フォームの状態を更新
         await update();
-        // 成功時にライブラリのステータスを即座に更新
+
+        // ステータス更新の成功時のみライブラリステータスを楽観的に更新
         if (result.type === 'success' && result.data?.success) {
-          library = { ...library, status: 'published' };
+          library = { ...library, status: 'published' as LibraryStatus };
         }
+
         isStatusUpdateInProgress = false;
       };
     }}
@@ -144,11 +148,14 @@
     use:enhance={() => {
       isStatusUpdateInProgress = true;
       return async ({ result, update }) => {
+        // フォームの状態を更新
         await update();
-        // 成功時にライブラリのステータスを即座に更新
+
+        // ステータス更新の成功時のみライブラリステータスを楽観的に更新
         if (result.type === 'success' && result.data?.success) {
-          library = { ...library, status: 'pending' };
+          library = { ...library, status: 'pending' as LibraryStatus };
         }
+
         isStatusUpdateInProgress = false;
       };
     }}
