@@ -92,6 +92,7 @@
 
 <LibraryDetail
   {library}
+  librarySummary={data.librarySummary}
   isAdminMode={false}
   {displayCopyCount}
   onCopyScriptId={handleCopyScriptId}

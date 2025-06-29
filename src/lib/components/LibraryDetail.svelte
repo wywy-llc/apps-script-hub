@@ -5,6 +5,33 @@
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
 
+  interface LibrarySummary {
+    id: string;
+    libraryId: string;
+    libraryNameJa: string | null;
+    libraryNameEn: string | null;
+    purposeJa: string | null;
+    purposeEn: string | null;
+    targetUsersJa: string | null;
+    targetUsersEn: string | null;
+    tagsJa: string[] | null;
+    tagsEn: string[] | null;
+    coreProblemJa: string | null;
+    coreProblemEn: string | null;
+    mainBenefits: Array<{
+      title: {
+        ja: string;
+        en: string;
+      };
+      description: {
+        ja: string;
+        en: string;
+      };
+    }> | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   interface Library {
     id: string;
     name: string;
@@ -33,6 +60,7 @@
 
   interface Props {
     library: Library;
+    librarySummary?: LibrarySummary | null;
     isAdminMode?: boolean;
     form?: Form;
     onScraping?: () => void;
@@ -48,6 +76,7 @@
 
   let {
     library,
+    librarySummary,
     isAdminMode = false,
     form,
     onScraping,
@@ -60,6 +89,9 @@
     displayCopyCount = library.copyCount || 0,
     onCopyScriptId,
   }: Props = $props();
+
+  // 言語設定（今回は日本語固定、将来的に切り替え可能にする）
+  let currentLanguage = $state<'ja' | 'en'>('ja');
 
   // ライブラリメソッドを生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
@@ -160,6 +192,120 @@
             {library.name}
           </h1>
           <p class="mt-2 text-gray-500">{library.description}</p>
+        </div>
+      {/if}
+
+      <!-- ライブラリ概要セクション -->
+      {#if librarySummary}
+        <div class="mt-8">
+          <h2
+            class="mb-6 {isAdminMode
+              ? 'text-2xl font-bold'
+              : 'border-b pb-2 text-2xl font-semibold'}"
+          >
+            ライブラリ概要
+          </h2>
+          <div class={isAdminMode ? 'overflow-hidden rounded-lg bg-white shadow-md' : ''}>
+            <div class={isAdminMode ? 'px-6 py-8' : ''}>
+              <!-- ライブラリ名 -->
+              <div class="mb-6">
+                <h3 class="mb-2 text-xl font-bold text-gray-900">
+                  {currentLanguage === 'ja'
+                    ? librarySummary.libraryNameJa || library.name
+                    : librarySummary.libraryNameEn || library.name}
+                </h3>
+                {#if librarySummary.purposeJa || librarySummary.purposeEn}
+                  <p class="leading-relaxed text-gray-600">
+                    {currentLanguage === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
+                  </p>
+                {/if}
+              </div>
+
+              <!-- 対象ユーザー -->
+              {#if librarySummary.targetUsersJa || librarySummary.targetUsersEn}
+                <div class="mb-6">
+                  <h4 class="mb-2 text-lg font-semibold text-gray-800">対象ユーザー</h4>
+                  <p class="text-gray-600">
+                    {currentLanguage === 'ja'
+                      ? librarySummary.targetUsersJa
+                      : librarySummary.targetUsersEn}
+                  </p>
+                </div>
+              {/if}
+
+              <!-- タグ -->
+              {#if (currentLanguage === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLanguage === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
+                <div class="mb-6">
+                  <h4 class="mb-2 text-lg font-semibold text-gray-800">タグ</h4>
+                  <div class="flex flex-wrap gap-2">
+                    {#each currentLanguage === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
+                      <span
+                        class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
+                      >
+                        {tag}
+                      </span>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
+              <!-- 解決する課題 -->
+              {#if librarySummary.coreProblemJa || librarySummary.coreProblemEn}
+                <div class="mb-6">
+                  <h4 class="mb-2 text-lg font-semibold text-gray-800">解決する課題</h4>
+                  <p class="leading-relaxed text-gray-600">
+                    {currentLanguage === 'ja'
+                      ? librarySummary.coreProblemJa
+                      : librarySummary.coreProblemEn}
+                  </p>
+                </div>
+              {/if}
+
+              <!-- 主な利点 -->
+              {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
+                <div class="mb-6">
+                  <h4 class="mb-3 text-lg font-semibold text-gray-800">主な利点</h4>
+                  <div class="space-y-4">
+                    {#each librarySummary.mainBenefits as benefit, index (index)}
+                      <div class="border-l-4 border-blue-500 pl-4">
+                        <h5 class="mb-1 font-medium text-gray-900">
+                          {currentLanguage === 'ja' ? benefit.title.ja : benefit.title.en}
+                        </h5>
+                        <p class="text-sm leading-relaxed text-gray-600">
+                          {currentLanguage === 'ja'
+                            ? benefit.description.ja
+                            : benefit.description.en}
+                        </p>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
+              <!-- 言語切り替えボタン -->
+              <div class="mt-6 border-t border-gray-200 pt-4">
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm text-gray-500">言語:</span>
+                  <button
+                    onclick={() => (currentLanguage = 'ja')}
+                    class="rounded px-3 py-1 text-sm {currentLanguage === 'ja'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+                  >
+                    日本語
+                  </button>
+                  <button
+                    onclick={() => (currentLanguage = 'en')}
+                    class="rounded px-3 py-1 text-sm {currentLanguage === 'en'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       {/if}
 
