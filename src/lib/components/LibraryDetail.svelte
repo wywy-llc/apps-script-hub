@@ -5,6 +5,7 @@
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
+  // cspell:ignore paraglide
   import type { Locale } from '$lib';
 
   interface LibrarySummary {
@@ -92,7 +93,7 @@
     onCopyScriptId,
   }: Props = $props();
 
-  // Paraglideの現在の言語設定を使用（自動的に更新される）
+  // Paraglide の現在の言語設定を使用（自動的に更新される） // cspell:ignore Paraglide
   let currentLocale = $derived<Locale>(getLocale());
 
   // ライブラリメソッドを生成
@@ -205,7 +206,7 @@
               ? 'text-2xl font-bold'
               : 'border-b pb-2 text-2xl font-semibold'}"
           >
-            ライブラリ概要
+            AI による要約
           </h2>
           <div class={isAdminMode ? 'overflow-hidden rounded-lg bg-white shadow-md' : ''}>
             <div class={isAdminMode ? 'px-6 py-8' : ''}>
@@ -266,7 +267,7 @@
               <!-- 主な利点 -->
               {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
                 <div class="mb-6">
-                  <h4 class="mb-3 text-lg font-semibold text-gray-800">主な利点</h4>
+                  <h4 class="mb-3 text-lg font-semibold text-gray-800">主な特徴</h4>
                   <div class="space-y-4">
                     {#each librarySummary.mainBenefits as benefit, index (index)}
                       <div class="border-l-4 border-blue-500 pl-4">
@@ -282,7 +283,7 @@
                 </div>
               {/if}
 
-              <!-- 言語設定はヘッダーのLanguageSwitcherで管理 -->
+              <!-- 言語設定はヘッダーの LanguageSwitcher で管理 -->
             </div>
           </div>
         </div>
@@ -296,7 +297,7 @@
               ? 'text-2xl font-bold'
               : 'border-b pb-2 text-2xl font-semibold'}"
           >
-            {isAdminMode ? '詳細' : 'README'}
+            GitHub README
           </h2>
           {#if isAdminMode}
             <div class="overflow-hidden rounded-lg bg-white shadow-md">
