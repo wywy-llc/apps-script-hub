@@ -10,6 +10,6 @@ export const DEFAULT_SCRAPER_CONFIG: ScraperConfig = {
     delayBetweenRequests: 1200, // ms
   },
   scriptIdPatterns: GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS,
-  gasTags: ['google-apps-script', 'apps-script'],
+  gasTags: ['google-apps-script', 'apps-script', 'google-workspace', 'google-sheets', 'clasp'],
   verbose: true,
 };

@@ -100,17 +100,17 @@ export class GitHubApiUtils {
         };
       }
 
-      // 最初の3つのタグのみを使用してクエリの長さを制限
-      const limitedTags = validTags.slice(0, 3);
+      // 最初の5つのタグのみを使用してクエリの長さを制限
+      const limitedTags = validTags.slice(0, 5);
       // GitHub Search APIの正しいOR検索クエリ形式を使用
       let query: string;
       if (limitedTags.length === 1) {
         // 単一タグの場合
-        query = `${limitedTags[0].trim()} in:topics language:javascript`;
+        query = `${limitedTags[0].trim()} in:topics`;
       } else {
         // 複数タグの場合：OR演算子を使用
         const tagTerms = limitedTags.map(tag => tag.trim()).join(' OR ');
-        query = `${tagTerms} in:topics language:javascript`;
+        query = `${tagTerms} in:topics`;
       }
 
       const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
@@ -187,7 +187,7 @@ export class GitHubApiUtils {
   ): Promise<TagSearchResult> {
     try {
       // 最もシンプルなクエリを使用
-      const query = 'google-apps-script in:topics language:javascript';
+      const query = 'google-apps-script in:topics';
       const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
         query
       )}&sort=stars&order=desc&per_page=${Math.min(maxResults, 50)}`; // 件数も制限
