@@ -29,6 +29,8 @@
   let endPage = $state(1);
   let perPage = $state(100);
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
+  let bulkUpdateInProgress = $state(false);
+  let bulkUpdateMessage = $state('');
 
   async function handleStatusUpdate(libraryId: string, newStatus: LibraryStatus) {
     statusUpdateInProgress[libraryId] = true;
@@ -80,6 +82,63 @@
       perPage = 100;
     }
   }
+
+  async function handleBulkUpdate() {
+    if (bulkUpdateInProgress) return;
+
+    if (
+      !confirm('全ライブラリの情報を一括更新しますか？この処理には時間がかかる場合があります。')
+    ) {
+      return;
+    }
+
+    bulkUpdateInProgress = true;
+    bulkUpdateMessage = '全ライブラリの一括更新を開始しています...';
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const totalLibraries = libraries.length;
+
+      for (let i = 0; i < libraries.length; i++) {
+        const library = libraries[i];
+        bulkUpdateMessage = `${i + 1}/${totalLibraries} ライブラリを更新中: ${library.name}`;
+
+        try {
+          const response = await fetch(`/admin/libraries/${library.id}/scraping`, {
+            method: 'POST',
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.error(`ライブラリ ${library.name} の更新に失敗:`, await response.text());
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`ライブラリ ${library.name} の更新エラー:`, error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      bulkUpdateMessage = `一括更新が完了しました。成功: ${successCount}件、失敗: ${errorCount}件`;
+
+      setTimeout(() => {
+        bulkUpdateMessage = '';
+        window.location.reload();
+      }, 3000);
+    } catch (error) {
+      console.error('一括更新エラー:', error);
+      bulkUpdateMessage = '一括更新中にエラーが発生しました。';
+    } finally {
+      bulkUpdateInProgress = false;
+      setTimeout(() => {
+        bulkUpdateMessage = '';
+      }, 5000);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -103,8 +162,50 @@
       >
         一括新規追加
       </button>
+      <button
+        onclick={handleBulkUpdate}
+        disabled={bulkUpdateInProgress}
+        class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {#if bulkUpdateInProgress}
+          <svg
+            class="mr-2 h-4 w-4 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          一括更新中...
+        {:else}
+          一括更新
+        {/if}
+      </button>
     </div>
   </div>
+
+  <!-- 一括更新メッセージ -->
+  {#if bulkUpdateMessage}
+    <div class="mb-6 rounded-md bg-blue-50 p-4 text-blue-800">
+      <div class="flex">
+        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium">{bulkUpdateMessage}</p>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- 一括追加フォーム -->
   {#if showBulkAddForm}
