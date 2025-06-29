@@ -23,6 +23,9 @@ export {
   type LibraryTestData,
 } from './library-test-data.factory';
 
+// ライブラリ要約関連のfactory
+export { LibrarySummaryTestDataFactories } from './library-summary-test-data.factory';
+
 // ユーザー関連のfactory
 export {
   DatabaseUserDataFactory,
@@ -37,6 +40,7 @@ export {
  * ```typescript
  * import {
  *   LibraryTestDataFactories,
+ *   LibrarySummaryTestDataFactories,
  *   UserTestDataFactories,
  *   DatabaseLibraryDataFactory,
  *   DatabaseUserDataFactory
@@ -44,6 +48,7 @@ export {
  *
  * // テストデータ生成
  * const libraryData = LibraryTestDataFactories.default.build();
+ * const librarySummary = LibrarySummaryTestDataFactories.oauth.build();
  * const userData = UserTestDataFactories.admin.build();
  *
  * // データベースに直接作成
