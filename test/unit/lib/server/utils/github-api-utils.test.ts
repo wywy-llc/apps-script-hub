@@ -1,11 +1,11 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
-import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 import type {
-  GitHubRepository,
   GitHubReadmeResponse,
+  GitHubRepository,
   GitHubSearchResponse,
 } from '../../../../../src/lib/types/github-scraper.js';
+import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 
 // fetchのモック
 const mockFetch = vi.fn();
@@ -52,7 +52,14 @@ describe('GitHubApiUtils', () => {
       );
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/googleworkspace/apps-script-oauth2'
+        'https://api.github.com/repos/googleworkspace/apps-script-oauth2',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: expect.stringMatching(/^token ghp_/),
+            'User-Agent': 'app-script-hub',
+          },
+        }
       );
       expect(result).toEqual(mockRepoData);
     });
@@ -99,7 +106,13 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.fetchReadme('test', 'repo');
 
-      expect(mockFetch).toHaveBeenCalledWith('https://api.github.com/repos/test/repo/readme');
+      expect(mockFetch).toHaveBeenCalledWith('https://api.github.com/repos/test/repo/readme', {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: expect.stringMatching(/^token ghp_/),
+          'User-Agent': 'app-script-hub',
+        },
+      });
       expect(result).toBe(originalContent);
     });
 
@@ -200,7 +213,14 @@ describe('GitHubApiUtils', () => {
       const result = await GitHubApiUtils.searchRepositoriesByTags(config, 10);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('https://api.github.com/search/repositories?q=')
+        expect.stringContaining('https://api.github.com/search/repositories?q='),
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: expect.stringMatching(/^token ghp_/),
+            'User-Agent': 'app-script-hub',
+          },
+        }
       );
       expect(result.success).toBe(true);
       expect(result.repositories).toHaveLength(1);
@@ -215,7 +235,7 @@ describe('GitHubApiUtils', () => {
       });
 
       const config = {
-        gasTags: ['tag1', 'tag2', 'tag3'],
+        gasTags: ['google-apps-script', 'apps-script', 'gas-library'],
         scriptIdPatterns: [],
         rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
         verbose: false,
@@ -223,10 +243,16 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'topic:tag1 OR topic:tag2 OR topic:tag3 language:javascript';
+      const expectedQuery = '(topic:google-apps-script OR topic:apps-script) language:javascript';
       const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
 
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: expect.stringMatching(/^token ghp_/),
+          'User-Agent': 'app-script-hub',
+        },
+      });
     });
 
     test('maxResultsが100を超える場合は100に制限される', async () => {
@@ -244,7 +270,13 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 150);
 
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100'));
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100'), {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: expect.stringMatching(/^token ghp_/),
+          'User-Agent': 'app-script-hub',
+        },
+      });
     });
 
     test('verboseモードでコンソールログが出力される', async () => {
@@ -256,7 +288,7 @@ describe('GitHubApiUtils', () => {
       });
 
       const config = {
-        gasTags: ['test'],
+        gasTags: ['google-apps-script', 'apps-script'],
         scriptIdPatterns: [],
         rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
         verbose: true,
@@ -266,7 +298,7 @@ describe('GitHubApiUtils', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         'GitHub Search Query:',
-        'topic:test language:javascript'
+        '(topic:google-apps-script OR topic:apps-script) language:javascript'
       );
 
       consoleSpy.mockRestore();
@@ -308,6 +340,62 @@ describe('GitHubApiUtils', () => {
       expect(result.success).toBe(false);
       expect(result.repositories).toHaveLength(0);
       expect(result.error).toBe('Network error');
+    });
+
+    test('422エラーの場合はフォールバック検索を実行する', async () => {
+      const testData = LibraryTestDataFactories.default.build();
+
+      // 最初の検索で422エラー
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 422,
+        statusText: 'Unprocessable Entity',
+        text: () => Promise.resolve('{"message": "Validation Failed"}'),
+      });
+
+      // フォールバック検索は成功
+      const mockSearchResponse: GitHubSearchResponse = {
+        total_count: 1,
+        incomplete_results: false,
+        items: [
+          {
+            name: testData.name,
+            description: testData.description,
+            html_url: testData.repositoryUrl,
+            clone_url: testData.repositoryUrl + '.git',
+            stargazers_count: testData.starCount || 0,
+            owner: {
+              login: testData.authorName,
+              html_url: testData.authorUrl,
+            },
+            license: {
+              name: testData.licenseType || 'MIT',
+              url: testData.licenseUrl || '',
+            },
+            created_at: '2023-01-01T00:00:00Z',
+            updated_at: '2023-12-01T00:00:00Z',
+          },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSearchResponse),
+      });
+
+      const config = {
+        gasTags: ['google-apps-script', 'apps-script'],
+        scriptIdPatterns: [],
+        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        verbose: false,
+      };
+
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config);
+
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(1);
+      expect(result.totalFound).toBe(1);
+      expect(mockFetch).toHaveBeenCalledTimes(2); // 最初の検索 + フォールバック検索
     });
   });
 

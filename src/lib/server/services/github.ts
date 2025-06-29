@@ -1,5 +1,5 @@
-import { GITHUB_TOKEN } from '$env/static/private';
 import { LICENSE_TYPES, normalizeLicenseName } from '$lib/constants/license-types.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 
 /**
  * GitHub API サービス
@@ -17,19 +17,7 @@ export class FetchGithubRepoService {
    * @returns GitHub リポジトリ情報
    */
   static async call(owner: string, repo: string) {
-    // GitHub API呼び出し用のヘッダー設定
-    const headers: Record<string, string> = {
-      Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'app-script-hub',
-    };
-
-    // GitHub API トークンが必須
-    if (!GITHUB_TOKEN) {
-      throw new Error(
-        'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
-      );
-    }
-    headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+    const headers = GitHubApiUtils.createHeaders();
 
     const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
 
@@ -70,19 +58,7 @@ export class FetchGithubLicenseService {
    */
   static async call(owner: string, repo: string): Promise<{ type: string; url: string }> {
     try {
-      // GitHub API呼び出し用のヘッダー設定
-      const headers: Record<string, string> = {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'app-script-hub',
-      };
-
-      // GitHub API トークンが必須
-      if (!GITHUB_TOKEN) {
-        throw new Error(
-          'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
-        );
-      }
-      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+      const headers = GitHubApiUtils.createHeaders();
 
       const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/license`, {
         headers,
@@ -126,19 +102,7 @@ export class FetchGithubReadmeService {
    */
   static async call(owner: string, repo: string): Promise<string> {
     try {
-      // GitHub API呼び出し用のヘッダー設定
-      const headers: Record<string, string> = {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'app-script-hub',
-      };
-
-      // GitHub API トークンが必須
-      if (!GITHUB_TOKEN) {
-        throw new Error(
-          'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
-        );
-      }
-      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+      const headers = GitHubApiUtils.createHeaders();
 
       const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
         headers,
