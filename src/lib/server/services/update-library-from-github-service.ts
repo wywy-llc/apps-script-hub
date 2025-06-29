@@ -59,7 +59,13 @@ export class UpdateLibraryFromGithubService {
 
     // 新しいlastCommitAtと既存データを比較
     const newLastCommitAt = new Date(repoData.pushed_at);
-    const shouldGenerateSummary = libraryData.lastCommitAt.getTime() !== newLastCommitAt.getTime();
+    const hasCommitChanges = libraryData.lastCommitAt.getTime() !== newLastCommitAt.getTime();
+
+    // library_summaryが存在するかチェック
+    const summaryExists = await SaveLibrarySummaryService.exists(libraryId);
+
+    // AI要約生成判定: lastCommitAtに変化がある または library_summaryが存在しない場合
+    const shouldGenerateSummary = hasCommitChanges || !summaryExists;
 
     // ライブラリを更新
     await db
@@ -79,10 +85,17 @@ export class UpdateLibraryFromGithubService {
       })
       .where(eq(library.id, libraryId));
 
-    // AIによるライブラリ要約を生成してDBに保存（lastCommitAtに変化がある場合のみ）
+    // AIによるライブラリ要約を生成してDBに保存（lastCommitAtに変化がある または library_summaryが存在しない場合）
     if (shouldGenerateSummary) {
       try {
-        console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        if (hasCommitChanges && summaryExists) {
+          console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        } else if (!summaryExists) {
+          console.log(`library_summaryが存在しないため、AI要約を生成します: ${libraryId}`);
+        } else {
+          console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        }
+
         const summary = await GenerateLibrarySummaryService.call({
           githubUrl: repoData.html_url,
         });
@@ -92,7 +105,9 @@ export class UpdateLibraryFromGithubService {
         // エラーが発生してもライブラリ更新処理は続行
       }
     } else {
-      console.log(`lastCommitAtに変化がないため、AI要約生成をスキップします: ${libraryId}`);
+      console.log(
+        `lastCommitAtに変化がなく、library_summaryも存在するため、AI要約生成をスキップします: ${libraryId}`
+      );
     }
   }
 }

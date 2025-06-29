@@ -9,6 +9,21 @@ import type { LibrarySummary } from '$lib/types/library-summary.js';
  */
 export class SaveLibrarySummaryService {
   /**
+   * 指定されたライブラリIDのlibrary_summaryが存在するかチェック
+   * @param libraryId ライブラリID
+   * @returns 存在する場合true、存在しない場合false
+   */
+  static async exists(libraryId: string): Promise<boolean> {
+    const existing = await db
+      .select()
+      .from(librarySummary)
+      .where(eq(librarySummary.libraryId, libraryId))
+      .limit(1);
+
+    return existing.length > 0;
+  }
+
+  /**
    * LibrarySummaryデータをDBに保存する
    * @param libraryId ライブラリID（library.idの外部キー）
    * @param summary ライブラリ要約データ

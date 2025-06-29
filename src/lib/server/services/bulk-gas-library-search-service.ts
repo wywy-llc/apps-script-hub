@@ -560,10 +560,20 @@ export class BulkGASLibrarySearchService {
                     repo.html_url,
                     new Date(scrapeResult.data.lastCommitAt)
                   );
-                  shouldGenerateAiSummary = commitStatus.isNew || commitStatus.shouldUpdate;
+
+                  let summaryExists = false;
+                  if (commitStatus.libraryId) {
+                    // 既存ライブラリの場合、library_summaryの存在をチェック
+                    summaryExists = await SaveLibrarySummaryService.exists(commitStatus.libraryId);
+                  }
+
+                  // 新規ライブラリ、lastCommitAtに変化、またはlibrary_summaryが存在しない場合
+                  shouldGenerateAiSummary =
+                    commitStatus.isNew || commitStatus.shouldUpdate || !summaryExists;
+
                   if (config.verbose && !shouldGenerateAiSummary) {
                     console.log(
-                      `  ⏭️  ${repo.name}: lastCommitAtに変化がないため、AI要約生成をスキップします`
+                      `  ⏭️  ${repo.name}: lastCommitAtに変化がなく、library_summaryも存在するため、AI要約生成をスキップします`
                     );
                   }
                 } catch {

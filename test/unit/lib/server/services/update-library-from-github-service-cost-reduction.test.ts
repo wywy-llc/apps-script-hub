@@ -17,6 +17,7 @@ vi.mock('../../../../../src/lib/server/services/generate-library-summary-service
 vi.mock('../../../../../src/lib/server/services/save-library-summary-service.js', () => ({
   SaveLibrarySummaryService: {
     call: vi.fn(),
+    exists: vi.fn(),
   },
 }));
 
@@ -91,6 +92,9 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
     mockFetchGithubLicenseService.call.mockResolvedValue(mockLicenseInfo);
 
+    // SaveLibrarySummaryService.existsのデフォルトモック（library_summaryが存在しない前提）
+    mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
+
     // GitHub API レスポンスのモック
     const mockRepoResponse = {
       ok: true,
@@ -112,6 +116,9 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
     // pushed_atが既存のlastCommitAtと同じ
     mockRepoData.pushed_at = sameLastCommitAt.toISOString();
 
+    // library_summaryが既に存在する場合をシミュレート
+    mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
+
     await UpdateLibraryFromGithubService.call(libraryId);
 
     // AI要約生成サービスが呼び出されないことを確認
@@ -122,6 +129,46 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
   test('lastCommitAtが異なる場合、AI要約生成を実行する', async () => {
     // pushed_atが既存のlastCommitAtと異なる
     mockRepoData.pushed_at = newLastCommitAt.toISOString();
+
+    // library_summaryが既に存在していてもlastCommitAtに変化がある場合は生成する
+    mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
+
+    const mockSummary = {
+      basicInfo: {
+        libraryName: { ja: 'テストライブラリ', en: 'Test Library' },
+        purpose: { ja: 'テスト用', en: 'For testing' },
+        targetUsers: { ja: 'テスト開発者', en: 'Test developers' },
+        tags: { ja: ['テスト'], en: ['test'] },
+      },
+      functionality: {
+        coreProblem: { ja: 'テストの複雑さ', en: 'Testing complexity' },
+        mainBenefits: [
+          {
+            title: { ja: 'シンプル', en: 'Simple' },
+            description: { ja: '簡単', en: 'Easy' },
+          },
+        ],
+      },
+    };
+
+    mockGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
+    mockSaveLibrarySummaryService.call.mockResolvedValue(undefined);
+
+    await UpdateLibraryFromGithubService.call(libraryId);
+
+    // AI要約生成サービスが呼び出されることを確認
+    expect(mockGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
+      githubUrl: mockRepoData.html_url,
+    });
+    expect(mockSaveLibrarySummaryService.call).toHaveBeenCalledWith(libraryId, mockSummary);
+  });
+
+  test('library_summaryが存在しない場合、lastCommitAtに変化がなくてもAI要約生成を実行する', async () => {
+    // pushed_atが既存のlastCommitAtと同じ
+    mockRepoData.pushed_at = sameLastCommitAt.toISOString();
+
+    // library_summaryが存在しない場合をシミュレート
+    mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
 
     const mockSummary = {
       basicInfo: {
