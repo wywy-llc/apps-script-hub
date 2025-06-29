@@ -28,7 +28,7 @@ test.describe('管理者画面 - ライブラリ承認機能', () => {
     await page.click('button:text-is("公開")');
 
     // 5. 公開状態への変更確認
-    await expect(page.locator('text=公開')).toBeVisible();
+    await expect(page.locator('span.bg-green-100:has-text("公開")')).toBeVisible();
     await expect(page.locator('text=ライブラリを公開しました。')).toBeVisible();
 
     // 6. 公開状態のボタン表示確認
@@ -129,7 +129,7 @@ test.describe('管理者画面 - ライブラリ承認機能', () => {
       await dialog.accept();
     });
     await page.click('button:text-is("公開")');
-    await expect(page.locator('text=公開')).toBeVisible();
+    await expect(page.locator('span.bg-green-100:has-text("公開")')).toBeVisible();
 
     // 3. 2つ目のライブラリは依然として未公開
     await page.goto(`/admin/libraries/${library2Id}`);
@@ -138,7 +138,7 @@ test.describe('管理者画面 - ライブラリ承認機能', () => {
 
     // 4. 1つ目のライブラリは依然として公開中
     await page.goto(`/admin/libraries/${library1Id}`);
-    await expect(page.locator('text=公開')).toBeVisible();
+    await expect(page.locator('span.bg-green-100:has-text("公開")')).toBeVisible();
     await expect(page.locator('button:text-is("未公開")')).toBeVisible();
   });
 });

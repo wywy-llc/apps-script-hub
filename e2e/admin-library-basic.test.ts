@@ -46,7 +46,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     await expect(page.locator(`text=${testData.expectedDescription}`).first()).toBeVisible();
 
     // ステータス
-    await expect(page.locator('text=承認待ち')).toBeVisible();
+    await expect(page.locator('text=未公開')).toBeVisible();
 
     // 7. README情報が取得・表示されているか確認
     await expect(page.locator('.markdown-body')).toBeVisible();
@@ -54,8 +54,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
     // 8. 管理者機能ボタンの確認
     await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();
     await expect(page.locator('button:has-text("編集")')).toBeVisible();
-    await expect(page.locator('button:has-text("承認・公開")')).toBeVisible();
-    await expect(page.locator('button:has-text("拒否")')).toBeVisible();
+    await expect(page.locator('button:has-text("公開")')).toBeVisible();
   });
 
   test('簡単なケース: googleworkspace/apps-script-oauth2の登録テスト', async ({ page }) => {
@@ -80,7 +79,7 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
       page.locator('dd').filter({ hasText: 'apps-script-oauth2' }).first()
     ).toBeVisible();
     await expect(page.locator('text=googleworkspace').first()).toBeVisible();
-    await expect(page.locator('text=承認待ち')).toBeVisible();
+    await expect(page.locator('text=未公開')).toBeVisible();
   });
 
   test('管理者トップページのリダイレクト確認', async ({ page }) => {
