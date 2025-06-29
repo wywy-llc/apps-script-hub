@@ -2,7 +2,11 @@ import { db, testConnection } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
-import { FetchGithubReadmeService, FetchGithubRepoService } from './github.js';
+import {
+  FetchGithubLicenseService,
+  FetchGithubReadmeService,
+  FetchGithubRepoService,
+} from './github.js';
 
 /**
  * ライブラリを新規作成するサービス
@@ -51,9 +55,10 @@ export class CreateLibraryService {
     }
 
     // GitHub から情報を取得
-    const [repoInfo, readmeContent] = await Promise.all([
+    const [repoInfo, readmeContent, licenseInfo] = await Promise.all([
       FetchGithubRepoService.call(owner, repo),
       FetchGithubReadmeService.call(owner, repo),
+      FetchGithubLicenseService.call(owner, repo),
     ]);
 
     // ライブラリを作成
@@ -70,6 +75,8 @@ export class CreateLibraryService {
       description: repoInfo.description,
       readmeContent: readmeContent,
       starCount: repoInfo.starCount,
+      licenseType: licenseInfo.type,
+      licenseUrl: licenseInfo.url,
       status: 'pending',
     });
 

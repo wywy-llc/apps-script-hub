@@ -1,5 +1,5 @@
-import { sql } from 'drizzle-orm';
 import { LIBRARY_STATUS, LibraryStatus } from '../../src/lib/constants/library-status';
+import { LICENSE_TYPES } from '../../src/lib/constants/license-types';
 import { library } from '../../src/lib/server/db/schema';
 import { createDatabaseFactory, createPresetFactories, generateUniqueId } from './base.factory';
 
@@ -46,6 +46,8 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     description: 'OAuth2 library for Google Apps Script',
     readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
     starCount: 100,
+    licenseType: LICENSE_TYPES.APACHE_2_0,
+    licenseUrl: 'https://github.com/googleworkspace/apps-script-oauth2/blob/main/LICENSE',
     status: LIBRARY_STATUS.PENDING,
   }),
   alternative: () => ({
@@ -57,6 +59,8 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     description: 'Sample library for testing',
     readmeContent: '# Sample Library\n\nA sample library for testing purposes',
     starCount: 50,
+    licenseType: LICENSE_TYPES.MIT,
+    licenseUrl: 'https://github.com/example/sample-library/blob/main/LICENSE',
     status: LIBRARY_STATUS.PENDING,
   }),
 });
@@ -75,6 +79,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     description: 'スプレッドシートやCloud Loggingに簡単・高機能なログ出力機能を追加します。',
     readmeContent: '# GasLogger\n\nGoogle Apps Script用のロギングライブラリです。',
     starCount: 847,
+    licenseType: LICENSE_TYPES.MIT,
+    licenseUrl: 'https://github.com/gas-developer/GasLogger/blob/main/LICENSE',
     status: LIBRARY_STATUS.PUBLISHED,
   }),
   pending: () => ({
@@ -86,6 +92,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     description: '承認待ちのライブラリです。検索結果には表示されません。',
     readmeContent: '# PendingLibrary\n\n承認待ちのライブラリです。',
     starCount: 10,
+    licenseType: LICENSE_TYPES.APACHE_2_0,
+    licenseUrl: 'https://github.com/test-user/PendingLibrary/blob/main/LICENSE',
     status: LIBRARY_STATUS.PENDING,
   }),
   rejected: () => ({
@@ -97,6 +105,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     description: '拒否されたライブラリです。検索結果には表示されません。',
     readmeContent: '# RejectedLibrary\n\n拒否されたライブラリです。',
     starCount: 5,
+    licenseType: LICENSE_TYPES.UNKNOWN,
+    licenseUrl: 'https://github.com/bad-user/RejectedLibrary',
     status: LIBRARY_STATUS.REJECTED,
   }),
   gasDateFormatter: () => ({
@@ -108,6 +118,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     description: 'Moment.jsライクな日時フォーマットライブラリ',
     readmeContent: '# GasDateFormatter\n\n日時フォーマットライブラリです。',
     starCount: 234,
+    licenseType: LICENSE_TYPES.BSD_3_CLAUSE,
+    licenseUrl: 'https://github.com/date-wizard/GasDateFormatter/blob/main/LICENSE',
     status: LIBRARY_STATUS.PUBLISHED,
   }),
   gasCalendarSync: () => ({
@@ -119,6 +131,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     description: 'Googleカレンダー同期ライブラリ',
     readmeContent: '# GasCalendarSync\n\nカレンダー同期ライブラリです。',
     starCount: 456,
+    licenseType: LICENSE_TYPES.MIT,
+    licenseUrl: 'https://github.com/sync-expert/GasCalendarSync/blob/main/LICENSE',
     status: LIBRARY_STATUS.PUBLISHED,
   }),
 });
@@ -141,21 +155,13 @@ export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryD
       description: 'A library for OAuth2 in Google Apps Script',
       readmeContent: '# Apps Script OAuth2\n\nOAuth2 library for Google Apps Script',
       starCount: 100,
+      licenseType: LICENSE_TYPES.APACHE_2_0,
+      licenseUrl: `https://github.com/googleworkspace/apps-script-oauth2-${timestamp}/blob/main/LICENSE`,
       status: LIBRARY_STATUS.PENDING,
     };
   },
   async (db, libraryData) => {
-    await db.execute(sql`
-      INSERT INTO "library" (
-        "id", "name", "script_id", "repository_url", "author_url", 
-        "author_name", "description", "readme_content", "star_count", "status"
-      ) VALUES (
-        ${libraryData.id}, ${libraryData.name}, ${libraryData.scriptId}, 
-        ${libraryData.repositoryUrl}, ${libraryData.authorUrl}, ${libraryData.authorName}, 
-        ${libraryData.description}, ${libraryData.readmeContent}, ${libraryData.starCount}, 
-        ${libraryData.status}
-      )
-    `);
+    await db.insert(library).values(libraryData);
     return libraryData.id;
   }
 );
