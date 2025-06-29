@@ -191,11 +191,18 @@
           {#if isAdminMode}
             <div class="overflow-hidden rounded-lg bg-white shadow-md">
               <div class="px-6">
-                <MarkdownRenderer content={library.readmeContent} />
+                <MarkdownRenderer
+                  content={library.readmeContent}
+                  repositoryUrl={library.repositoryUrl}
+                />
               </div>
             </div>
           {:else}
-            <MarkdownRenderer content={library.readmeContent} class="!p-0" />
+            <MarkdownRenderer
+              content={library.readmeContent}
+              repositoryUrl={library.repositoryUrl}
+              class="!p-0"
+            />
           {/if}
         </div>
       {:else}
