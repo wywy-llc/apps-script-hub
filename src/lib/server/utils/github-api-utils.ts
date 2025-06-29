@@ -75,7 +75,8 @@ export class GitHubApiUtils {
   }
 
   /**
-   * GitHub Search APIでGASタグのリポジトリを検索
+   * GitHub Search APIでGASタグのリポジトリを検索（ページング対応）
+   * maxResultsが100を超える場合は複数ページから取得
    */
   public static async searchRepositoriesByTags(
     config: ScraperConfig,
@@ -113,9 +114,10 @@ export class GitHubApiUtils {
         query = `${tagTerms} in:topics`;
       }
 
-      const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
-        query
-      )}&sort=stars&order=desc&per_page=${Math.min(maxResults, 100)}`;
+      // GitHub APIの制限：1000件まで、1ページあたり100件まで
+      const apiMaxResults = Math.min(maxResults, 1000);
+      const perPage = 100;
+      const totalPages = Math.ceil(apiMaxResults / perPage);
 
       if (config.verbose) {
         console.log('Original gasTags:', config.gasTags);
@@ -123,39 +125,89 @@ export class GitHubApiUtils {
         console.log('Valid tags:', validTags);
         console.log('Limited tags:', limitedTags);
         console.log('GitHub Search Query:', query);
-        console.log('GitHub Search URL:', searchUrl);
+        console.log(`取得予定件数: ${apiMaxResults}件 (${totalPages}ページ)`);
       }
 
-      const headers = this.createHeaders();
-      const response = await fetch(searchUrl, { headers });
+      let allRepositories: GitHubRepository[] = [];
+      let totalFound = 0;
 
-      // エラーレスポンスの詳細情報を取得
-      if (!response.ok) {
-        let errorDetails = `${response.status} ${response.statusText}`;
-        try {
-          const errorBody = await response.text();
-          if (errorBody) {
-            const errorData = JSON.parse(errorBody);
-            if (errorData.message) {
-              errorDetails += `: ${errorData.message}`;
-            }
-            if (errorData.errors) {
-              errorDetails += ` - ${JSON.stringify(errorData.errors)}`;
-            }
-          }
-        } catch {
-          // JSONパースエラーは無視
+      // 複数ページから検索結果を取得
+      for (let page = 1; page <= totalPages; page++) {
+        const remainingResults = apiMaxResults - allRepositories.length;
+        const pageSize = Math.min(perPage, remainingResults);
+
+        const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
+          query
+        )}&sort=stars&order=desc&per_page=${pageSize}&page=${page}`;
+
+        if (config.verbose) {
+          console.log(`ページ ${page}/${totalPages} を検索中: ${searchUrl}`);
         }
-        throw new Error(`GitHub Search API Error: ${errorDetails}`);
+
+        const headers = this.createHeaders();
+        const response = await fetch(searchUrl, { headers });
+
+        // エラーレスポンスの詳細情報を取得
+        if (!response.ok) {
+          let errorDetails = `${response.status} ${response.statusText}`;
+          try {
+            const errorBody = await response.text();
+            if (errorBody) {
+              const errorData = JSON.parse(errorBody);
+              if (errorData.message) {
+                errorDetails += `: ${errorData.message}`;
+              }
+              if (errorData.errors) {
+                errorDetails += ` - ${JSON.stringify(errorData.errors)}`;
+              }
+            }
+          } catch {
+            // JSONパースエラーは無視
+          }
+          throw new Error(`GitHub Search API Error: ${errorDetails}`);
+        }
+
+        const searchResult: GitHubSearchResponse = await response.json();
+
+        // 初回のtotal_countを保存
+        if (page === 1) {
+          totalFound = searchResult.total_count;
+        }
+
+        allRepositories.push(...searchResult.items);
+
+        if (config.verbose) {
+          console.log(
+            `ページ ${page}: ${searchResult.items.length}件取得 (累計: ${allRepositories.length}件)`
+          );
+        }
+
+        // 必要な件数に達したら終了
+        if (allRepositories.length >= apiMaxResults) {
+          break;
+        }
+
+        // 検索結果が空の場合は終了
+        if (searchResult.items.length === 0) {
+          break;
+        }
+
+        // GitHub API レート制限対策: ページ間で少し待機
+        if (page < totalPages) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
       }
 
-      const searchResult: GitHubSearchResponse = await response.json();
+      // maxResultsを超えた場合は切り詰める
+      if (allRepositories.length > maxResults) {
+        allRepositories = allRepositories.slice(0, maxResults);
+      }
 
       return {
         success: true,
-        repositories: searchResult.items,
-        totalFound: searchResult.total_count,
-        processedCount: searchResult.items.length,
+        repositories: allRepositories,
+        totalFound,
+        processedCount: allRepositories.length,
       };
     } catch (error) {
       console.error('GitHub Search エラー:', error);
@@ -218,6 +270,158 @@ export class GitHubApiUtils {
         totalFound: 0,
         processedCount: 0,
         error: error instanceof Error ? error.message : 'フォールバック検索に失敗しました',
+      };
+    }
+  }
+
+  /**
+   * GitHub Search APIでGASタグのリポジトリを検索（ページ範囲指定）
+   * 指定されたページ範囲から検索結果を取得
+   *
+   * @param config - スクレイパー設定
+   * @param startPage - 開始ページ（1から開始）
+   * @param endPage - 終了ページ
+   * @param perPage - 1ページあたりの件数（10, 25, 50, 100）
+   * @returns ページ範囲指定検索結果
+   */
+  public static async searchRepositoriesByPageRange(
+    config: ScraperConfig,
+    startPage: number,
+    endPage: number,
+    perPage: number
+  ): Promise<TagSearchResult> {
+    try {
+      // gasTagsが空の場合はデフォルトタグを使用
+      const tagsToUse =
+        config.gasTags && config.gasTags.length > 0
+          ? config.gasTags
+          : ['google-apps-script', 'apps-script'];
+
+      // 各タグが有効かチェック
+      const validTags = tagsToUse.filter(tag => tag && tag.trim().length > 0);
+      if (validTags.length === 0) {
+        return {
+          success: false,
+          repositories: [],
+          totalFound: 0,
+          processedCount: 0,
+          error: '有効なGASタグが指定されていません',
+        };
+      }
+
+      // 最初の5つのタグのみを使用してクエリの長さを制限
+      const limitedTags = validTags.slice(0, 5);
+      // GitHub Search APIの正しいOR検索クエリ形式を使用
+      let query: string;
+      if (limitedTags.length === 1) {
+        // 単一タグの場合
+        query = `${limitedTags[0].trim()} in:topics`;
+      } else {
+        // 複数タグの場合：OR演算子を使用
+        const tagTerms = limitedTags.map(tag => tag.trim()).join(' OR ');
+        query = `${tagTerms} in:topics`;
+      }
+
+      const totalPages = endPage - startPage + 1;
+      const allRepositories: GitHubRepository[] = [];
+      let totalFound = 0;
+
+      if (config.verbose) {
+        console.log('Original gasTags:', config.gasTags);
+        console.log('Tags to use:', tagsToUse);
+        console.log('Valid tags:', validTags);
+        console.log('Limited tags:', limitedTags);
+        console.log('GitHub Search Query:', query);
+        console.log(
+          `ページ範囲指定検索: ${startPage} - ${endPage} (${perPage}件/ページ, ${totalPages}ページ)`
+        );
+      }
+
+      // 指定されたページ範囲で検索結果を取得
+      for (let page = startPage; page <= endPage; page++) {
+        const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
+          query
+        )}&sort=stars&order=desc&per_page=${perPage}&page=${page}`;
+
+        if (config.verbose) {
+          console.log(`ページ ${page}/${endPage} を検索中: ${searchUrl}`);
+        }
+
+        const headers = this.createHeaders();
+        const response = await fetch(searchUrl, { headers });
+
+        // エラーレスポンスの詳細情報を取得
+        if (!response.ok) {
+          let errorDetails = `${response.status} ${response.statusText}`;
+          try {
+            const errorBody = await response.text();
+            if (errorBody) {
+              const errorData = JSON.parse(errorBody);
+              if (errorData.message) {
+                errorDetails += `: ${errorData.message}`;
+              }
+              if (errorData.errors) {
+                errorDetails += ` - ${JSON.stringify(errorData.errors)}`;
+              }
+            }
+          } catch {
+            // JSONパースエラーは無視
+          }
+          throw new Error(`GitHub Search API Error: ${errorDetails}`);
+        }
+
+        const searchResult: GitHubSearchResponse = await response.json();
+
+        // 初回のtotal_countを保存
+        if (page === startPage) {
+          totalFound = searchResult.total_count;
+        }
+
+        allRepositories.push(...searchResult.items);
+
+        if (config.verbose) {
+          console.log(
+            `ページ ${page}: ${searchResult.items.length}件取得 (累計: ${allRepositories.length}件)`
+          );
+        }
+
+        // 検索結果が空の場合は終了
+        if (searchResult.items.length === 0) {
+          if (config.verbose) {
+            console.log(`ページ ${page} で検索結果が0件のため処理を終了します`);
+          }
+          break;
+        }
+
+        // GitHub API レート制限対策: ページ間で少し待機
+        if (page < endPage) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+
+      return {
+        success: true,
+        repositories: allRepositories,
+        totalFound,
+        processedCount: allRepositories.length,
+      };
+    } catch (error) {
+      console.error('GitHub Search エラー:', error);
+
+      // フォールバック: より単純な検索を試行
+      if (error instanceof Error && error.message.includes('422')) {
+        if (config.verbose) {
+          console.log('フォールバック検索を実行中...');
+        }
+        return this.fallbackSearch(perPage * (endPage - startPage + 1), config.verbose);
+      }
+
+      return {
+        success: false,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+        error: error instanceof Error ? error.message : 'GitHub検索に失敗しました',
       };
     }
   }

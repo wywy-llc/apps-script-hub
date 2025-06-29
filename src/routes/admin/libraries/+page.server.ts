@@ -35,16 +35,48 @@ export const actions: Actions = {
   bulkAddByTags: async ({ request }) => {
     try {
       const formData = await request.formData();
-      const maxResultsStr = formData.get('maxResults') as string;
+      const startPageStr = formData.get('startPage') as string;
+      const endPageStr = formData.get('endPage') as string;
+      const perPageStr = formData.get('perPage') as string;
 
-      if (!maxResultsStr?.trim()) {
-        return fail(400, { error: '検索数を入力してください。' });
+      // パラメータの基本検証
+      if (!startPageStr?.trim() || !endPageStr?.trim() || !perPageStr?.trim()) {
+        return fail(400, { error: 'ページ範囲の設定が不正です。' });
       }
 
-      const maxResults = parseInt(maxResultsStr, 10);
+      const startPage = parseInt(startPageStr, 10);
+      const endPage = parseInt(endPageStr, 10);
+      const perPage = parseInt(perPageStr, 10);
 
-      if (isNaN(maxResults) || maxResults < 1 || maxResults > 100) {
-        return fail(400, { error: '検索数は1から100の間で入力してください。' });
+      // 数値範囲の検証
+      if (isNaN(startPage) || isNaN(endPage) || isNaN(perPage)) {
+        return fail(400, { error: 'ページ範囲の値が不正です。' });
+      }
+
+      if (startPage < 1 || startPage > 10) {
+        return fail(400, { error: '開始ページは1から10の間で入力してください。' });
+      }
+
+      if (endPage < 1 || endPage > 10) {
+        return fail(400, { error: '終了ページは1から10の間で入力してください。' });
+      }
+
+      if (startPage > endPage) {
+        return fail(400, { error: '開始ページは終了ページ以下である必要があります。' });
+      }
+
+      if (![10, 25, 50, 100].includes(perPage)) {
+        return fail(400, {
+          error: '1ページあたりの件数は10, 25, 50, 100のいずれかを選択してください。',
+        });
+      }
+
+      // 総検索件数の計算と制限チェック
+      const totalResults = (endPage - startPage + 1) * perPage;
+      if (totalResults > 1000) {
+        return fail(400, {
+          error: '検索総件数が1000件を超えています。ページ範囲を調整してください。',
+        });
       }
 
       // 重複チェック関数
@@ -57,8 +89,13 @@ export const actions: Actions = {
         return existing.length > 0;
       };
 
-      // GASタグによる一括スクレイピング実行
-      const result = await BulkGASLibrarySearchService.call(maxResults, duplicateChecker);
+      // GASタグによる一括スクレイピング実行（ページ範囲指定）
+      const result = await BulkGASLibrarySearchService.callWithPageRange(
+        startPage,
+        endPage,
+        perPage,
+        duplicateChecker
+      );
 
       // 成功したデータをデータベースに保存
       const insertedLibraries = [];

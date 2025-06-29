@@ -247,7 +247,7 @@ describe('GitHubApiUtils', () => {
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
       const expectedQuery = 'google-apps-script OR apps-script OR gas-library in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
@@ -259,7 +259,7 @@ describe('GitHubApiUtils', () => {
       });
     });
 
-    test('maxResultsが100を超える場合は100に制限される', async () => {
+    test('maxResultsが1000を超える場合は1000に制限される', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
@@ -272,9 +272,9 @@ describe('GitHubApiUtils', () => {
         verbose: false,
       };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config, 150);
+      await GitHubApiUtils.searchRepositoriesByTags(config, 1500);
 
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100'), {
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100&page=1'), {
         headers: {
           Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
@@ -282,6 +282,199 @@ describe('GitHubApiUtils', () => {
           'X-GitHub-Api-Version': '2022-11-28',
         },
       });
+    });
+
+    test('ページング機能が正しく動作する（200件取得の場合）', async () => {
+      const testData = LibraryTestDataFactories.default.build();
+
+      // 1ページ目のレスポンス
+      const mockPage1Response = {
+        total_count: 200,
+        incomplete_results: false,
+        items: Array.from({ length: 100 }, (_, i) => ({
+          name: `${testData.name}-${i}`,
+          description: testData.description,
+          html_url: `${testData.repositoryUrl}-${i}`,
+          clone_url: `${testData.repositoryUrl}-${i}.git`,
+          stargazers_count: testData.starCount || 0,
+          owner: {
+            login: testData.authorName,
+            html_url: testData.authorUrl,
+          },
+          license: {
+            name: testData.licenseType || 'MIT',
+            url: testData.licenseUrl || '',
+          },
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z',
+        })),
+      };
+
+      // 2ページ目のレスポンス
+      const mockPage2Response = {
+        total_count: 200,
+        incomplete_results: false,
+        items: Array.from({ length: 100 }, (_, i) => ({
+          name: `${testData.name}-${i + 100}`,
+          description: testData.description,
+          html_url: `${testData.repositoryUrl}-${i + 100}`,
+          clone_url: `${testData.repositoryUrl}-${i + 100}.git`,
+          stargazers_count: testData.starCount || 0,
+          owner: {
+            login: testData.authorName,
+            html_url: testData.authorUrl,
+          },
+          license: {
+            name: testData.licenseType || 'MIT',
+            url: testData.licenseUrl || '',
+          },
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z',
+        })),
+      };
+
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockPage1Response),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockPage2Response),
+        });
+
+      const config = {
+        gasTags: ['google-apps-script'],
+        scriptIdPatterns: [],
+        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        verbose: false,
+      };
+
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config, 200);
+
+      // 2回のAPIコールが実行されることを確認
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      // 1ページ目のURL確認
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining('per_page=100&page=1'),
+        expect.any(Object)
+      );
+
+      // 2ページ目のURL確認
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('per_page=100&page=2'),
+        expect.any(Object)
+      );
+
+      // 結果の検証
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(200);
+      expect(result.totalFound).toBe(200);
+      expect(result.processedCount).toBe(200);
+    });
+
+    test('ページ範囲指定機能が正しく動作する', async () => {
+      const testData = LibraryTestDataFactories.default.build();
+
+      // ページ1のレスポンス
+      const mockPage1Response = {
+        total_count: 150,
+        incomplete_results: false,
+        items: Array.from({ length: 50 }, (_, i) => ({
+          name: `${testData.name}-page1-${i}`,
+          description: testData.description,
+          html_url: `${testData.repositoryUrl}-page1-${i}`,
+          clone_url: `${testData.repositoryUrl}-page1-${i}.git`,
+          stargazers_count: testData.starCount || 0,
+          owner: {
+            login: testData.authorName,
+            html_url: testData.authorUrl,
+          },
+          license: {
+            name: testData.licenseType || 'MIT',
+            url: testData.licenseUrl || '',
+          },
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z',
+        })),
+      };
+
+      // ページ2のレスポンス
+      const mockPage2Response = {
+        total_count: 150,
+        incomplete_results: false,
+        items: Array.from({ length: 25 }, (_, i) => ({
+          name: `${testData.name}-page2-${i}`,
+          description: testData.description,
+          html_url: `${testData.repositoryUrl}-page2-${i}`,
+          clone_url: `${testData.repositoryUrl}-page2-${i}.git`,
+          stargazers_count: testData.starCount || 0,
+          owner: {
+            login: testData.authorName,
+            html_url: testData.authorUrl,
+          },
+          license: {
+            name: testData.licenseType || 'MIT',
+            url: testData.licenseUrl || '',
+          },
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z',
+        })),
+      };
+
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockPage1Response),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockPage2Response),
+        });
+
+      const config = {
+        gasTags: ['google-apps-script'],
+        scriptIdPatterns: [],
+        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        verbose: false,
+      };
+
+      // ページ1からページ2を検索（25件/ページ）
+      const result = await GitHubApiUtils.searchRepositoriesByPageRange(config, 1, 2, 25);
+
+      // 2回のAPIコールが実行されることを確認
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      // ページ1のURL確認
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining('per_page=25&page=1'),
+        expect.any(Object)
+      );
+
+      // ページ2のURL確認
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('per_page=25&page=2'),
+        expect.any(Object)
+      );
+
+      // 結果の検証
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(75); // ページ1(50件) + ページ2(25件)
+      expect(result.totalFound).toBe(150);
+      expect(result.processedCount).toBe(75);
+
+      // 各ページのデータが含まれていることを確認
+      expect(
+        result.repositories.some((repo: GitHubRepository) => repo.name.includes('page1'))
+      ).toBe(true);
+      expect(
+        result.repositories.some((repo: GitHubRepository) => repo.name.includes('page2'))
+      ).toBe(true);
     });
 
     test('verboseモードでコンソールログが出力される', async () => {
@@ -319,10 +512,9 @@ describe('GitHubApiUtils', () => {
         'google-apps-script OR apps-script in:topics'
       );
       expect(consoleSpy).toHaveBeenCalledWith(
-        'GitHub Search URL:',
-        expect.stringContaining('https://api.github.com/search/repositories?q=')
+        'ページ 1/1 を検索中: https://api.github.com/search/repositories?q=google-apps-script%20OR%20apps-script%20in%3Atopics&sort=stars&order=desc&per_page=10&page=1'
       );
-      expect(consoleSpy).toHaveBeenCalledTimes(6);
+      expect(consoleSpy).toHaveBeenCalledTimes(8); // ページング対応で追加のログが出力される
 
       consoleSpy.mockRestore();
     });
@@ -343,7 +535,7 @@ describe('GitHubApiUtils', () => {
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
       const expectedQuery = 'google-apps-script OR apps-script in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
@@ -371,7 +563,7 @@ describe('GitHubApiUtils', () => {
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
       const expectedQuery = 'google-apps-script OR apps-script in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
@@ -400,7 +592,7 @@ describe('GitHubApiUtils', () => {
 
       const expectedQuery =
         'google-apps-script OR apps-script OR gas-library OR clasp OR googleappsscript in:topics'; // cspell:disable-line
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10`;
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10&page=1`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
@@ -438,7 +630,7 @@ describe('GitHubApiUtils', () => {
       // 最初の5つのタグのみが使用される
       const expectedQuery =
         'google-apps-script OR apps-script OR gas-library OR clasp OR googleappsscript in:topics'; // cspell:disable-line
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10`;
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10&page=1`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {

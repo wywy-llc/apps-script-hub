@@ -25,7 +25,10 @@
   let statusUpdateInProgress: Record<string, boolean> = {};
   let showBulkAddForm = $state(false);
   let bulkAddInProgress = $state(false);
-  let maxResults = $state(10);
+  let startPage = $state(1);
+  let endPage = $state(1);
+  let perPage = $state(100);
+  let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
 
   async function handleStatusUpdate(libraryId: string, newStatus: LibraryStatus) {
     statusUpdateInProgress[libraryId] = true;
@@ -72,7 +75,9 @@
   function toggleBulkAddForm() {
     showBulkAddForm = !showBulkAddForm;
     if (!showBulkAddForm) {
-      maxResults = 10;
+      startPage = 1;
+      endPage = 1;
+      perPage = 100;
     }
   }
 </script>
@@ -131,7 +136,9 @@
             await update();
             bulkAddInProgress = false;
             if (result.type === 'success') {
-              maxResults = 10;
+              startPage = 1;
+              endPage = 1;
+              perPage = 100;
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();
@@ -139,28 +146,91 @@
           };
         }}
       >
-        <div class="mb-4">
-          <label for="maxResults" class="mb-2 block text-sm font-medium text-gray-700">
-            検索するリポジトリ数（最大100件）
-          </label>
-          <input
-            id="maxResults"
-            name="maxResults"
-            type="number"
-            min="1"
-            max="100"
-            bind:value={maxResults}
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
-            disabled={bulkAddInProgress}
-            required
-          />
-          <p class="mt-2 text-xs text-gray-500">
-            <strong>自動検索対象タグ:</strong> google-apps-script, apps-script, google-workspace, google-sheets,
-            gas-library, clasp
-          </p>
-          <p class="mt-1 text-xs text-gray-500">
-            GitHubでこれらのタグを持つリポジトリを自動検索し、READMEからGASスクリプトIDを抽出します。重複チェックも自動で行います。
-          </p>
+        <!-- ページ範囲設定 -->
+        <div class="mb-6 space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">検索範囲設定</h3>
+
+          <!-- ページ範囲 -->
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label for="startPage" class="mb-1 block text-sm font-medium text-gray-700">
+                開始ページ
+              </label>
+              <input
+                id="startPage"
+                name="startPage"
+                type="number"
+                min="1"
+                max="10"
+                bind:value={startPage}
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={bulkAddInProgress}
+                required
+              />
+            </div>
+
+            <div>
+              <label for="endPage" class="mb-1 block text-sm font-medium text-gray-700">
+                終了ページ
+              </label>
+              <input
+                id="endPage"
+                name="endPage"
+                type="number"
+                min="1"
+                max="10"
+                bind:value={endPage}
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={bulkAddInProgress}
+                required
+              />
+            </div>
+
+            <div>
+              <label for="perPage" class="mb-1 block text-sm font-medium text-gray-700">
+                1ページあたりの件数
+              </label>
+              <select
+                id="perPage"
+                name="perPage"
+                bind:value={perPage}
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={bulkAddInProgress}
+              >
+                <option value={10}>10件/ページ</option>
+                <option value={25}>25件/ページ</option>
+                <option value={50}>50件/ページ</option>
+                <option value={100}>100件/ページ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 総件数表示 -->
+          <div class="rounded-md bg-gray-50 p-3">
+            <p class="text-sm text-gray-700">
+              <strong>📋 検索予定件数:</strong>
+              {Math.max(0, (endPage - startPage + 1) * perPage)}件 (ページ {startPage} 〜 {endPage}, {perPage}件/ページ)
+            </p>
+            <p class="mt-1 text-xs text-gray-500">
+              GitHub APIの制限により、最大1000件までの取得となります。
+            </p>
+          </div>
+
+          <!-- 非表示のhiddenフィールド -->
+          <input type="hidden" name="maxResults" bind:value={maxResults} />
+          <div class="mt-2 rounded-md bg-blue-50 p-3">
+            <p class="text-xs text-blue-700">
+              <strong>📋 検索対象タグ:</strong> google-apps-script, apps-script, google-workspace, google-sheets,
+              clasp
+            </p>
+            <p class="mt-1 text-xs text-blue-600">
+              <strong>🔍 処理内容:</strong> GitHubでタグ検索 → READMEからスクリプトID抽出 → 重複チェック
+              → DB登録
+            </p>
+            <p class="mt-1 text-xs text-orange-600">
+              <strong>⚠️ 注意:</strong> 大量検索（500件以上）は時間がかかります（5-10分程度）
+            </p>
+          </div>
         </div>
 
         <div class="flex items-center justify-end space-x-3">
