@@ -57,6 +57,10 @@ export class UpdateLibraryFromGithubService {
     // ライセンス情報を取得
     const licenseInfo = await FetchGithubLicenseService.call(owner, repo);
 
+    // 新しいlastCommitAtと既存データを比較
+    const newLastCommitAt = new Date(repoData.pushed_at);
+    const shouldGenerateSummary = libraryData.lastCommitAt.getTime() !== newLastCommitAt.getTime();
+
     // ライブラリを更新
     await db
       .update(library)
@@ -70,19 +74,25 @@ export class UpdateLibraryFromGithubService {
         starCount: repoData.stargazers_count || 0,
         licenseType: licenseInfo.type,
         licenseUrl: licenseInfo.url,
+        lastCommitAt: newLastCommitAt,
         updatedAt: new Date(),
       })
       .where(eq(library.id, libraryId));
 
-    // AIによるライブラリ要約を生成してDBに保存
-    try {
-      const summary = await GenerateLibrarySummaryService.call({
-        githubUrl: repoData.html_url,
-      });
-      await SaveLibrarySummaryService.call(libraryId, summary);
-    } catch (error) {
-      console.warn('ライブラリ要約生成に失敗しました:', error);
-      // エラーが発生してもライブラリ更新処理は続行
+    // AIによるライブラリ要約を生成してDBに保存（lastCommitAtに変化がある場合のみ）
+    if (shouldGenerateSummary) {
+      try {
+        console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        const summary = await GenerateLibrarySummaryService.call({
+          githubUrl: repoData.html_url,
+        });
+        await SaveLibrarySummaryService.call(libraryId, summary);
+      } catch (error) {
+        console.warn('ライブラリ要約生成に失敗しました:', error);
+        // エラーが発生してもライブラリ更新処理は続行
+      }
+    } else {
+      console.log(`lastCommitAtに変化がないため、AI要約生成をスキップします: ${libraryId}`);
     }
   }
 }

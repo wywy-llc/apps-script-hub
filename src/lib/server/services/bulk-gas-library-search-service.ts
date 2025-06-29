@@ -6,6 +6,7 @@ import type {
   ScrapedLibraryData,
   ScraperConfig,
 } from '$lib/types/github-scraper.js';
+import { CheckLibraryCommitStatusService } from './check-library-commit-status-service.js';
 import { GASLibraryScraper } from './gas-library-scraper.js';
 import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
 import { SaveLibrarySummaryService } from './save-library-summary-service.js';
@@ -551,6 +552,31 @@ export class BulkGASLibrarySearchService {
                 continue;
               }
 
+              // AI要約生成が必要かどうかを事前チェック
+              let shouldGenerateAiSummary = false;
+              if (generateSummary) {
+                try {
+                  const commitStatus = await CheckLibraryCommitStatusService.call(
+                    repo.html_url,
+                    new Date(scrapeResult.data.lastCommitAt)
+                  );
+                  shouldGenerateAiSummary = commitStatus.isNew || commitStatus.shouldUpdate;
+                  if (config.verbose && !shouldGenerateAiSummary) {
+                    console.log(
+                      `  ⏭️  ${repo.name}: lastCommitAtに変化がないため、AI要約生成をスキップします`
+                    );
+                  }
+                } catch {
+                  // チェックエラーの場合は安全にAI要約生成を実行
+                  shouldGenerateAiSummary = true;
+                  if (config.verbose) {
+                    console.warn(
+                      `  ⚠️  ${repo.name}: コミット状況チェックに失敗、AI要約生成を実行します`
+                    );
+                  }
+                }
+              }
+
               // DB保存実行
               const saveResult = await saveCallback(scrapeResult.data, generateSummary);
               if (saveResult.success && saveResult.id) {
@@ -563,8 +589,8 @@ export class BulkGASLibrarySearchService {
                   console.log(`  ✓ ${repo.name} (${scrapeResult.data.scriptId}) を保存しました`);
                 }
 
-                // AI要約生成（保存が成功した場合のみ）
-                if (generateSummary) {
+                // AI要約生成（新規ライブラリまたはlastCommitAtに変化がある場合のみ）
+                if (shouldGenerateAiSummary) {
                   try {
                     const summary = await GenerateLibrarySummaryService.call({
                       githubUrl: repo.html_url,
