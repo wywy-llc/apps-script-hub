@@ -55,7 +55,7 @@ describe('GitHubApiUtils', () => {
         'https://api.github.com/repos/googleworkspace/apps-script-oauth2',
         {
           headers: {
-            Accept: 'application/vnd.github.v3+json',
+            Accept: 'application/vnd.github+json',
             Authorization: expect.stringMatching(/^token ghp_/),
             'User-Agent': 'app-script-hub',
           },
@@ -108,7 +108,7 @@ describe('GitHubApiUtils', () => {
 
       expect(mockFetch).toHaveBeenCalledWith('https://api.github.com/repos/test/repo/readme', {
         headers: {
-          Accept: 'application/vnd.github.v3+json',
+          Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
         },
@@ -216,7 +216,7 @@ describe('GitHubApiUtils', () => {
         expect.stringContaining('https://api.github.com/search/repositories?q='),
         {
           headers: {
-            Accept: 'application/vnd.github.v3+json',
+            Accept: 'application/vnd.github+json',
             Authorization: expect.stringMatching(/^token ghp_/),
             'User-Agent': 'app-script-hub',
           },
@@ -243,12 +243,13 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = '(topic:google-apps-script OR topic:apps-script) language:javascript';
+      const expectedQuery =
+        'topic:google-apps-script OR topic:apps-script OR topic:gas-library language:javascript';
       const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         headers: {
-          Accept: 'application/vnd.github.v3+json',
+          Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
         },
@@ -272,7 +273,7 @@ describe('GitHubApiUtils', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100'), {
         headers: {
-          Accept: 'application/vnd.github.v3+json',
+          Accept: 'application/vnd.github+json',
           Authorization: expect.stringMatching(/^token ghp_/),
           'User-Agent': 'app-script-hub',
         },
@@ -298,10 +299,64 @@ describe('GitHubApiUtils', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         'GitHub Search Query:',
-        '(topic:google-apps-script OR topic:apps-script) language:javascript'
+        'topic:google-apps-script OR topic:apps-script language:javascript'
       );
 
       consoleSpy.mockRestore();
+    });
+
+    test('gasTagsが空の場合はデフォルトタグを使用する', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
+      });
+
+      const config = {
+        gasTags: [], // 空の配列
+        scriptIdPatterns: [],
+        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        verbose: false,
+      };
+
+      await GitHubApiUtils.searchRepositoriesByTags(config, 5);
+
+      const expectedQuery = 'topic:google-apps-script OR topic:apps-script language:javascript';
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
+
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: expect.stringMatching(/^token ghp_/),
+          'User-Agent': 'app-script-hub',
+        },
+      });
+    });
+
+    test('gasTagsが未定義の場合はデフォルトタグを使用する', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
+      });
+
+      const config = {
+        gasTags: undefined, // 未定義
+        scriptIdPatterns: [],
+        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        verbose: false,
+      } as any; // eslint-disable-line @typescript-eslint/no-explicit-any -- 型チェック回避のためテストでのみ使用
+
+      await GitHubApiUtils.searchRepositoriesByTags(config, 5);
+
+      const expectedQuery = 'topic:google-apps-script OR topic:apps-script language:javascript';
+      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5`;
+
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: expect.stringMatching(/^token ghp_/),
+          'User-Agent': 'app-script-hub',
+        },
+      });
     });
 
     test('API エラーの場合は失敗レスポンスを返す', async () => {

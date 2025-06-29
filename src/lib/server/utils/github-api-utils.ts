@@ -20,7 +20,7 @@ export class GitHubApiUtils {
    */
   public static createHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      Accept: 'application/vnd.github.v3+json',
+      Accept: 'application/vnd.github+json',
       'User-Agent': 'app-script-hub',
     };
 
@@ -81,7 +81,13 @@ export class GitHubApiUtils {
     maxResults: number = 10
   ): Promise<TagSearchResult> {
     try {
-      const searchQueries = config.gasTags.map(tag => `topic:${tag}`);
+      // gasTagsが空の場合はデフォルトタグを使用
+      const tagsToUse =
+        config.gasTags && config.gasTags.length > 0
+          ? config.gasTags
+          : ['google-apps-script', 'apps-script'];
+
+      const searchQueries = tagsToUse.map(tag => `topic:${tag}`);
       const query = `${searchQueries.join(' OR ')} language:javascript`;
 
       const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
