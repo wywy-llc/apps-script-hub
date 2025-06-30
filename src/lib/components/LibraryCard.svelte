@@ -24,10 +24,10 @@
     return num.toString();
   }
 
-  // タグクリック時の検索機能（将来の拡張用）
-  // function searchByTag(tag: string) {
-  //   window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
-  // }
+  // タグクリック時の検索機能
+  function searchByTag(tag: string) {
+    window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
+  }
 </script>
 
 <div
@@ -53,11 +53,14 @@
       <div class="mt-3">
         <div class="flex flex-wrap gap-1">
           {#each (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).slice(0, 3) as tag, index (index)}
-            <span
-              class="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+            <button
+              type="button"
+              onclick={() => searchByTag(tag)}
+              class="inline-flex cursor-pointer items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 transition-colors hover:bg-blue-200"
+              title="「{tag}」で検索"
             >
               {tag}
-            </span>
+            </button>
           {/each}
         </div>
       </div>
