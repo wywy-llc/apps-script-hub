@@ -26,14 +26,50 @@
 
   // テスト用のライブラリデータ
   const mockLibrary = {
-    id: 1,
+    id: '1',
     name: 'GasDateFormatter',
+    scriptId: 'script123',
+    repositoryUrl: 'https://github.com/user/gas-date-formatter',
+    authorUrl: 'https://github.com/user-name',
+    authorName: 'user-name',
     description:
       'Moment.jsライクなシンタックスで、GASの日時オブジェクトを簡単にフォーマットするためのユーティリティライブラリ。タイムゾーンの扱いもサポート。',
-    tags: ['Date', 'Utility', 'Format'],
-    author: 'user-name',
-    version: 'v1.2.0',
-    lastUpdated: '3日前',
+    readmeContent: '',
+    licenseType: 'MIT',
+    licenseUrl: '',
+    starCount: 42,
+    copyCount: 15,
+    lastCommitAt: new Date('2024-01-01'),
+    status: 'published',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  };
+
+  const mockLibrarySummary = {
+    id: '1',
+    libraryId: '1',
+    libraryNameJa: 'GAS日付フォーマッター',
+    libraryNameEn: 'GasDateFormatter',
+    purposeJa: 'GASで日時オブジェクトを簡単にフォーマットするためのライブラリ',
+    purposeEn: 'A library for easily formatting date objects in GAS',
+    targetUsersJa: 'GAS開発者、日付処理を頻繁に行う開発者',
+    targetUsersEn: 'GAS developers, developers who frequently handle dates',
+    tagsJa: ['日付', 'ユーティリティ', 'フォーマット'],
+    tagsEn: ['Date', 'Utility', 'Format'],
+    coreProblemJa: 'GASでの日付フォーマットが複雑で手間がかかる',
+    coreProblemEn: 'Date formatting in GAS is complex and time-consuming',
+    mainBenefits: [
+      {
+        title: { ja: 'シンプルな書式指定', en: 'Simple format specification' },
+        description: { ja: 'Moment.jsライクな直感的な記法', en: 'Intuitive Moment.js-like syntax' },
+      },
+      {
+        title: { ja: 'タイムゾーン対応', en: 'Timezone support' },
+        description: { ja: '複数のタイムゾーンに対応', en: 'Supports multiple timezones' },
+      },
+    ],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   };
 
   const longDescriptionLibrary = {
@@ -63,6 +99,7 @@
   name="Default"
   args={{
     library: mockLibrary,
+    librarySummary: mockLibrarySummary,
   }}
   play={async ({ canvasElement }) => {
     // ライブラリ名が表示されることを確認

@@ -46,7 +46,7 @@
   {#if libraries.length > 0}
     <div class="mx-auto max-w-3xl space-y-6">
       {#each libraries as library (library.id)}
-        <LibraryCard {library} />
+        <LibraryCard {library} librarySummary={library.librarySummary} />
       {/each}
     </div>
 

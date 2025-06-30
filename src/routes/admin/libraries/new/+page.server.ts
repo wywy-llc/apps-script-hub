@@ -1,4 +1,4 @@
-import { CreateLibraryService } from '$lib/server/services/library.js';
+import { CreateLibraryService } from '$lib/server/services/create-library-service';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types.js';
 

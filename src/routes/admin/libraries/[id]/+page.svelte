@@ -109,6 +109,7 @@
 <main>
   <LibraryDetail
     {library}
+    librarySummary={data.librarySummary}
     isAdminMode={true}
     form={form || undefined}
     onScraping={handleScraping}

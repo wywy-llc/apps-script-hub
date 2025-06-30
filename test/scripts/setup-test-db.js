@@ -103,6 +103,27 @@ async function setupTestDatabase() {
       );
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "library_summary" (
+        "id" text PRIMARY KEY NOT NULL,
+        "library_id" text NOT NULL UNIQUE,
+        "library_name_ja" text,
+        "library_name_en" text,
+        "purpose_ja" text,
+        "purpose_en" text,
+        "target_users_ja" text,
+        "target_users_en" text,
+        "tags_ja" jsonb,
+        "tags_en" jsonb,
+        "core_problem_ja" text,
+        "core_problem_en" text,
+        "main_benefits" jsonb,
+        "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+        "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+        FOREIGN KEY ("library_id") REFERENCES "library"("id")
+      );
+    `);
+
     console.log('✅ データベーススキーマを作成しました');
   } catch (error) {
     console.error('❌ スキーマ作成エラー:', error);

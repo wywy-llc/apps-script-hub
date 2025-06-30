@@ -1,4 +1,4 @@
-import { UpdateLibraryFromGithubService } from '$lib/server/services/update-library.js';
+import { UpdateLibraryFromGithubService } from '$lib/server/services/update-library-from-github-service';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
 

@@ -1,6 +1,6 @@
 import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-status.js';
 import { db } from '$lib/server/db/index.js';
-import { library } from '$lib/server/db/schema.js';
+import { library, librarySummary } from '$lib/server/db/schema.js';
 import { error, fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types.js';
@@ -12,7 +12,8 @@ export const load: PageServerLoad = async ({ params }) => {
     throw error(404, 'ライブラリが見つかりません。');
   }
 
-  const result = await db
+  // ライブラリ情報を取得
+  const libraryResult = await db
     .select({
       id: library.id,
       name: library.name,
@@ -35,14 +36,24 @@ export const load: PageServerLoad = async ({ params }) => {
     .where(eq(library.id, libraryId))
     .limit(1);
 
-  if (result.length === 0) {
+  if (libraryResult.length === 0) {
     throw error(404, 'ライブラリが見つかりません。');
   }
 
-  const libraryData = result[0];
+  const libraryData = libraryResult[0];
+
+  // ライブラリ要約情報を取得（存在しない場合はnull）
+  const summaryResult = await db
+    .select()
+    .from(librarySummary)
+    .where(eq(librarySummary.libraryId, libraryId))
+    .limit(1);
+
+  const librarySummaryData = summaryResult.length > 0 ? summaryResult[0] : null;
 
   return {
     library: libraryData,
+    librarySummary: librarySummaryData,
   };
 };
 

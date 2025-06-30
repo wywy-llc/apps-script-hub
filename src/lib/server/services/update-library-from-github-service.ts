@@ -1,7 +1,9 @@
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { FetchGithubLicenseService } from './github.js';
+import { FetchGithubLicenseService } from './fetch-github-license-service';
+import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
+import { SaveLibrarySummaryService } from './save-library-summary-service.js';
 
 /**
  * GitHub リポジトリ情報を再取得するサービス
@@ -55,6 +57,16 @@ export class UpdateLibraryFromGithubService {
     // ライセンス情報を取得
     const licenseInfo = await FetchGithubLicenseService.call(owner, repo);
 
+    // 新しいlastCommitAtと既存データを比較
+    const newLastCommitAt = new Date(repoData.pushed_at);
+    const hasCommitChanges = libraryData.lastCommitAt.getTime() !== newLastCommitAt.getTime();
+
+    // library_summaryが存在するかチェック
+    const summaryExists = await SaveLibrarySummaryService.exists(libraryId);
+
+    // AI要約生成判定: lastCommitAtに変化がある または library_summaryが存在しない場合
+    const shouldGenerateSummary = hasCommitChanges || !summaryExists;
+
     // ライブラリを更新
     await db
       .update(library)
@@ -68,8 +80,34 @@ export class UpdateLibraryFromGithubService {
         starCount: repoData.stargazers_count || 0,
         licenseType: licenseInfo.type,
         licenseUrl: licenseInfo.url,
+        lastCommitAt: newLastCommitAt,
         updatedAt: new Date(),
       })
       .where(eq(library.id, libraryId));
+
+    // AIによるライブラリ要約を生成してDBに保存（lastCommitAtに変化がある または library_summaryが存在しない場合）
+    if (shouldGenerateSummary) {
+      try {
+        if (hasCommitChanges && summaryExists) {
+          console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        } else if (!summaryExists) {
+          console.log(`library_summaryが存在しないため、AI要約を生成します: ${libraryId}`);
+        } else {
+          console.log(`lastCommitAtが変更されたため、AI要約を生成します: ${libraryId}`);
+        }
+
+        const summary = await GenerateLibrarySummaryService.call({
+          githubUrl: repoData.html_url,
+        });
+        await SaveLibrarySummaryService.call(libraryId, summary);
+      } catch (error) {
+        console.warn('ライブラリ要約生成に失敗しました:', error);
+        // エラーが発生してもライブラリ更新処理は続行
+      }
+    } else {
+      console.log(
+        `lastCommitAtに変化がなく、library_summaryも存在するため、AI要約生成をスキップします: ${libraryId}`
+      );
+    }
   }
 }
