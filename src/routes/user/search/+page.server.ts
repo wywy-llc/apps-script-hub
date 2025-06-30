@@ -89,11 +89,17 @@ export const load = async ({ url }: { url: URL }) => {
     };
   }
 
-  // 検索クエリがある場合は、名前、説明、作者名で検索
+  // 検索クエリがある場合は、名前、作者名、AI要約の情報とタグで検索
   const searchCondition = or(
     like(library.name, `%${searchQuery}%`),
-    like(library.description, `%${searchQuery}%`),
-    like(library.authorName, `%${searchQuery}%`)
+    like(library.authorName, `%${searchQuery}%`),
+    like(librarySummary.libraryNameJa, `%${searchQuery}%`),
+    like(librarySummary.libraryNameEn, `%${searchQuery}%`),
+    like(librarySummary.purposeJa, `%${searchQuery}%`),
+    like(librarySummary.purposeEn, `%${searchQuery}%`),
+    // タグ配列内の部分検索（JSONB演算子使用）
+    sql`${librarySummary.tagsJa}::text ILIKE ${'%' + searchQuery + '%'}`,
+    sql`${librarySummary.tagsEn}::text ILIKE ${'%' + searchQuery + '%'}`
   );
 
   const [librariesResult, totalCount] = await Promise.all([
@@ -142,6 +148,7 @@ export const load = async ({ url }: { url: URL }) => {
     db
       .select({ count: sql<number>`count(*)` })
       .from(library)
+      .leftJoin(librarySummary, eq(library.id, librarySummary.libraryId))
       .where(sql`${eq(library.status, 'published')} AND (${searchCondition})`)
       .then(result => result[0]?.count || 0),
   ]);
