@@ -35,15 +35,22 @@
     breaks: true,
   });
 
-  // 使用例のマークダウンをHTMLに変換
-  let usageExampleHtml = $derived(() => {
-    const usageExample =
-      currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn;
+  // 使用例のマークダウンを取得
+  let usageExample = $derived(
+    currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn
+  );
 
+  // 使用例のマークダウンをHTMLに変換
+  let usageExampleHtml = $derived.by(() => {
     if (!usageExample) return '';
 
-    // マークダウンをHTMLに変換（シンタックスハイライト付き）
-    return marked.parse(usageExample) as string;
+    try {
+      // マークダウンをHTMLに変換（シンタックスハイライト付き）
+      return marked.parse(usageExample) as string;
+    } catch (error) {
+      console.error('マークダウンの変換に失敗しました:', error);
+      return `<pre><code>${usageExample}</code></pre>`; // フォールバック: プレーンテキストとして表示
+    }
   });
 </script>
 
@@ -220,7 +227,7 @@
           </h4>
           <div class="markdown-body rounded-lg border border-indigo-200 bg-white p-4 shadow-sm">
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html usageExampleHtml()}
+            {@html usageExampleHtml}
           </div>
         </div>
       {/if}

@@ -162,7 +162,7 @@ export class GenerateLibrarySummaryService {
     const prompt = this.buildPrompt(params);
 
     const response = await client.chat.completions.create({
-      model: 'o4-mini',
+      model: 'o3',
       messages: [
         {
           role: 'user',
@@ -344,12 +344,60 @@ GASライブラリのGitHubリポジトリを多角的に分析・推論し、�
 1.  Step 2で特定した\`coreProblem\`を解決する上で、最もインパクトのある主要な機能や特徴を1〜3つ選び出します。
 2.  それぞれを\`mainBenefits\`の項目として、利点が伝わるように\`title\`と\`description\`を記述します。
 
-### Step 5: \`usageExample\`の作成 (Markdown形式)
-1.  これまでの分析に基づき、\`usageExample\`を**Markdown形式**で作成します。
-2.  内容は、ライブラリの最も中心的な使い方を示す、シンプルなコードスニペットを含めてください。
-3.  コードは言語識別子\`javascript\`を指定したMarkdownのコードブロック（\`\`\`javascript ... \`\`\`）で囲ってください。
-4.  コードブロックの前後には、そのコードが何をしているのか、なぜ便利なのかを説明する**解説文**を簡潔に記述してください。
+### Step 5: \`usageExample\`の作成 (READMEのコード例を詳細解説)
+1.  まず、リポジトリの\`README.md\`に掲載されている主要なコード例を探してください。
+2.  そのコード例をベースにして、\`usageExample\`を作成します。あなたの主なタスクは、**READMEに書かれている以上の、より詳細で分かりやすい解説を加えること**です。各行や主要な引数が何を意味し、どのように機能するかを丁寧に説明してください。
+3.  もし\`README.md\`に適切なコード例がない場合のみ、これまでの分析に基づいて、以下の要件を満たす実践的なコード例を新規に作成してください。
+    * **ES6以降のモダンな文法**（\`const\`, \`let\`, アロー関数など）を使用する。
+    * **Google Apps Scriptの文脈**で、現実に即したコードであること。
+    * メソッドに渡す**典型的な引数**と、その**戻り値を変数に格納して利用する**流れが明確にわかること。
+4.  最終的なアウトプットは、言語識別子\`javascript\`を指定したMarkdownのコードブロックと、その前後の詳細な解説文で構成してください。
 5.  このMarkdown形式の解説付きコードを、日本語(ja)と英語(en)の両方で生成してください。
+6.  以下の出力例を参考に、品質の高い解説とコードを生成してください。
+
+--- 出力例 (Example Output) ---
+
+**[ja]**
+このライブラリの中心的なメソッド \`MyLogger.log()\` の使用例です。
+以下のコードでは、まずロガーを初期化し、'INFO' レベルで構造化されたメッセージを記録しています。
+
+\`\`\`javascript
+// スプレッドシートIDを渡してロガーライブラリを初期化します
+const logger = new MyLogger('XXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+
+// 記録したい情報をオブジェクトとして準備します
+const userInfo = { id: 'user001', action: 'login' };
+const message = JSON.stringify(userInfo);
+
+// 'INFO' レベルでログを記録し、結果を受け取ります
+const result = logger.log(message, 'INFO');
+
+console.log(\`ログが記録されました。行番号: \${result.row}\`);
+\`\`\`
+
+このように、第1引数に記録したいメッセージ、第2引数にログレベルを渡します。戻り値として、ログが書き込まれたスプレッドシートの行番号などが含まれるオブジェクトが返されるため、後続処理に利用できます。
+
+**[en]**
+This is an example of how to use the library's core method, \`MyLogger.log()\`.
+In the following code, we first initialize the logger and then record a structured message with the 'INFO' level.
+
+\`\`\`javascript
+// Initialize the logger library with a spreadsheet ID
+const logger = new MyLogger('XXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+
+// Prepare the information you want to log as an object
+const userInfo = { id: 'user001', action: 'login' };
+const message = JSON.stringify(userInfo);
+
+// Log the message with the 'INFO' level and receive the result
+const result = logger.log(message, 'INFO');
+
+console.log(\`Log recorded. Row number: \${result.row}\`);
+\`\`\`
+
+As shown, you pass the message to record as the first argument and the log level as the second. The method returns an object containing results, such as the row number in the spreadsheet where the log was written, which can be used for subsequent actions.
+
+---
 
 ### Step 6: JSONの構築と最終レビュー (Constructing and Finalizing the JSON)
 1.  上記ステップで得られた推論結果を、厳格なJSONスキーマに従って組み立てます。
