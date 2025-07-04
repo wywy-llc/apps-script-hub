@@ -2,6 +2,7 @@
   import { getLocale } from '$lib/paraglide/runtime.js'; // cspell:ignore paraglide
   import type { Locale } from '$lib';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
+  import { sanitizeMarkdownHtml } from '$lib/utils/html-sanitizer.js';
   import 'github-markdown-css/github-markdown.css';
   import hljs from 'highlight.js/lib/core';
   import bash from 'highlight.js/lib/languages/bash';
@@ -72,12 +73,15 @@
     currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn
   );
 
-  // 使用例のマークダウンをHTMLに変換（SSRセーフ）
+  // 使用例のマークダウンをHTMLに変換（SSRセーフ + XSS対策）
   let usageExampleHtml = $derived.by(() => {
     if (!usageExample) return '';
 
     // SSRセーフなマークダウンレンダリング関数を使用
-    return renderMarkdownSafe(usageExample);
+    const renderedHtml = renderMarkdownSafe(usageExample);
+
+    // XSS対策: HTMLをサニタイズ
+    return sanitizeMarkdownHtml(renderedHtml);
   });
 </script>
 
@@ -253,6 +257,7 @@
             使用例
           </h4>
           <div class="markdown-body rounded-lg border border-indigo-200 bg-white p-4 shadow-sm">
+            <!-- XSS対策済み: DOMPurifyでサニタイズされたHTML -->
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html usageExampleHtml}
           </div>
