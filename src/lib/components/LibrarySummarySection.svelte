@@ -44,13 +44,8 @@
   let usageExampleHtml = $derived.by(() => {
     if (!usageExample) return '';
 
-    try {
-      // マークダウンをHTMLに変換（シンタックスハイライト付き）
-      return marked.parse(usageExample) as string;
-    } catch (error) {
-      console.error('マークダウンの変換に失敗しました:', error);
-      return `<pre><code>${usageExample}</code></pre>`; // フォールバック: プレーンテキストとして表示
-    }
+    // マークダウンをHTMLに変換（シンタックスハイライト付き）
+    return marked.parse(usageExample) as string;
   });
 </script>
 
@@ -86,7 +81,7 @@
         <!-- 対象ユーザー -->
         {#if librarySummary.targetUsersJa || librarySummary.targetUsersEn}
           <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm">
-            <h4 class="mb-3 flex items-center text-sm font-semibold text-blue-900">
+            <h4 class="mb-3 flex items-center text-base font-semibold text-blue-900">
               <svg
                 class="mr-2 h-5 w-5 text-blue-600"
                 fill="none"
@@ -111,7 +106,7 @@
         <!-- 解決する課題 -->
         {#if librarySummary.coreProblemJa || librarySummary.coreProblemEn}
           <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
-            <h4 class="mb-3 flex items-center text-sm font-semibold text-yellow-900">
+            <h4 class="mb-3 flex items-center text-base font-semibold text-yellow-900">
               <svg
                 class="mr-2 h-5 w-5 text-yellow-600"
                 fill="none"
@@ -137,7 +132,7 @@
       <!-- タグ -->
       {#if (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
         <div class="my-4">
-          <h4 class="mb-3 flex items-center text-sm font-semibold text-blue-800">
+          <h4 class="mb-3 flex items-center text-base font-semibold text-blue-800">
             <svg
               class="mr-2 h-5 w-5 text-blue-600"
               fill="none"
@@ -168,7 +163,7 @@
       <!-- 主な特徴 -->
       {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
         <div class="mb-8">
-          <h4 class="mb-4 flex items-center text-sm font-semibold text-emerald-800">
+          <h4 class="mb-4 flex items-center text-base font-semibold text-emerald-800">
             <svg
               class="mr-2 h-5 w-5 text-emerald-600"
               fill="none"
@@ -193,11 +188,11 @@
                   >
                     <span class="text-sm font-semibold text-white">{index + 1}</span>
                   </div>
-                  <h5 class="text-xs font-semibold text-emerald-900">
+                  <h5 class="text-base font-semibold text-emerald-900">
                     {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
                   </h5>
                 </div>
-                <p class="text-xs leading-relaxed text-emerald-800">
+                <p class="text-sm leading-relaxed text-emerald-800">
                   {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
                 </p>
               </div>
@@ -209,7 +204,7 @@
       <!-- 使用例 -->
       {#if librarySummary.usageExampleJa || librarySummary.usageExampleEn}
         <div class="mb-6">
-          <h4 class="mb-4 flex items-center text-sm font-semibold text-indigo-800">
+          <h4 class="mb-4 flex items-center text-base font-semibold text-indigo-800">
             <svg
               class="mr-2 h-5 w-5 text-indigo-600"
               fill="none"
