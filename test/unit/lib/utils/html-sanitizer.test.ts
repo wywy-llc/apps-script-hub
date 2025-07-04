@@ -11,8 +11,12 @@ vi.mock('dompurify', () => ({
   default: {
     sanitize: vi.fn((html: string) => {
       // 基本的なサニタイズをシミュレート
+      let previousHtml;
+      do {
+        previousHtml = html;
+        html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, ''); // scriptタグを削除
+      } while (html !== previousHtml);
       return html
-        .replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, '') // scriptタグを削除
         .replace(/on\w+="[^"]*"/gi, '') // onイベント属性を削除
         .replace(/href="javascript:[^"]*"/gi, 'href=""'); // javascript:プロトコルを削除
     }),
