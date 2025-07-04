@@ -16,7 +16,7 @@ vi.mock('dompurify', () => ({
         previousHtml = html;
         html = html
           .replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, '') // scriptタグを削除
-          .replace(/\s*on\w+="[^"]*"/gi, '') // onイベント属性を削除（前のスペースも含む）
+          .replace(/\s*on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^>\s]*)/gi, '') // onイベント属性を削除（前のスペースも含む）
           .replace(/href="javascript:[^"]*"/gi, 'href=""'); // javascript:プロトコルを削除
       } while (html !== previousHtml);
       return html;
@@ -40,6 +40,18 @@ describe('html-sanitizer', () => {
 
     test('onイベント属性を削除する', () => {
       const maliciousHtml = '<button onclick="alert(\'XSS\')">Click me</button>';
+      const result = sanitizeHtml(maliciousHtml);
+      expect(result).toBe('<button>Click me</button>');
+    });
+
+    test('複数のonイベント属性を削除する', () => {
+      const maliciousHtml = '<button onclick="alert(\'XSS\')" onmouseover="alert(\'XSS\')">Click me</button>';
+      const result = sanitizeHtml(maliciousHtml);
+      expect(result).toBe('<button>Click me</button>');
+    });
+
+    test('不正なonイベント属性を削除する', () => {
+      const maliciousHtml = '<button onload=alert(\'XSS\')>Click me</button>';
       const result = sanitizeHtml(maliciousHtml);
       expect(result).toBe('<button>Click me</button>');
     });
