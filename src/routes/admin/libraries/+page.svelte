@@ -67,10 +67,43 @@
     }
   }
 
-  function handleDelete(id: string) {
-    // 削除処理のロジック
-    if (confirm('本当に削除しますか？')) {
-      console.log('削除:', id);
+  async function handleDelete(id: string) {
+    const targetLibrary = libraries.find(lib => lib.id === id);
+    const libraryName = targetLibrary?.name || 'ライブラリ';
+
+    if (!confirm(`本当に「${libraryName}」を削除しますか？この操作は取り消せません。`)) {
+      return;
+    }
+
+    try {
+      // FormDataを使用してSvelteKitのdeleteアクションに送信
+      const formData = new FormData();
+      formData.append('libraryId', id);
+
+      const response = await fetch('?/delete', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        // レスポンスをJSONとして解析
+        const result = await response.json();
+
+        if (result.type === 'success') {
+          // ライブラリ一覧から削除されたライブラリを除去
+          libraries = libraries.filter(lib => lib.id !== id);
+          alert(result.data?.message || 'ライブラリを削除しました。');
+        } else {
+          console.error('ライブラリ削除に失敗しました:', result.data?.error || '不明なエラー');
+          alert(result.data?.error || 'ライブラリの削除に失敗しました。');
+        }
+      } else {
+        console.error('ライブラリ削除に失敗しました');
+        alert('ライブラリの削除に失敗しました。');
+      }
+    } catch (error) {
+      console.error('ライブラリ削除エラー:', error);
+      alert('ライブラリの削除中にエラーが発生しました。');
     }
   }
 
