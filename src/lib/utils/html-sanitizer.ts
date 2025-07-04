@@ -46,7 +46,7 @@ const SANITIZE_CONFIG = {
   ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class', 'id', 'lang'],
   // リンクのプロトコル制限
   ALLOWED_URI_REGEXP:
-    /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i, // cspell:ignore callto xmpp
+    /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z.+-]+(?:[^a-z.+-]|$))/i, // cspell:ignore callto xmpp
 };
 
 /**
