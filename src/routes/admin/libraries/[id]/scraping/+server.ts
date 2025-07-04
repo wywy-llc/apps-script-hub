@@ -9,8 +9,8 @@ export const POST: RequestHandler = async ({ params }) => {
     throw error(400, { message: 'ライブラリIDが指定されていません。' });
   }
 
-  // GitHubからライブラリ情報を更新
-  await UpdateLibraryFromGithubService.call(libraryId);
+  // GitHubからライブラリ情報を更新（AI要約生成はスキップ）
+  await UpdateLibraryFromGithubService.call(libraryId, { skipAiSummary: true });
 
   return json({
     success: true,

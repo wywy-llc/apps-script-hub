@@ -19,6 +19,8 @@
   let scrapingMessage = $state('');
   let isStatusUpdateInProgress = $state(false);
   let statusMessage = $state('');
+  let isAiSummaryInProgress = $state(false);
+  let aiSummaryMessage = $state('');
 
   // メッセージ管理のための状態
   let messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -60,11 +62,22 @@
     })
       .then(async response => {
         if (response.ok) {
-          scrapingMessage = 'スクレイピングが完了しました。ページを再読み込みしてください。';
-          // ページを再読み込み
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          scrapingMessage = 'スクレイピングが完了しました。';
+
+          // AI要約生成の確認ダイアログ
+          const shouldGenerateAiSummary = confirm(
+            'スクレイピングが完了しました。\n\nAIによる要約を再生成しますか？\n\n※要約の生成には少し時間がかかります。'
+          );
+
+          if (shouldGenerateAiSummary) {
+            // AI要約生成を実行
+            handleAiSummaryGeneration();
+          } else {
+            // ページを再読み込み
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
         } else {
           const error = await response.json();
           scrapingMessage = error.message || 'スクレイピングに失敗しました。';
@@ -76,11 +89,61 @@
       })
       .finally(() => {
         isScrapingInProgress = false;
-        // 3秒後にメッセージを消去
-        setTimeout(() => {
-          scrapingMessage = '';
-        }, 3000);
+        // 3秒後にメッセージを消去（AI要約生成が実行されない場合）
+        if (!isAiSummaryInProgress) {
+          setTimeout(() => {
+            scrapingMessage = '';
+          }, 3000);
+        }
       });
+  }
+
+  /**
+   * AI要約生成を実行
+   */
+  async function handleAiSummaryGeneration() {
+    if (isAiSummaryInProgress) return;
+
+    isAiSummaryInProgress = true;
+    aiSummaryMessage = 'AIによる要約を生成中です。しばらくお待ちください...';
+    scrapingMessage = ''; // スクレイピングメッセージをクリア
+
+    try {
+      const formData = new FormData();
+      const response = await fetch(`?/generateAiSummary`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.type === 'success') {
+          aiSummaryMessage = result.data?.message || 'AI要約の生成が完了しました。';
+
+          // ページを再読み込みして新しい要約を表示
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          aiSummaryMessage = result.data?.error || 'AI要約の生成に失敗しました。';
+        }
+      } else {
+        const error = await response.json();
+        aiSummaryMessage = error.message || 'AI要約の生成に失敗しました。';
+      }
+    } catch (error) {
+      console.error('AI要約生成エラー:', error);
+      aiSummaryMessage = 'AI要約の生成中にエラーが発生しました。';
+    } finally {
+      isAiSummaryInProgress = false;
+
+      // AI要約生成が失敗した場合のみ、5秒後にメッセージを消去
+      if (!aiSummaryMessage.includes('完了')) {
+        setTimeout(() => {
+          aiSummaryMessage = '';
+        }, 5000);
+      }
+    }
   }
 
   /**
@@ -119,6 +182,8 @@
     {scrapingMessage}
     {isStatusUpdateInProgress}
     {statusMessage}
+    {isAiSummaryInProgress}
+    {aiSummaryMessage}
   />
 
   <!-- 隠しフォーム群（ステータス更新用） -->
