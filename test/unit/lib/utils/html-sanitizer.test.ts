@@ -14,12 +14,12 @@ vi.mock('dompurify', () => ({
       let previousHtml: string;
       do {
         previousHtml = html;
-        html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, ''); // scriptタグを削除
+        html = html
+          .replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, '') // scriptタグを削除
+          .replace(/\s*on\w+="[^"]*"/gi, '') // onイベント属性を削除（前のスペースも含む）
+          .replace(/href="javascript:[^"]*"/gi, 'href=""'); // javascript:プロトコルを削除
       } while (html !== previousHtml);
-      return html
-        .replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, '') // scriptタグを削除
-        .replace(/\s*on\w+="[^"]*"/gi, '') // onイベント属性を削除（前のスペースも含む）
-        .replace(/href="javascript:[^"]*"/gi, 'href=""'); // javascript:プロトコルを削除
+      return html;
     }),
   },
 }));
