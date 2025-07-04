@@ -92,8 +92,7 @@ function hello() {
     });
 
     test('悪意のあるMarkdownHTMLをサニタイズする', () => {
-      const maliciousMarkdownHtml =
-        '<h1>Title</h1><script>alert("XSS")</script><p>Content</p>';
+      const maliciousMarkdownHtml = '<h1>Title</h1><script>alert("XSS")</script><p>Content</p>';
       const result = sanitizeMarkdownHtml(maliciousMarkdownHtml);
       expect(result).toBe('<h1>Title</h1><p>Content</p>');
     });
