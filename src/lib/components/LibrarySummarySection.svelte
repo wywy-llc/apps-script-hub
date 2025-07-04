@@ -70,13 +70,13 @@
     <div class={isAdminMode ? 'px-6 py-8' : 'px-6 py-6'}>
       <!-- ライブラリ名 -->
       <div class="mb-8">
-        <h3 class="mb-3 text-xl font-bold text-gray-900">
+        <h3 class="mb-3 text-lg font-bold text-gray-900">
           {currentLocale === 'ja'
             ? librarySummary.libraryNameJa || libraryName
             : librarySummary.libraryNameEn || libraryName}
         </h3>
         {#if librarySummary.purposeJa || librarySummary.purposeEn}
-          <p class="text-lg leading-relaxed text-gray-700">
+          <p class="text-sm leading-relaxed text-gray-700">
             {currentLocale === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
           </p>
         {/if}
@@ -86,7 +86,7 @@
         <!-- 対象ユーザー -->
         {#if librarySummary.targetUsersJa || librarySummary.targetUsersEn}
           <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm">
-            <h4 class="mb-3 flex items-center text-lg font-semibold text-blue-900">
+            <h4 class="mb-3 flex items-center text-sm font-semibold text-blue-900">
               <svg
                 class="mr-2 h-5 w-5 text-blue-600"
                 fill="none"
@@ -102,7 +102,7 @@
               </svg>
               対象ユーザー
             </h4>
-            <p class="text-blue-800">
+            <p class="text-sm leading-relaxed text-blue-800">
               {currentLocale === 'ja' ? librarySummary.targetUsersJa : librarySummary.targetUsersEn}
             </p>
           </div>
@@ -111,7 +111,7 @@
         <!-- 解決する課題 -->
         {#if librarySummary.coreProblemJa || librarySummary.coreProblemEn}
           <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
-            <h4 class="mb-3 flex items-center text-lg font-semibold text-yellow-900">
+            <h4 class="mb-3 flex items-center text-sm font-semibold text-yellow-900">
               <svg
                 class="mr-2 h-5 w-5 text-yellow-600"
                 fill="none"
@@ -127,7 +127,7 @@
               </svg>
               解決する課題
             </h4>
-            <p class="leading-relaxed text-yellow-800">
+            <p class="text-sm leading-relaxed text-yellow-800">
               {currentLocale === 'ja' ? librarySummary.coreProblemJa : librarySummary.coreProblemEn}
             </p>
           </div>
@@ -137,7 +137,7 @@
       <!-- タグ -->
       {#if (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
         <div class="my-4">
-          <h4 class="mb-3 flex items-center text-lg font-semibold text-blue-800">
+          <h4 class="mb-3 flex items-center text-sm font-semibold text-blue-800">
             <svg
               class="mr-2 h-5 w-5 text-blue-600"
               fill="none"
@@ -156,7 +156,7 @@
           <div class="flex flex-wrap gap-2">
             {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
               <span
-                class="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800 shadow-sm"
+                class="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-xs font-medium text-blue-800 shadow-sm"
               >
                 {tag}
               </span>
@@ -168,7 +168,7 @@
       <!-- 主な特徴 -->
       {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
         <div class="mb-8">
-          <h4 class="mb-4 flex items-center text-lg font-semibold text-emerald-800">
+          <h4 class="mb-4 flex items-center text-sm font-semibold text-emerald-800">
             <svg
               class="mr-2 h-5 w-5 text-emerald-600"
               fill="none"
@@ -193,11 +193,11 @@
                   >
                     <span class="text-sm font-semibold text-white">{index + 1}</span>
                   </div>
-                  <h5 class="font-semibold text-emerald-900">
+                  <h5 class="text-xs font-semibold text-emerald-900">
                     {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
                   </h5>
                 </div>
-                <p class="text-sm leading-relaxed text-emerald-800">
+                <p class="text-xs leading-relaxed text-emerald-800">
                   {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
                 </p>
               </div>
@@ -209,7 +209,7 @@
       <!-- 使用例 -->
       {#if librarySummary.usageExampleJa || librarySummary.usageExampleEn}
         <div class="mb-6">
-          <h4 class="mb-4 flex items-center text-lg font-semibold text-indigo-800">
+          <h4 class="mb-4 flex items-center text-sm font-semibold text-indigo-800">
             <svg
               class="mr-2 h-5 w-5 text-indigo-600"
               fill="none"
