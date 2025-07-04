@@ -2,6 +2,11 @@
   import { getLocale } from '$lib/paraglide/runtime.js'; // cspell:ignore paraglide
   import type { Locale } from '$lib';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
+  import 'github-markdown-css/github-markdown.css';
+  import hljs from 'highlight.js';
+  import 'highlight.js/styles/github.css';
+  import { marked } from 'marked';
+  import { markedHighlight } from 'marked-highlight';
 
   interface Props {
     librarySummary: LibrarySummaryRecord;
@@ -13,6 +18,33 @@
 
   // Paraglide の現在の言語設定を使用（自動的に更新される） // cspell:ignore Paraglide
   let currentLocale = $derived<Locale>(getLocale());
+
+  // Markedの設定（シンタックスハイライト付き）
+  marked.use(
+    markedHighlight({
+      langPrefix: 'hljs language-',
+      highlight(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+      },
+    })
+  );
+
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
+  // 使用例のマークダウンをHTMLに変換
+  let usageExampleHtml = $derived(() => {
+    const usageExample =
+      currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn;
+
+    if (!usageExample) return '';
+
+    // マークダウンをHTMLに変換（シンタックスハイライト付き）
+    return marked.parse(usageExample) as string;
+  });
 </script>
 
 <div class="mt-8">
@@ -186,23 +218,9 @@
             </svg>
             使用例
           </h4>
-          <div class="rounded-lg border border-indigo-200 bg-gray-900 p-1 shadow-lg">
-            <div class="flex items-center justify-between rounded-t-lg bg-indigo-800 px-4 py-2">
-              <div class="flex space-x-2">
-                <div class="h-3 w-3 rounded-full bg-red-500"></div>
-                <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
-                <div class="h-3 w-3 rounded-full bg-green-500"></div>
-              </div>
-              <span class="text-xs text-indigo-100">Code Example</span>
-            </div>
-            <div class="rounded-b-lg bg-gray-900 p-4">
-              <pre
-                class="overflow-x-auto text-sm leading-relaxed whitespace-pre-wrap text-indigo-400"><code
-                  >{currentLocale === 'ja'
-                    ? librarySummary.usageExampleJa
-                    : librarySummary.usageExampleEn}</code
-                ></pre>
-            </div>
+          <div class="markdown-body rounded-lg border border-indigo-200 bg-white p-4 shadow-sm">
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            {@html usageExampleHtml()}
           </div>
         </div>
       {/if}
