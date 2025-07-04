@@ -50,8 +50,8 @@ test.describe('管理者画面 - ライブラリ機能（基本）', () => {
       page.locator('h1:has-text("ライブラリ詳細") + div span.bg-gray-100:has-text("未公開")')
     ).toBeVisible();
 
-    // 7. README情報が取得・表示されているか確認
-    await expect(page.locator('.markdown-body')).toBeVisible();
+    // 7. ライブラリ詳細情報が正常に表示されているか確認
+    await expect(page.locator('h2:has-text("概要")')).toBeVisible();
 
     // 8. 管理者機能ボタンの確認
     await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();

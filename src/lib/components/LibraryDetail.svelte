@@ -1,7 +1,6 @@
 <script lang="ts">
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
   import LibrarySummarySection from '$lib/components/LibrarySummarySection.svelte';
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
@@ -15,7 +14,6 @@
     authorUrl: string;
     authorName: string;
     description: string;
-    readmeContent?: string;
     licenseType?: string;
     licenseUrl?: string;
     starCount?: number;
@@ -170,48 +168,6 @@
       <!-- AI による要約セクション -->
       {#if librarySummary}
         <LibrarySummarySection {librarySummary} libraryName={library.name} {isAdminMode} />
-      {/if}
-
-      <!-- README セクション -->
-      {#if library.readmeContent}
-        <div class="mt-8">
-          <h2
-            class="mb-6 {isAdminMode
-              ? 'text-2xl font-bold'
-              : 'border-b pb-2 text-2xl font-semibold'}"
-          >
-            GitHub README
-          </h2>
-          {#if isAdminMode}
-            <div class="overflow-hidden rounded-lg bg-white shadow-md">
-              <div class="px-6">
-                <MarkdownRenderer
-                  content={library.readmeContent}
-                  repositoryUrl={library.repositoryUrl}
-                />
-              </div>
-            </div>
-          {:else}
-            <MarkdownRenderer
-              content={library.readmeContent}
-              repositoryUrl={library.repositoryUrl}
-              class="!p-0"
-            />
-          {/if}
-        </div>
-      {:else}
-        <div
-          class="mt-8 {isAdminMode
-            ? 'overflow-hidden rounded-lg bg-white shadow-md'
-            : 'rounded-lg bg-gray-50 p-8 text-center'}"
-        >
-          <div class={isAdminMode ? 'px-6 py-8 text-center text-gray-500' : 'text-gray-500'}>
-            <p>README が{isAdminMode ? '見つかりませんでした' : '利用できません'}。</p>
-            {#if isAdminMode}
-              <p class="mt-2 text-sm">スクレイピングを実行してREADMEを取得してください。</p>
-            {/if}
-          </div>
-        </div>
       {/if}
 
       {#if isAdminMode}

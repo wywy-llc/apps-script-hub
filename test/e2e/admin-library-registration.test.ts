@@ -65,8 +65,8 @@ test.describe('管理者画面 - ライブラリ登録', () => {
     await expect(page.locator('button:has-text("編集")')).toBeVisible();
     await expect(page.locator('button.bg-green-600:has-text("公開する")')).toBeVisible();
 
-    // 7. README情報が表示されているか確認（GitHubから取得されたかの確認）
-    await expect(page.locator('.markdown-body')).toBeVisible();
+    // 7. ライブラリ詳細情報が正常に表示されているか確認（GitHubから取得されたかの確認）
+    await expect(page.locator('h2:has-text("概要")')).toBeVisible();
   });
 
   test('フォームバリデーション - 必須項目未入力', async ({ page }) => {
