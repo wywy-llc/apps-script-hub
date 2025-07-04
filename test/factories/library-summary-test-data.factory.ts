@@ -53,6 +53,10 @@ const defaultLibrarySummaryData: LibrarySummary = {
         },
       },
     ],
+    usageExample: {
+      ja: '// テストライブラリの使用例\nconst testLib = new TestLibrary();\ntestLib.runMockTest();\n// テスト結果を確認\nconst result = testLib.getResult();',
+      en: '// Test Library Usage Example\nconst testLib = new TestLibrary();\ntestLib.runMockTest();\n// Check test result\nconst result = testLib.getResult();',
+    },
   },
 };
 
@@ -113,6 +117,10 @@ const oauthLibrarySummaryData: LibrarySummary = {
         },
       },
     ],
+    usageExample: {
+      ja: '// OAuth2認証の実装\nconst auth = new OAuth2Service();\nauth.authorize("google", "your-client-id", "your-client-secret");\n// トークンを取得\nconst token = auth.getToken();',
+      en: '// OAuth2 Authentication Implementation\nconst auth = new OAuth2Service();\nauth.authorize("google", "your-client-id", "your-client-secret");\n// Get token\nconst token = auth.getToken();',
+    },
   },
 };
 
@@ -163,6 +171,10 @@ const utilityLibrarySummaryData: LibrarySummary = {
         },
       },
     ],
+    usageExample: {
+      ja: '// ユーティリティライブラリの使用例\nconst util = new UtilityLibrary();\n// 文字列処理\nconst result = util.formatString("hello world");\n// 日付処理\nconst date = util.formatDate(new Date());',
+      en: '// Utility Library Usage Example\nconst util = new UtilityLibrary();\n// String processing\nconst result = util.formatString("hello world");\n// Date processing\nconst date = util.formatDate(new Date());',
+    },
   },
 };
 

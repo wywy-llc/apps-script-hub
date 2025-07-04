@@ -44,6 +44,10 @@ describe('SaveLibrarySummaryService', () => {
           description: { ja: 'テストが簡単', en: 'Easy testing' },
         },
       ],
+      usageExample: {
+        ja: '// テストライブラリの使用例\nconst testLib = new TestLibrary();\ntestLib.runTest();',
+        en: '// Test Library Usage Example\nconst testLib = new TestLibrary();\ntestLib.runTest();',
+      },
     },
   };
 

@@ -89,6 +89,8 @@ export const librarySummary = pgTable('library_summary', {
       };
     }>
   >(),
+  usageExampleJa: text('usage_example_ja'),
+  usageExampleEn: text('usage_example_en'),
   createdAt: timestamp('created_at', {
     withTimezone: true,
     mode: 'date',

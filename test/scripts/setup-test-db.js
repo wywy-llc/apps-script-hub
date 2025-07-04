@@ -118,6 +118,8 @@ async function setupTestDatabase() {
         "core_problem_ja" text,
         "core_problem_en" text,
         "main_benefits" jsonb,
+        "usage_example_ja" text,
+        "usage_example_en" text,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
         FOREIGN KEY ("library_id") REFERENCES "library"("id")

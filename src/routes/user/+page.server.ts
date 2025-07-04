@@ -40,6 +40,8 @@ export const load: PageServerLoad = async ({ locals }) => {
         coreProblemJa: librarySummary.coreProblemJa,
         coreProblemEn: librarySummary.coreProblemEn,
         mainBenefits: librarySummary.mainBenefits,
+        usageExampleJa: librarySummary.usageExampleJa,
+        usageExampleEn: librarySummary.usageExampleEn,
         createdAt: librarySummary.createdAt,
         updatedAt: librarySummary.updatedAt,
       },

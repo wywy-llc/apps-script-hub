@@ -63,6 +63,10 @@ describe('GenerateLibrarySummaryService', () => {
           },
         },
       ],
+      usageExample: {
+        ja: '// GASライブラリの使用例\nconst lib = new GasLibrary();\nlib.callApi();',
+        en: '// GAS Library Usage Example\nconst lib = new GasLibrary();\nlib.callApi();',
+      },
     },
   };
 
@@ -203,14 +207,13 @@ describe('GenerateLibrarySummaryService', () => {
       const calledWith = mockChatCompletionsCreate.mock.calls[0][0];
       const prompt = calledWith.messages[0].content;
 
-      expect(prompt).toContain(
-        'GitHub URLからGoogle Apps Scriptライブラリの要約JSONを生成してください'
-      );
-      expect(prompt).toContain('mainBenefitsは1-3個');
-      expect(prompt).toContain('各テキストは簡潔に');
-      expect(prompt).toContain('GitHubの実際の情報のみ使用');
-      expect(prompt).toContain('完全なJSONのみ出力（説明不要）');
-      expect(prompt).toContain(`**GithubリポジトリURL:** ${mockParams.githubUrl}`);
+      expect(prompt).toContain('# Role');
+      expect(prompt).toContain('Google Apps Script (GAS)の専門家であり');
+      expect(prompt).toContain('# Goal');
+      expect(prompt).toContain('GitHub Repository URL');
+      expect(prompt).toContain('構造化されたJSON要約を生成');
+      expect(prompt).toContain('usageExampleの作成');
+      expect(prompt).toContain(mockParams.githubUrl);
     });
 
     test('JSONスキーマが適切に定義されている', async () => {
@@ -242,6 +245,7 @@ describe('GenerateLibrarySummaryService', () => {
       // functionality構造の検証
       expect(schema.properties.functionality.properties).toHaveProperty('coreProblem');
       expect(schema.properties.functionality.properties).toHaveProperty('mainBenefits');
+      expect(schema.properties.functionality.properties).toHaveProperty('usageExample');
 
       // 必須フィールドの検証
       expect(schema.required).toContain('basicInfo');
@@ -250,6 +254,9 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.basicInfo.required).toContain('purpose');
       expect(schema.properties.basicInfo.required).toContain('targetUsers');
       expect(schema.properties.basicInfo.required).toContain('tags');
+      expect(schema.properties.functionality.required).toContain('coreProblem');
+      expect(schema.properties.functionality.required).toContain('mainBenefits');
+      expect(schema.properties.functionality.required).toContain('usageExample');
 
       // 厳密性の検証
       expect(schema.additionalProperties).toBe(false);
