@@ -110,7 +110,7 @@ describe('GenerateLibrarySummaryService', () => {
       // 検証
       expect(mockedOpenAIUtils.getClient).toHaveBeenCalled();
       expect(mockChatCompletionsCreate).toHaveBeenCalledWith({
-        model: 'o4-mini',
+        model: 'o3',
         messages: [
           {
             role: 'user',
@@ -212,7 +212,7 @@ describe('GenerateLibrarySummaryService', () => {
       expect(prompt).toContain('# Goal');
       expect(prompt).toContain('GitHub Repository URL');
       expect(prompt).toContain('構造化されたJSON要約を生成');
-      expect(prompt).toContain('usageExampleの作成');
+      expect(prompt).toContain('usageExample`の作成');
       expect(prompt).toContain(mockParams.githubUrl);
     });
 
@@ -264,7 +264,7 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.functionality.additionalProperties).toBe(false);
     });
 
-    test('o3-miniモデルと推論設定が正しく使用される', async () => {
+    test('o3モデルと推論設定が正しく使用される', async () => {
       // OpenAI APIのレスポンスをモック
       const mockResponse = {
         choices: [
@@ -282,7 +282,7 @@ describe('GenerateLibrarySummaryService', () => {
 
       // API呼び出し設定の検証
       const calledWith = mockChatCompletionsCreate.mock.calls[0][0];
-      expect(calledWith.model).toBe('o4-mini');
+      expect(calledWith.model).toBe('o3');
       expect(calledWith.reasoning_effort).toBe('medium');
       expect(calledWith.response_format.type).toBe('json_schema');
       expect(calledWith.response_format.json_schema.strict).toBe(true);
