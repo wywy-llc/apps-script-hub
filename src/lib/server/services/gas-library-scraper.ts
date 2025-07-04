@@ -63,7 +63,6 @@ export class GASLibraryScraper {
         authorUrl: repoInfo.owner.html_url,
         authorName: repoInfo.owner.login,
         description: repoInfo.description || '',
-        readmeContent,
         licenseType: repoInfo.license?.name,
         licenseUrl: repoInfo.license?.url,
         starCount: repoInfo.stargazers_count,

@@ -118,25 +118,6 @@ describe('GitHubApiUtils', () => {
       expect(result).toBe(originalContent);
     });
 
-    test('テストファクトリーのREADMEコンテンツでテストできる', async () => {
-      const testData = LibraryTestDataFactories.default.build();
-      const base64Content = btoa(testData.readmeContent || '');
-
-      const mockReadmeData: GitHubReadmeResponse = {
-        content: base64Content,
-        encoding: 'base64',
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockReadmeData),
-      });
-
-      const result = await GitHubApiUtils.fetchReadme('googleworkspace', 'apps-script-oauth2');
-
-      expect(result).toBe(testData.readmeContent);
-    });
-
     test('Base64以外のエンコーディングの場合はそのまま返す', async () => {
       const mockReadmeData: GitHubReadmeResponse = {
         content: 'Raw content',

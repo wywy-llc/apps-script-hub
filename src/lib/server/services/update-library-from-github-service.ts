@@ -42,19 +42,6 @@ export class UpdateLibraryFromGithubService {
 
     const repoData = await repoResponse.json();
 
-    // README を取得
-    let readmeContent = '';
-    try {
-      const readmeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`);
-
-      if (readmeResponse.ok) {
-        const readmeData = await readmeResponse.json();
-        readmeContent = Buffer.from(readmeData.content, 'base64').toString('utf-8');
-      }
-    } catch (err) {
-      console.warn('README 取得エラー:', err);
-    }
-
     // ライセンス情報を取得
     const licenseInfo = await FetchGithubLicenseService.call(owner, repo);
 
@@ -77,7 +64,6 @@ export class UpdateLibraryFromGithubService {
         authorName: repoData.owner.login,
         authorUrl: `https://github.com/${repoData.owner.login}`,
         repositoryUrl: repoData.html_url,
-        readmeContent: readmeContent,
         starCount: repoData.stargazers_count || 0,
         licenseType: licenseInfo.type,
         licenseUrl: licenseInfo.url,

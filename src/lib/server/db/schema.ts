@@ -33,7 +33,6 @@ export const library = pgTable('library', {
   authorUrl: text('author_url').notNull(),
   authorName: text('author_name').notNull(),
   description: text('description').notNull(),
-  readmeContent: text('readme_content').notNull(),
   starCount: integer('star_count').default(0).notNull(),
   copyCount: integer('copy_count').default(0).notNull(),
   licenseType: text('license_type').notNull(),

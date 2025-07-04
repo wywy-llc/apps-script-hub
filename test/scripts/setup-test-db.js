@@ -91,7 +91,6 @@ async function setupTestDatabase() {
         "author_url" text NOT NULL,
         "author_name" text NOT NULL,
         "description" text NOT NULL,
-        "readme_content" text NOT NULL,
         "star_count" integer DEFAULT 0 NOT NULL,
         "copy_count" integer DEFAULT 0 NOT NULL,
         "license_type" text NOT NULL,

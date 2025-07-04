@@ -4,7 +4,6 @@ import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { FetchGithubLicenseService } from './fetch-github-license-service';
-import { FetchGithubReadmeService } from './fetch-github-readme-service';
 import { FetchGithubRepoService } from './fetch-github-repo-service';
 import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
 import { SaveLibrarySummaryService } from './save-library-summary-service.js';
@@ -56,9 +55,8 @@ export class CreateLibraryService {
     }
 
     // GitHub から情報を取得
-    const [repoInfo, readmeContent, licenseInfo, lastCommitAt] = await Promise.all([
+    const [repoInfo, licenseInfo, lastCommitAt] = await Promise.all([
       FetchGithubRepoService.call(owner, repo),
-      FetchGithubReadmeService.call(owner, repo),
       FetchGithubLicenseService.call(owner, repo),
       GitHubApiUtils.fetchLastCommitDate(owner, repo),
     ]);
@@ -79,8 +77,8 @@ export class CreateLibraryService {
       authorUrl: repoInfo.authorUrl,
       authorName: repoInfo.authorName,
       description: repoInfo.description,
-      readmeContent: readmeContent,
       starCount: repoInfo.starCount,
+      copyCount: 0,
       licenseType: licenseInfo.type,
       licenseUrl: licenseInfo.url,
       lastCommitAt: lastCommitAt,

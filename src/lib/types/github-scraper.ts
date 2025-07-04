@@ -49,7 +49,6 @@ export interface ScrapedLibraryData {
   authorUrl: string;
   authorName: string;
   description: string;
-  readmeContent?: string;
   licenseType?: string;
   licenseUrl?: string;
   starCount?: number;

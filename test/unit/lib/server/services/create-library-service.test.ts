@@ -1,18 +1,16 @@
-import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { db, testConnection } from '../../../../../src/lib/server/db/index.js';
 import { CreateLibraryService } from '../../../../../src/lib/server/services/create-library-service.js';
+import { FetchGithubLicenseService } from '../../../../../src/lib/server/services/fetch-github-license-service.js';
+import { FetchGithubRepoService } from '../../../../../src/lib/server/services/fetch-github-repo-service.js';
 import { GenerateLibrarySummaryService } from '../../../../../src/lib/server/services/generate-library-summary-service.js';
 import { SaveLibrarySummaryService } from '../../../../../src/lib/server/services/save-library-summary-service.js';
-import { FetchGithubRepoService } from '../../../../../src/lib/server/services/fetch-github-repo-service.js';
-import { FetchGithubReadmeService } from '../../../../../src/lib/server/services/fetch-github-readme-service.js';
-import { FetchGithubLicenseService } from '../../../../../src/lib/server/services/fetch-github-license-service.js';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
-import { db, testConnection } from '../../../../../src/lib/server/db/index.js';
 import { LibrarySummaryTestDataFactories } from '../../../../factories/index.js';
 
 // モックを設定
 vi.mock('../../../../../src/lib/server/db/index.js');
 vi.mock('../../../../../src/lib/server/services/fetch-github-repo-service.js');
-vi.mock('../../../../../src/lib/server/services/fetch-github-readme-service.js');
 vi.mock('../../../../../src/lib/server/services/fetch-github-license-service.js');
 vi.mock('../../../../../src/lib/server/utils/github-api-utils.js');
 vi.mock('../../../../../src/lib/server/services/generate-library-summary-service.js');
@@ -21,7 +19,6 @@ vi.mock('../../../../../src/lib/server/services/save-library-summary-service.js'
 const mockDb = vi.mocked(db);
 const mockTestConnection = vi.mocked(testConnection);
 const mockFetchGithubRepoService = vi.mocked(FetchGithubRepoService);
-const mockFetchGithubReadmeService = vi.mocked(FetchGithubReadmeService);
 const mockFetchGithubLicenseService = vi.mocked(FetchGithubLicenseService);
 const mockGitHubApiUtils = vi.mocked(GitHubApiUtils);
 const mockGenerateLibrarySummaryService = vi.mocked(GenerateLibrarySummaryService);
@@ -48,7 +45,6 @@ describe('CreateLibraryService', () => {
   };
 
   const mockLastCommitAt = new Date('2024-01-01T00:00:00Z');
-  const mockReadmeContent = '# Test README';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,7 +52,6 @@ describe('CreateLibraryService', () => {
     // デフォルトのモック設定
     mockTestConnection.mockResolvedValue(true);
     mockFetchGithubRepoService.call.mockResolvedValue(mockRepoInfo);
-    mockFetchGithubReadmeService.call.mockResolvedValue(mockReadmeContent);
     mockFetchGithubLicenseService.call.mockResolvedValue(mockLicenseInfo);
     mockGitHubApiUtils.fetchLastCommitDate.mockResolvedValue(mockLastCommitAt);
 
@@ -96,7 +91,6 @@ describe('CreateLibraryService', () => {
     // 基本的なライブラリ作成が正常に実行されたことを確認
     expect(mockTestConnection).toHaveBeenCalledOnce();
     expect(mockFetchGithubRepoService.call).toHaveBeenCalledWith('owner', 'repo');
-    expect(mockFetchGithubReadmeService.call).toHaveBeenCalledWith('owner', 'repo');
     expect(mockFetchGithubLicenseService.call).toHaveBeenCalledWith('owner', 'repo');
     expect(mockGitHubApiUtils.fetchLastCommitDate).toHaveBeenCalledWith('owner', 'repo');
 
