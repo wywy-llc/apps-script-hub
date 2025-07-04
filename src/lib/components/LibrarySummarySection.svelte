@@ -46,7 +46,7 @@
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- 対象ユーザー -->
         {#if librarySummary.targetUsersJa || librarySummary.targetUsersEn}
-          <div class="rounded-lg bg-blue-50 p-4">
+          <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm">
             <h4 class="mb-3 flex items-center text-lg font-semibold text-blue-900">
               <svg
                 class="mr-2 h-5 w-5 text-blue-600"
@@ -71,10 +71,10 @@
 
         <!-- 解決する課題 -->
         {#if librarySummary.coreProblemJa || librarySummary.coreProblemEn}
-          <div class="rounded-lg bg-amber-50 p-4">
-            <h4 class="mb-3 flex items-center text-lg font-semibold text-amber-900">
+          <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
+            <h4 class="mb-3 flex items-center text-lg font-semibold text-yellow-900">
               <svg
-                class="mr-2 h-5 w-5 text-amber-600"
+                class="mr-2 h-5 w-5 text-yellow-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -88,7 +88,7 @@
               </svg>
               解決する課題
             </h4>
-            <p class="leading-relaxed text-amber-800">
+            <p class="leading-relaxed text-yellow-800">
               {currentLocale === 'ja' ? librarySummary.coreProblemJa : librarySummary.coreProblemEn}
             </p>
           </div>
@@ -98,11 +98,26 @@
       <!-- タグ -->
       {#if (currentLocale === 'ja' ? librarySummary.tagsJa : librarySummary.tagsEn) && (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).length > 0}
         <div class="my-4">
-          <h4 class="mb-3 text-lg font-semibold text-gray-800">タグ</h4>
+          <h4 class="mb-3 flex items-center text-lg font-semibold text-blue-800">
+            <svg
+              class="mr-2 h-5 w-5 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+              ></path>
+            </svg>
+            タグ
+          </h4>
           <div class="flex flex-wrap gap-2">
             {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
               <span
-                class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-blue-200 px-4 py-2 text-sm font-medium text-blue-900 shadow-sm"
+                class="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800 shadow-sm"
               >
                 {tag}
               </span>
@@ -114,9 +129,9 @@
       <!-- 主な特徴 -->
       {#if librarySummary.mainBenefits && librarySummary.mainBenefits.length > 0}
         <div class="mb-8">
-          <h4 class="mb-4 flex items-center text-lg font-semibold text-gray-800">
+          <h4 class="mb-4 flex items-center text-lg font-semibold text-emerald-800">
             <svg
-              class="mr-2 h-5 w-5 text-green-600"
+              class="mr-2 h-5 w-5 text-emerald-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -132,18 +147,18 @@
           </h4>
           <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
             {#each librarySummary.mainBenefits as benefit, index (index)}
-              <div class="rounded-lg border border-green-200 bg-green-50 p-4 shadow-sm">
+              <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
                 <div class="mb-2 flex items-center">
                   <div
-                    class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-green-100"
+                    class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600"
                   >
-                    <span class="text-sm font-semibold text-green-700">{index + 1}</span>
+                    <span class="text-sm font-semibold text-white">{index + 1}</span>
                   </div>
-                  <h5 class="font-semibold text-green-900">
+                  <h5 class="font-semibold text-emerald-900">
                     {currentLocale === 'ja' ? benefit.title.ja : benefit.title.en}
                   </h5>
                 </div>
-                <p class="text-sm leading-relaxed text-green-800">
+                <p class="text-sm leading-relaxed text-emerald-800">
                   {currentLocale === 'ja' ? benefit.description.ja : benefit.description.en}
                 </p>
               </div>
@@ -155,9 +170,9 @@
       <!-- 使用例 -->
       {#if librarySummary.usageExampleJa || librarySummary.usageExampleEn}
         <div class="mb-6">
-          <h4 class="mb-4 flex items-center text-lg font-semibold text-gray-800">
+          <h4 class="mb-4 flex items-center text-lg font-semibold text-indigo-800">
             <svg
-              class="mr-2 h-5 w-5 text-purple-600"
+              class="mr-2 h-5 w-5 text-indigo-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -171,18 +186,18 @@
             </svg>
             使用例
           </h4>
-          <div class="rounded-lg border border-gray-300 bg-gray-900 p-1 shadow-lg">
-            <div class="flex items-center justify-between rounded-t-lg bg-gray-800 px-4 py-2">
+          <div class="rounded-lg border border-indigo-200 bg-gray-900 p-1 shadow-lg">
+            <div class="flex items-center justify-between rounded-t-lg bg-indigo-800 px-4 py-2">
               <div class="flex space-x-2">
                 <div class="h-3 w-3 rounded-full bg-red-500"></div>
                 <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
                 <div class="h-3 w-3 rounded-full bg-green-500"></div>
               </div>
-              <span class="text-xs text-gray-400">Code Example</span>
+              <span class="text-xs text-indigo-100">Code Example</span>
             </div>
             <div class="rounded-b-lg bg-gray-900 p-4">
               <pre
-                class="overflow-x-auto text-sm leading-relaxed whitespace-pre-wrap text-green-400"><code
+                class="overflow-x-auto text-sm leading-relaxed whitespace-pre-wrap text-indigo-400"><code
                   >{currentLocale === 'ja'
                     ? librarySummary.usageExampleJa
                     : librarySummary.usageExampleEn}</code
