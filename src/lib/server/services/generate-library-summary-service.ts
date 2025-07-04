@@ -269,8 +269,16 @@ export class GenerateLibrarySummaryService {
                   usageExample: {
                     type: 'object',
                     properties: {
-                      ja: { type: 'string' },
-                      en: { type: 'string' },
+                      ja: {
+                        type: 'string',
+                        description:
+                          'Markdown形式で記述された、コードとその解説。コードブロック（```javascript）を使用すること。',
+                      },
+                      en: {
+                        type: 'string',
+                        description:
+                          'Code and its explanation in Markdown format. Use code blocks (```javascript).',
+                      },
                     },
                     required: ['ja', 'en'],
                     additionalProperties: false,
@@ -336,10 +344,12 @@ GASライブラリのGitHubリポジトリを多角的に分析・推論し、�
 1.  Step 2で特定した\`coreProblem\`を解決する上で、最もインパクトのある主要な機能や特徴を1〜3つ選び出します。
 2.  それぞれを\`mainBenefits\`の項目として、利点が伝わるように\`title\`と\`description\`を記述します。
 
-### Step 5: usageExampleの作成 (Creating the Usage Example)
-1. これまでの分析に基づき、\`usageExample\`のためのシンプルで簡潔なコードスニペットを作成します。
-2. このコードは、ライブラリの最も基本的で中心的なユースケースを示すものにしてください。開発者が一目でその価値を理解できるような内容が理想です。
-3. 日本語と英語で簡単なコメントを付与してください。
+### Step 5: \`usageExample\`の作成 (Markdown形式)
+1.  これまでの分析に基づき、\`usageExample\`を**Markdown形式**で作成します。
+2.  内容は、ライブラリの最も中心的な使い方を示す、シンプルなコードスニペットを含めてください。
+3.  コードは言語識別子\`javascript\`を指定したMarkdownのコードブロック（\`\`\`javascript ... \`\`\`）で囲ってください。
+4.  コードブロックの前後には、そのコードが何をしているのか、なぜ便利なのかを説明する**解説文**を簡潔に記述してください。
+5.  このMarkdown形式の解説付きコードを、日本語(ja)と英語(en)の両方で生成してください。
 
 ### Step 6: JSONの構築と最終レビュー (Constructing and Finalizing the JSON)
 1.  上記ステップで得られた推論結果を、厳格なJSONスキーマに従って組み立てます。
