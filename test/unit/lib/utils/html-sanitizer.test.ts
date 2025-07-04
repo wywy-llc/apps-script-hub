@@ -10,16 +10,9 @@ vi.mock('$app/environment', () => ({
 vi.mock('dompurify', () => ({
   default: {
     sanitize: vi.fn((html: string) => {
-      // 基本的なサニタイズをシミュレート
-      let previousHtml: string;
-      do {
-        previousHtml = html;
-        html = html
-          .replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*[^>]*>/gi, '') // scriptタグを削除
-          .replace(/\s*on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^>\s]*)/gi, '') // onイベント属性を削除（前のスペースも含む）
-          .replace(/href="javascript:[^"]*"/gi, 'href=""'); // javascript:プロトコルを削除
-      } while (html !== previousHtml);
-      return html;
+      // DOMPurifyを使用してサニタイズ
+      const DOMPurify = require('dompurify');
+      return DOMPurify.sanitize(html);
     }),
   },
 }));
