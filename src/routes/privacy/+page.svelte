@@ -1,0 +1,177 @@
+<script lang="ts">
+  import Footer from '$lib/components/Footer.svelte';
+  import * as m from '$lib/paraglide/messages.js';
+
+  // プライバシーポリシーページ
+  // AppsScriptHubのプライバシーポリシーを表示
+</script>
+
+<svelte:head>
+  <title>{m.privacy_page_title()} - AppsScriptHub</title>
+  <meta name="description" content={m.privacy_page_description()} />
+</svelte:head>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between">
+        <a href="/" class="text-2xl font-bold text-blue-600">AppsScriptHub</a>
+        <nav class="flex space-x-4">
+          <a href="/" class="text-gray-600 hover:text-gray-900">{m.libraries_title()}</a>
+          <a href="/terms" class="text-gray-600 hover:text-gray-900">{m.terms()}</a>
+          <a href="/privacy" class="font-medium text-blue-600">{m.privacy()}</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Privacy Policy Content -->
+  <div class="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-4xl">
+      <div class="rounded-lg bg-white p-8 shadow-sm">
+        <!-- Title -->
+        <h1 class="mb-8 text-4xl font-bold text-gray-900">{m.privacy_title()}</h1>
+
+        <!-- Last Updated -->
+        <div class="mb-8 text-sm text-gray-500">
+          {m.last_updated()}: {m.privacy_last_updated()}
+        </div>
+
+        <!-- Privacy Policy Content -->
+        <div class="prose prose-lg max-w-none">
+          <!-- Introduction -->
+          <p class="mb-6">
+            {m.privacy_introduction()}
+          </p>
+
+          <!-- Section 1: 個人情報の定義 -->
+          <h2 id="section-1" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_1_title()}
+          </h2>
+          <p class="mb-4">
+            {m.privacy_section_1_content()}
+          </p>
+          <ul class="mb-6 list-disc pl-6">
+            <li class="mb-2">{m.privacy_section_1_point_1()}</li>
+            <li class="mb-2">{m.privacy_section_1_point_2()}</li>
+            <li class="mb-2">{m.privacy_section_1_point_3()}</li>
+            <li class="mb-2">{m.privacy_section_1_point_4()}</li>
+          </ul>
+
+          <!-- Section 2: 個人情報の収集方法 -->
+          <h2 id="section-2" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_2_title()}
+          </h2>
+          <p class="mb-4">
+            {m.privacy_section_2_content()}
+          </p>
+          <ul class="mb-6 list-disc pl-6">
+            <li class="mb-2">{m.privacy_section_2_point_1()}</li>
+            <li class="mb-2">{m.privacy_section_2_point_2()}</li>
+            <li class="mb-2">{m.privacy_section_2_point_3()}</li>
+            <li class="mb-2">{m.privacy_section_2_point_4()}</li>
+          </ul>
+
+          <!-- Section 3: 個人情報の利用目的 -->
+          <h2 id="section-3" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_3_title()}
+          </h2>
+          <p class="mb-4">
+            {m.privacy_section_3_content()}
+          </p>
+          <ul class="mb-6 list-disc pl-6">
+            <li class="mb-2">{m.privacy_section_3_point_1()}</li>
+            <li class="mb-2">{m.privacy_section_3_point_2()}</li>
+            <li class="mb-2">{m.privacy_section_3_point_3()}</li>
+            <li class="mb-2">{m.privacy_section_3_point_4()}</li>
+            <li class="mb-2">{m.privacy_section_3_point_5()}</li>
+            <li class="mb-2">{m.privacy_section_3_point_6()}</li>
+          </ul>
+
+          <!-- Section 4: 個人情報の第三者提供 -->
+          <h2 id="section-4" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_4_title()}
+          </h2>
+          <p class="mb-4">
+            {m.privacy_section_4_content()}
+          </p>
+          <ul class="mb-6 list-disc pl-6">
+            <li class="mb-2">{m.privacy_section_4_point_1()}</li>
+            <li class="mb-2">{m.privacy_section_4_point_2()}</li>
+            <li class="mb-2">{m.privacy_section_4_point_3()}</li>
+            <li class="mb-2">{m.privacy_section_4_point_4()}</li>
+          </ul>
+
+          <!-- Section 5: 個人情報の開示・訂正・削除 -->
+          <h2 id="section-5" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_5_title()}
+          </h2>
+          <p class="mb-6">
+            {m.privacy_section_5_content()}
+          </p>
+
+          <!-- Section 6: 個人情報の安全管理 -->
+          <h2 id="section-6" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_6_title()}
+          </h2>
+          <p class="mb-6">
+            {m.privacy_section_6_content()}
+          </p>
+
+          <!-- Section 7: Cookie等の使用 -->
+          <h2 id="section-7" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_7_title()}
+          </h2>
+          <p class="mb-4">
+            {m.privacy_section_7_content()}
+          </p>
+          <ul class="mb-6 list-disc pl-6">
+            <li class="mb-2">{m.privacy_section_7_point_1()}</li>
+            <li class="mb-2">{m.privacy_section_7_point_2()}</li>
+            <li class="mb-2">{m.privacy_section_7_point_3()}</li>
+          </ul>
+
+          <!-- Section 8: アクセス解析ツール -->
+          <h2 id="section-8" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_8_title()}
+          </h2>
+          <p class="mb-6">
+            {m.privacy_section_8_content()}
+          </p>
+
+          <!-- Section 9: プライバシーポリシーの変更 -->
+          <h2 id="section-9" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_9_title()}
+          </h2>
+          <p class="mb-6">
+            {m.privacy_section_9_content()}
+          </p>
+
+          <!-- Section 10: お問い合わせ -->
+          <h2 id="section-10" class="mt-8 mb-4 text-2xl font-semibold text-gray-900">
+            {m.privacy_section_10_title()}
+          </h2>
+          <p class="mb-6">
+            {m.privacy_section_10_content()}
+          </p>
+
+          <!-- Contact -->
+          <div class="mt-12 rounded-lg bg-gray-50 p-6">
+            <h3 class="mb-4 text-lg font-semibold text-gray-900">{m.privacy_contact_title()}</h3>
+            <div class="space-y-2 text-gray-700">
+              <p>{m.privacy_contact_company()}</p>
+              <p>{m.privacy_contact_address()}</p>
+              <p>{m.privacy_contact_phone()}</p>
+              <p>{m.privacy_contact_web()}</p>
+              <p>{m.privacy_contact_email()}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <Footer />
+</main>
