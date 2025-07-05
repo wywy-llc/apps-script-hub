@@ -4,6 +4,7 @@
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
+  import { toastStore } from '$lib/stores/toast-store.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
   interface Library {
@@ -77,7 +78,7 @@
     if (input && input.value) {
       try {
         await navigator.clipboard.writeText(input.value);
-        console.log('Copied!');
+        toastStore.success('コピーしました');
 
         // スクリプトIDがコピーされた場合はコールバックを実行
         if (elementId === 'script-id' && onCopyScriptId) {
@@ -85,7 +86,7 @@
         }
       } catch (err) {
         console.error('Copy failed', err);
-        alert('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
+        toastStore.error('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
         input.select();
         input.setSelectionRange(0, 99999);
       }
