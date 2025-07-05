@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { search_placeholder } from '$lib/paraglide/messages.js';
+  import { search_placeholder, header_search } from '$lib/paraglide/messages.js';
 
   // GASライブラリ検索コンポーネント
   // トップページとサーチページで共通利用されるレスポンシブ検索ボックス
@@ -50,5 +50,13 @@
       />
     </svg>
   </div>
-  <input type="search" name="q" id="search" class={inputClasses} {placeholder} bind:value />
+  <input
+    type="search"
+    name="q"
+    id="search"
+    class={inputClasses}
+    {placeholder}
+    bind:value
+    aria-label={header_search()}
+  />
 </form>

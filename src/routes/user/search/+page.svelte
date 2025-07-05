@@ -31,8 +31,8 @@
   <title
     >{searchQuery
       ? search_results_for({ query: searchQuery, count: totalResults })
-      : all_libraries_count({ count: totalResults })} - AppsScriptHub</title
-  >
+      : all_libraries_count({ count: totalResults })} - AppsScriptHub
+  </title>
   <meta
     name="description"
     content="AppsScriptHubでのライブラリ検索結果ページ。GASで使える便利なライブラリを見つけよう。"
