@@ -1,5 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
-import { sanitizeHtml, sanitizeMarkdownHtml } from '../../../../src/lib/utils/html-sanitizer.js';
+import {
+  sanitizeHtml,
+  sanitizeMarkdownHtml,
+  preprocessMarkdown,
+} from '../../../../src/lib/utils/html-sanitizer.js';
 
 // ブラウザ環境をモック
 vi.mock('$app/environment', () => ({
@@ -95,6 +99,48 @@ function hello() {
       const maliciousMarkdownHtml = '<h1>Title</h1><script>alert("XSS")</script><p>Content</p>';
       const result = sanitizeMarkdownHtml(maliciousMarkdownHtml);
       expect(result).toBe('<h1>Title</h1><p>Content</p>');
+    });
+  });
+
+  describe('preprocessMarkdown', () => {
+    test('エスケープされた改行文字を実際の改行に変換する', () => {
+      const input = '### タイトル\\n```javascript\\nconsole.log("test");\\n```';
+      const result = preprocessMarkdown(input);
+      expect(result).toBe('### タイトル\n```javascript\nconsole.log("test");\n```');
+    });
+
+    test('エスケープされたタブ文字を実際のタブに変換する', () => {
+      const input = 'function test() {\\n\\treturn true;\\n}';
+      const result = preprocessMarkdown(input);
+      expect(result).toBe('function test() {\n\treturn true;\n}');
+    });
+
+    test('連続する空行を整理する', () => {
+      const input = 'line1\n\n\n\n\nline2';
+      const result = preprocessMarkdown(input);
+      expect(result).toBe('line1\n\nline2');
+    });
+
+    test('文字列の前後の余分な空白を削除する', () => {
+      const input = '   \n  タイトル\n内容  \n  ';
+      const result = preprocessMarkdown(input);
+      expect(result).toBe('タイトル\n内容');
+    });
+
+    test('空文字列を渡すと空文字列を返す', () => {
+      const result = preprocessMarkdown('');
+      expect(result).toBe('');
+    });
+
+    test('提供されたマークダウンサンプルを正しく処理する', () => {
+      const input =
+        '### 【入門】アクティブシートをJSONでS3にアップロードする\\n```javascript\\n// ライブラリ (SheetS3) がプロジェクトに追加済みと仮定\\nfunction quickUpload() {\\n  SheetS3.uploadActiveSheetAsJson({\\n    bucket: "my-bucket",            // アップロード先バケット\\n    key:    "data/active.json"      // オブジェクトキー\\n  });\\n}\\n```';
+      const result = preprocessMarkdown(input);
+      expect(result).toContain(
+        '### 【入門】アクティブシートをJSONでS3にアップロードする\n```javascript'
+      );
+      expect(result).toContain('function quickUpload() {\n  SheetS3.uploadActiveSheetAsJson({');
+      expect(result).toContain('bucket: "my-bucket",');
     });
   });
 });

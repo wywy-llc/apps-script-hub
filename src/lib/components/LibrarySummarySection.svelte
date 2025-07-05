@@ -2,7 +2,7 @@
   import { getLocale } from '$lib/paraglide/runtime.js'; // cspell:ignore paraglide
   import type { Locale } from '$lib';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
-  import { sanitizeMarkdownHtml } from '$lib/utils/html-sanitizer.js';
+  import { sanitizeMarkdownHtml, preprocessMarkdown } from '$lib/utils/html-sanitizer.js';
   import 'github-markdown-css/github-markdown.css';
   import hljs from 'highlight.js/lib/core';
   import bash from 'highlight.js/lib/languages/bash';
@@ -77,8 +77,11 @@
   let usageExampleHtml = $derived.by(() => {
     if (!usageExample) return '';
 
+    // マークダウンの前処理（エスケープ文字等の修正）
+    const preprocessedMarkdown = preprocessMarkdown(usageExample);
+
     // SSRセーフなマークダウンレンダリング関数を使用
-    const renderedHtml = renderMarkdownSafe(usageExample);
+    const renderedHtml = renderMarkdownSafe(preprocessedMarkdown);
 
     // XSS対策: HTMLをサニタイズ
     return sanitizeMarkdownHtml(renderedHtml);

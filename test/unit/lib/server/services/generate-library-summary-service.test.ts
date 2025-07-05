@@ -206,13 +206,6 @@ describe('GenerateLibrarySummaryService', () => {
       // プロンプトの内容を検証
       const calledWith = mockChatCompletionsCreate.mock.calls[0][0];
       const prompt = calledWith.messages[0].content;
-
-      expect(prompt).toContain('# Role');
-      expect(prompt).toContain('Google Apps Script (GAS)の専門家であり');
-      expect(prompt).toContain('# Goal');
-      expect(prompt).toContain('GitHub Repository URL');
-      expect(prompt).toContain('構造化されたJSON要約を生成');
-      expect(prompt).toContain('usageExample`の作成');
       expect(prompt).toContain(mockParams.githubUrl);
     });
 

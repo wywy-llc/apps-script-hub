@@ -80,6 +80,28 @@ export function sanitizeHtml(html: string): string {
 }
 
 /**
+ * マークダウンテキストの前処理を行う関数
+ * 表示問題を引き起こす可能性のある文字列を修正
+ * @param markdown 元のマークダウンテキスト
+ * @returns 修正されたマークダウンテキスト
+ */
+export function preprocessMarkdown(markdown: string): string {
+  if (!markdown) return '';
+
+  return (
+    markdown
+      // エスケープされた改行文字を実際の改行に変換
+      .replace(/\\n/g, '\n')
+      // エスケープされたタブ文字を実際のタブに変換
+      .replace(/\\t/g, '\t')
+      // 連続する空行を整理（3つ以上の空行を2つに制限）
+      .replace(/\n{3,}/g, '\n\n')
+      // 文字列の前後の余分な空白を削除
+      .trim()
+  );
+}
+
+/**
  * MarkdownからHTMLに変換してサニタイズする関数
  * marked.jsと組み合わせて使用
  * @param markdownHtml marked.jsで変換されたHTML
