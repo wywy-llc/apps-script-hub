@@ -1,5 +1,6 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
+  import { copy_count_update_failed } from '$lib/paraglide/messages.js';
   import type { PageData } from './$types.js';
 
   // ライブラリ詳細ページコンポーネント
@@ -34,7 +35,7 @@
         markAsCopied();
       }
     } catch (err) {
-      console.error('コピー回数の更新に失敗しました:', err);
+      console.error(copy_count_update_failed(), err);
     }
   }
 

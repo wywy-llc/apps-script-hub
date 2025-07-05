@@ -1,11 +1,15 @@
 <script lang="ts">
-  import { last_updated } from '$lib/paraglide/messages.js';
+  import {
+    last_updated,
+    search_by_tag_aria,
+    search_by_tag_tooltip,
+  } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   // cspell:ignore paraglide
   import type { Locale } from '$lib';
+  import TagButton from '$lib/components/TagButton.svelte';
   import type { Library } from '$lib/server/db/schema.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
-  import TagButton from '$lib/components/TagButton.svelte';
 
   interface Props {
     library: Library;
@@ -56,8 +60,8 @@
           {#each (currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || []).slice(0, 3) as tag, index (index)}
             <TagButton
               onclick={() => searchByTag(tag)}
-              title="「{tag}」で検索"
-              aria-label="「{tag}」タグで検索"
+              title={search_by_tag_tooltip({ tag })}
+              aria-label={search_by_tag_aria({ tag })}
             >
               {tag}
             </TagButton>

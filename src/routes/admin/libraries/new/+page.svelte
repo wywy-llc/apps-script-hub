@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import type { ActionData } from './$types';
+  import * as m from '$lib/paraglide/messages.js';
 
   // 管理者画面 - 新規ライブラリ追加ページ
   // GitHubリポジトリから情報を自動取得してライブラリを登録
@@ -19,7 +20,7 @@
   // フォーム送信時の処理
   $effect(() => {
     if (form?.success) {
-      submitMessage = 'ライブラリが正常に登録されました。詳細ページに移動します...';
+      submitMessage = m.library_registration_success();
       // 詳細ページに遷移
       setTimeout(() => {
         goto(`/admin/libraries/${form.id}`);
@@ -34,15 +35,15 @@
 </script>
 
 <svelte:head>
-  <title>管理画面 - 新規ライブラリ追加 - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub管理者画面 - 新しいライブラリをシステムに登録" />
+  <title>{m.library_registration_title()} - AppsScriptHub</title>
+  <meta name="description" content="AppsScriptHub admin - Register new libraries to the system" />
 </svelte:head>
 
 <div class="bg-gray-50">
   <main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
     <div class="mx-auto max-w-3xl">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">新規ライブラリ追加</h1>
+        <h1 class="text-3xl font-bold text-gray-900">{m.library_registration_title()}</h1>
         <p class="mt-2 text-sm text-gray-600">
           GAS スクリプトIDとGitHub リポジトリURLを入力してください。GitHub
           APIから詳細情報を自動取得してデータベースに保存します。

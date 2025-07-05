@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '$lib/constants/error-messages.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 
 /**
@@ -17,14 +18,12 @@ export class FetchGithubRepoService {
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error('指定されたGitHubリポジトリが見つかりません。');
+        throw new Error(ERROR_MESSAGES.REPOSITORY_NOT_FOUND);
       }
       if (response.status === 403) {
-        throw new Error(
-          'GitHub API の制限に達しました。しばらく時間をおいてから再試行してください。'
-        );
+        throw new Error(ERROR_MESSAGES.GITHUB_API_RATE_LIMIT);
       }
-      throw new Error('GitHubリポジトリの情報取得に失敗しました。');
+      throw new Error(ERROR_MESSAGES.GITHUB_REPO_INFO_FETCH_FAILED);
     }
 
     const repoData = await response.json();

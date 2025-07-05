@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { notifications } from '$lib/paraglide/messages.js';
   import { toastStore } from '$lib/stores/toast-store.js';
   import Toast from './Toast.svelte';
 </script>
@@ -12,7 +13,7 @@
     class="fixed top-4 right-4 z-50 w-full max-w-sm space-y-2"
     role="alert"
     aria-live="polite"
-    aria-label="通知メッセージ"
+    aria-label={notifications()}
   >
     {#each $toastStore.toasts as toast (toast.id)}
       <Toast {toast} />

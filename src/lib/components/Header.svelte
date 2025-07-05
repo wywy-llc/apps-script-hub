@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app_title } from '$lib/paraglide/messages.js';
+  import { app_title, login } from '$lib/paraglide/messages.js';
   import Button from './Button.svelte';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
 
@@ -18,7 +18,7 @@
       <!-- 右側のアクション -->
       <div class="flex items-center space-x-4">
         <LanguageSwitcher />
-        <Button variant="primary" size="md" href="/auth/login">Login</Button>
+        <Button variant="primary" size="md" href="/auth/login">{login()}</Button>
       </div>
     </div>
   </div>

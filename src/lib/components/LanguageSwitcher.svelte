@@ -2,16 +2,36 @@
   import type { Locale } from '$lib';
   import { LANGUAGE_NAMES } from '$lib';
   import { getLocale, locales, setLocale } from '$lib/paraglide/runtime.js';
+  import { onMount } from 'svelte';
+
+  // localStorageのキー
+  const LOCALE_STORAGE_KEY = 'preferred-locale';
 
   // 現在のロケールを取得
-  let currentLocale = getLocale();
+  let currentLocale = $derived(getLocale());
 
   // ドロップダウンの開閉状態
-  let isOpen = false;
+  let isOpen = $state(false);
+
+  // コンポーネント初期化時にlocalStorageから設定を読み込み
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale;
+      if (savedLocale && locales.includes(savedLocale) && savedLocale !== getLocale()) {
+        setLocale(savedLocale);
+      }
+    }
+  });
 
   // 現在のページのURLを他の言語にローカライズ
   function switchLanguage(newLocale: Locale) {
     setLocale(newLocale);
+
+    // localStorageに保存
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
+    }
+
     isOpen = false; // 言語選択後にドロップダウンを閉じる
   }
 
@@ -36,7 +56,7 @@
   <button
     type="button"
     class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm transition-colors select-none hover:bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-    on:click={toggleDropdown}
+    onclick={toggleDropdown}
     aria-expanded={isOpen}
     aria-haspopup="listbox"
   >
@@ -89,7 +109,7 @@
                 {currentLocale === locale
                 ? 'bg-blue-600 font-medium text-white hover:bg-blue-700'
                 : ''}"
-              on:click={() => switchLanguage(locale)}
+              onclick={() => switchLanguage(locale)}
               role="option"
               aria-selected={currentLocale === locale}
             >

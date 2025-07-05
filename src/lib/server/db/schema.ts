@@ -90,6 +90,11 @@ export const librarySummary = pgTable('library_summary', {
   >(),
   usageExampleJa: text('usage_example_ja'),
   usageExampleEn: text('usage_example_en'),
+  // seoInfo
+  seoTitleJa: text('seo_title_ja'),
+  seoTitleEn: text('seo_title_en'),
+  seoDescriptionJa: text('seo_description_ja'),
+  seoDescriptionEn: text('seo_description_en'),
   createdAt: timestamp('created_at', {
     withTimezone: true,
     mode: 'date',

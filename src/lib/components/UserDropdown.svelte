@@ -1,5 +1,6 @@
 <script lang="ts">
   import { clickOutside } from '$lib/actions/clickOutside';
+  import { admin_dashboard, library_search, logout } from '$lib/paraglide/messages.js';
   import { signOut } from '@auth/sveltekit/client';
 
   export let user: { name?: string; email?: string; image?: string };
@@ -51,7 +52,7 @@
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             on:click={closeDropdown}
           >
-            管理画面
+            {admin_dashboard()}
           </a>
         {/if}
         <a
@@ -59,14 +60,14 @@
           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
           on:click={closeDropdown}
         >
-          ライブラリ検索
+          {library_search()}
         </a>
         <hr class="my-1 border-gray-200" />
         <button
           on:click={handleSignOut}
           class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         >
-          ログアウト
+          {logout()}
         </button>
       </div>
     </div>

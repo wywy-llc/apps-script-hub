@@ -1,5 +1,6 @@
 <script lang="ts">
   import { convertRelativeToAbsolute, getReadmeBaseUrl } from '$lib/helpers/link-converter.js';
+  import { markdown_render_error } from '$lib/paraglide/messages.js';
   import { preprocessMarkdown, sanitizeMarkdownHtml } from '$lib/utils/html-sanitizer.js';
   import 'github-markdown-css/github-markdown.css';
   import hljs from 'highlight.js/lib/core';
@@ -101,7 +102,7 @@
       return sanitizedHtml;
     } catch (error) {
       console.error('MarkdownRenderer rendering error:', error);
-      return '<p style="color: red; padding: 20px; border: 2px solid red;">マークダウンのレンダリングでエラーが発生しました。</p>';
+      return `<p style="color: red; padding: 20px; border: 2px solid red;">${markdown_render_error()}</p>`;
     }
   }
 

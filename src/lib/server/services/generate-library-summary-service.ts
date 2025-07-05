@@ -71,6 +71,16 @@ const authUrl = oauth.getAuthUrl('client_id', 'redirect_uri');
 const token = oauth.getAccessToken('auth_code');`,
         },
       },
+      seoInfo: {
+        title: {
+          ja: '【GAS】OAuth2認証ライブラリ - 簡単実装',
+          en: 'GAS OAuth2 Authentication Library - Easy Implementation',
+        },
+        description: {
+          ja: 'Google Apps ScriptでOAuth2認証を簡単に実装。複雑な認証フローを簡潔なメソッドで自動化し、開発時間を大幅に短縮。',
+          en: 'Easy OAuth2 authentication implementation for Google Apps Script. Automate complex authentication flows with concise methods, significantly reducing development time.',
+        },
+      },
     };
   }
 
@@ -134,6 +144,16 @@ const testLib = new TestLibrary();
 testLib.setMockData('sample_data');
 // Run test
 const result = testLib.runTest();`,
+      },
+    },
+    seoInfo: {
+      title: {
+        ja: '【GAS】テストライブラリ - E2E効率化',
+        en: 'GAS Test Library - E2E Testing Efficiency',
+      },
+      description: {
+        ja: 'Google Apps Script用テストライブラリ。モックデータでAPIコスト削減し、高速なE2Eテスト実行を実現。',
+        en: 'Test library for Google Apps Script. Reduce API costs with mock data and achieve fast E2E test execution.',
       },
     },
   };
@@ -287,8 +307,45 @@ export class GenerateLibrarySummaryService {
                 required: ['coreProblem', 'mainBenefits', 'usageExample'],
                 additionalProperties: false,
               },
+              seoInfo: {
+                type: 'object',
+                properties: {
+                  title: {
+                    type: 'object',
+                    properties: {
+                      ja: {
+                        type: 'string',
+                        description: 'SEO向けのタイトルタグ（日本語30文字前後）',
+                      },
+                      en: {
+                        type: 'string',
+                        description: 'Title tag for SEO (around 60 characters)',
+                      },
+                    },
+                    required: ['ja', 'en'],
+                    additionalProperties: false,
+                  },
+                  description: {
+                    type: 'object',
+                    properties: {
+                      ja: {
+                        type: 'string',
+                        description: 'SEO向けのdescriptionタグ（日本語120文字前後）',
+                      },
+                      en: {
+                        type: 'string',
+                        description: 'Description tag for SEO (around 160 characters)',
+                      },
+                    },
+                    required: ['ja', 'en'],
+                    additionalProperties: false,
+                  },
+                },
+                required: ['title', 'description'],
+                additionalProperties: false,
+              },
             },
-            required: ['basicInfo', 'functionality'],
+            required: ['basicInfo', 'functionality', 'seoInfo'],
             additionalProperties: false,
           },
         },
@@ -370,7 +427,23 @@ READMEのコード例を基盤とし、**Step 3で定義した対象ユーザー
     - コードブロック内には、処理の流れがわかるような**インラインコメントを必ず含めてください。**
 - **Output:** \`usageExample\`
 
-### Step 6: 最終生成 (Finalization)
+### Step 6: SEOメタデータの生成 (SEO Metadata Generation)
+これまでのステップで分析した情報（libraryName, purpose, coreProblem, targetUsers）を総動員し、高いクリック率(CTR)を目指すSEOメタデータを生成します。
+
+- **\`title\` (ja/en):**
+  - **検索キーワード:** ユーザーが検索時に使用するであろう、最も重要なキーワード（例: "GAS OAuth2", "Google Apps Script API 連携"）を**タイトルの前半に**含めてください。
+  - **具体性と便益:** ライブラリが「何をするものか」が一目で分かり、ユーザーが得られる「具体的なメリット」が伝わるように記述します。
+  - **フォーマット:** 日本語タイトルには \`【GAS】\` という接頭辞を付けて、対象技術を明確にしてください。
+  - **文字数:** 検索結果で省略されないよう、**日本語は30文字前後**、**英語は60文字以内**に厳守してください。
+  - **Output:** \`seoInfo.title\`
+- **\`description\` (ja/en):**
+  - **検索意図への回答:** ユーザーが抱えるであろう課題（\`coreProblem\`）に触れ、このライブラリがその解決策であることを明確に示してください。
+  - **価値の要約:** \`targetUsers\` が誰で、\`mainBenefits\` が何であるかを簡潔に要約して含めます。
+  - **具体性:** 抽象的な表現を避け、「〜を自動化」「〜の時間を短縮」のように、具体的なアクションや結果を記述します。
+  - **文字数:** **日本語は120文字前後**、**英語は160文字以内**に厳守してください。
+  - **Output:** \`seoInfo.description\`
+
+### Step 7: 最終生成 (Finalization)
 上記ステップで得られたすべての要素を、スキーマに従って完全なJSONオブジェクトに組み立てます。
 - **要件:** 全てのテキストフィールドは、日本語(ja)と英語(en)の両方で生成してください。
 

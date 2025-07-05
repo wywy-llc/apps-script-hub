@@ -33,11 +33,12 @@ describe('SearchPage', () => {
     );
     const { container } = render(SearchPage, { data: mockData });
 
-    // 基本要素の確認（DOM存在確認）
-    expect(container.querySelector('input[placeholder="GASライブラリを検索"]')).toBeTruthy();
+    // 基本要素の確認（アクセシビリティ対応）
+    const searchInput = screen.getByRole('searchbox');
+    expect(searchInput).toBeTruthy();
     expect(container.querySelector('h1')).toBeTruthy();
-    // 検索クエリがない場合は「すべてのライブラリ」が表示される
-    expect(screen.getByText(/すべてのライブラリ/)).toBeDefined();
+    // 検索クエリがない場合は「All libraries」が表示される（多言語対応）
+    expect(screen.getByText(/All libraries/)).toBeDefined();
   });
 
   // 検索フォームの存在確認
@@ -57,13 +58,14 @@ describe('SearchPage', () => {
     );
     const { container } = render(SearchPage, { data: mockData });
 
-    // フォーム要素の確認
+    // フォーム要素の確認（アクセシビリティ対応）
     const searchForm = container.querySelector('form');
-    const searchInput = container.querySelector('input[type="search"]');
+    const searchInput = screen.getByRole('searchbox');
 
     expect(searchForm).toBeTruthy();
     expect(searchInput).toBeTruthy();
-    expect(searchInput?.getAttribute('placeholder')).toBe('GASライブラリを検索');
+    expect(searchInput.getAttribute('placeholder')).toBe('Search GAS libraries');
+    expect(searchInput.getAttribute('aria-label')).toBe('Search Apps Script libraries');
   });
 
   // コンポーネントの基本構造確認

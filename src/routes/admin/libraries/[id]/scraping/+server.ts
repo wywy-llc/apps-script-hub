@@ -9,11 +9,24 @@ export const POST: RequestHandler = async ({ params }) => {
     throw error(400, { message: 'ライブラリIDが指定されていません。' });
   }
 
-  // GitHubからライブラリ情報を更新（AI要約生成はスキップ）
-  await UpdateLibraryFromGithubService.call(libraryId, { skipAiSummary: true });
+  try {
+    // GitHubからライブラリ情報を更新（AI要約生成はスキップ）
+    await UpdateLibraryFromGithubService.call(libraryId, { skipAiSummary: true });
 
-  return json({
-    success: true,
-    message: 'スクレイピングが完了しました。',
-  });
+    return json({
+      success: true,
+      message: 'スクレイピングが完了しました。',
+    });
+  } catch (err) {
+    console.error('スクレイピング処理エラー:', err);
+    console.error(
+      'エラースタックトレース:',
+      err instanceof Error ? err.stack : 'スタックトレース不明'
+    );
+
+    throw error(500, {
+      message:
+        'スクレイピング処理中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+    });
+  }
 };

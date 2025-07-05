@@ -4,6 +4,7 @@
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
+  import * as m from '$lib/paraglide/messages.js';
   import { toastStore } from '$lib/stores/toast-store.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
@@ -78,7 +79,7 @@
     if (input && input.value) {
       try {
         await navigator.clipboard.writeText(input.value);
-        toastStore.success('コピーしました');
+        toastStore.success(m.copied_success());
 
         // スクリプトIDがコピーされた場合はコールバックを実行
         if (elementId === 'script-id' && onCopyScriptId) {
@@ -86,7 +87,7 @@
         }
       } catch (err) {
         console.error('Copy failed', err);
-        toastStore.error('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
+        toastStore.error(m.copy_failed());
         input.select();
         input.setSelectionRange(0, 99999);
       }
@@ -107,7 +108,7 @@
     <div class="mx-auto max-w-3xl">
       <div class="mb-8 flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">ライブラリ詳細</h1>
+          <h1 class="text-3xl font-bold text-gray-900">{m.library_detail_title()}</h1>
           <div class="mt-2 flex items-center space-x-3">
             <p class="text-sm text-gray-500">{library.name}</p>
             <span class={getStatusBadge(library.status)}>
@@ -122,14 +123,14 @@
             disabled={isScrapingInProgress}
             class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isScrapingInProgress ? 'スクレイピング中...' : 'スクレイピング実行'}
+            {isScrapingInProgress ? m.scraping_in_progress() : m.execute_scraping()}
           </button>
           <button
             type="button"
             onclick={onEdit}
             class="inline-flex cursor-pointer justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
           >
-            編集
+            {m.edit()}
           </button>
           <!-- ステータス更新ボタン -->
           {#if onStatusUpdate}
@@ -222,24 +223,24 @@
       {#if isAdminMode}
         <!-- 管理者モード: 概要セクション -->
         <div class="mt-12">
-          <h2 class="mb-6 text-2xl font-bold text-gray-900">概要</h2>
+          <h2 class="mb-6 text-2xl font-bold text-gray-900">{m.overview()}</h2>
           <div class="overflow-hidden rounded-lg bg-white shadow-md">
             <div class="px-6 py-8">
               <dl class="space-y-8">
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">ライブラリ名</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.library_name()}</dt>
                   <dd class="mt-1 text-lg font-semibold text-gray-900">
                     {library.name}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">GAS スクリプトID</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.gas_script_id()}</dt>
                   <dd class="mt-1 font-mono text-base break-all text-gray-900">
                     {library.scriptId}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">GitHub リポジトリURL</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.github_repository_url()}</dt>
                   <dd class="mt-1 text-base text-blue-600 hover:underline">
                     <a href={library.repositoryUrl} target="_blank" rel="noopener noreferrer">
                       {library.repositoryUrl}
@@ -247,7 +248,7 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">GASメソッド</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.gas_methods()}</dt>
                   <dd class="mt-1 text-base text-blue-600 hover:underline">
                     <a
                       href={libraryUrl}
@@ -260,7 +261,7 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">GASプロジェクト</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.gas_project()}</dt>
                   <dd class="mt-1 text-base text-blue-600 hover:underline">
                     <a
                       href={gasProjectUrl}
@@ -273,7 +274,7 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">GitHub 作者</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.github_author()}</dt>
                   <dd class="mt-1 text-base">
                     {#if library.authorName}
                       <a
@@ -298,14 +299,14 @@
                 </div>
                 {#if library.description}
                   <div>
-                    <dt class="text-sm font-medium text-gray-500">説明</dt>
+                    <dt class="text-sm font-medium text-gray-500">{m.description()}</dt>
                     <dd class="mt-1 text-base text-gray-900">
                       {library.description}
                     </dd>
                   </div>
                 {/if}
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">ライセンス</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.license()}</dt>
                   <dd class="mt-1 text-base">
                     {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
                       <a
@@ -314,23 +315,23 @@
                         rel="noopener noreferrer"
                         class="text-blue-600 hover:underline"
                       >
-                        {library.licenseType || 'ライセンス情報'}
+                        {library.licenseType || m.license_info()}
                       </a>
                     {:else}
                       <span class="text-gray-900">
-                        {library.licenseType || '不明'}
+                        {library.licenseType || m.unknown()}
                       </span>
                     {/if}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">作成日時</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.created_at()}</dt>
                   <dd class="mt-1 text-base text-gray-900">
                     {new Date(library.createdAt).toLocaleString('ja-JP')}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">更新日時</dt>
+                  <dt class="text-sm font-medium text-gray-500">{m.updated_at()}</dt>
                   <dd class="mt-1 text-base text-gray-900">
                     {new Date(library.updatedAt).toLocaleString('ja-JP')}
                   </dd>
@@ -339,6 +340,51 @@
             </div>
           </div>
         </div>
+
+        <!-- SEO情報セクション -->
+        {#if librarySummary && (librarySummary.seoTitleJa || librarySummary.seoTitleEn || librarySummary.seoDescriptionJa || librarySummary.seoDescriptionEn)}
+          <div class="mt-8">
+            <h3 class="mb-4 text-xl font-bold text-gray-900">SEO情報</h3>
+            <div class="overflow-hidden rounded-lg bg-white shadow-md">
+              <div class="px-6 py-6">
+                <dl class="space-y-6">
+                  {#if librarySummary.seoTitleJa}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEOタイトル（日本語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoTitleJa}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoTitleEn}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEOタイトル（英語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoTitleEn}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoDescriptionJa}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEO説明文（日本語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoDescriptionJa}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoDescriptionEn}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEO説明文（英語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoDescriptionEn}
+                      </dd>
+                    </div>
+                  {/if}
+                </dl>
+              </div>
+            </div>
+          </div>
+        {/if}
       {/if}
     </div>
 
@@ -347,8 +393,8 @@
       <div class="sticky top-24 space-y-6">
         <!-- インストールカード -->
         <div class="rounded-lg border p-4">
-          <h3 class="mb-3 font-semibold text-gray-800">インストール</h3>
-          <label for="script-id" class="text-sm font-medium text-gray-600">スクリプトID</label>
+          <h3 class="mb-3 font-semibold text-gray-800">{m.installation()}</h3>
+          <label for="script-id" class="text-sm font-medium text-gray-600">{m.script_id()}</label>
           <div class="mt-1 flex items-center">
             <input
               id="script-id"
@@ -359,7 +405,7 @@
             />
             <button
               onclick={() => copyToClipboard('script-id')}
-              aria-label="スクリプトIDをコピー"
+              aria-label={m.copy_script_id_aria()}
               class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
             >
               <svg
@@ -380,7 +426,7 @@
 
           <!-- ライセンス情報 -->
           <div class="mt-4 border-t border-gray-200 pt-4">
-            <dt class="mb-1 text-sm font-medium text-gray-600">ライセンス</dt>
+            <dt class="mb-1 text-sm font-medium text-gray-600">{m.license()}</dt>
             <dd class="text-sm">
               {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
                 <a
@@ -389,11 +435,11 @@
                   rel="noopener noreferrer"
                   class="text-blue-600 hover:text-blue-900 hover:underline"
                 >
-                  {library.licenseType || 'ライセンス情報'}
+                  {library.licenseType || m.license_info()}
                 </a>
               {:else}
                 <span class="text-gray-700">
-                  {library.licenseType || '不明'}
+                  {library.licenseType || m.unknown()}
                 </span>
               {/if}
             </dd>
@@ -403,7 +449,7 @@
         <!-- Aboutカード -->
         <div class="rounded-lg border p-4">
           <dl>
-            <dt class="font-semibold text-gray-800">GitHub Stars</dt>
+            <dt class="font-semibold text-gray-800">{m.github_stars()}</dt>
             <dd class="mb-3">
               <span class="inline-flex items-center">
                 <svg class="mr-1 h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -415,17 +461,17 @@
               </span>
             </dd>
 
-            <dt class="font-semibold text-gray-800">最終更新日時</dt>
+            <dt class="font-semibold text-gray-800">{m.last_updated_detail()}</dt>
             <dd class="mb-3">{formatDate(library.lastCommitAt)}</dd>
 
             {#if !isAdminMode}
-              <dt class="font-semibold text-gray-800">スクリプトIDコピー数</dt>
+              <dt class="font-semibold text-gray-800">{m.script_id_copy_count()}</dt>
               <dd class="mb-3">
                 {displayCopyCount}回
               </dd>
             {/if}
 
-            <dt class="font-semibold text-gray-800">作者</dt>
+            <dt class="font-semibold text-gray-800">{m.author()}</dt>
             <dd class="mb-3">
               <a
                 href={library.authorUrl}
@@ -437,7 +483,7 @@
               </a>
             </dd>
 
-            <dt class="font-semibold text-gray-800">スクリプト参考</dt>
+            <dt class="font-semibold text-gray-800">{m.script_reference()}</dt>
             <dd class="mb-3">
               <a
                 href={libraryUrl}
@@ -451,7 +497,7 @@
             </dd>
 
             <!-- GASプロジェクトを追加 -->
-            <dt class="font-semibold text-gray-800">GASプロジェクト</dt>
+            <dt class="font-semibold text-gray-800">{m.gas_project()}</dt>
             <dd class="mb-3">
               <a
                 href={gasProjectUrl}
@@ -464,7 +510,7 @@
               </a>
             </dd>
 
-            <dt class="font-semibold text-gray-800">GitHub リポジトリ</dt>
+            <dt class="font-semibold text-gray-800">{m.github_repository()}</dt>
             <dd class="mb-3">
               <a
                 href={library.repositoryUrl}

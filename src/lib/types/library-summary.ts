@@ -40,6 +40,16 @@ export interface LibrarySummary {
       en: string;
     };
   };
+  seoInfo: {
+    title: {
+      ja: string;
+      en: string;
+    };
+    description: {
+      ja: string;
+      en: string;
+    };
+  };
 }
 
 /**
@@ -77,6 +87,10 @@ export interface LibrarySummaryRecord {
   }> | null;
   usageExampleJa: string | null;
   usageExampleEn: string | null;
+  seoTitleJa: string | null;
+  seoTitleEn: string | null;
+  seoDescriptionJa: string | null;
+  seoDescriptionEn: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
