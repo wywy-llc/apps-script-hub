@@ -1,6 +1,16 @@
 <script lang="ts">
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
+  import {
+    all_libraries_count,
+    next,
+    no_search_results,
+    previous,
+    search_from_box,
+    search_gas_libraries,
+    search_results_for,
+    try_different_keywords,
+  } from '$lib/paraglide/messages.js';
   import type { PageData } from './$types.js';
 
   // 検索結果ページコンポーネント
@@ -18,7 +28,11 @@
 </script>
 
 <svelte:head>
-  <title>{searchQuery ? `「${searchQuery}」の検索結果` : 'ライブラリ一覧'} - AppsScriptHub</title>
+  <title
+    >{searchQuery
+      ? search_results_for({ query: searchQuery, count: totalResults })
+      : all_libraries_count({ count: totalResults })} - AppsScriptHub</title
+  >
   <meta
     name="description"
     content="AppsScriptHubでのライブラリ検索結果ページ。GASで使える便利なライブラリを見つけよう。"
@@ -29,15 +43,15 @@
   <!-- 検索バーと結果件数 -->
   <div class="mb-8">
     <div class="mx-auto mb-6 max-w-xl">
-      <SearchBox placeholder="GASライブラリを検索" value={searchQuery} />
+      <SearchBox placeholder={search_gas_libraries()} value={searchQuery} />
     </div>
     {#if searchQuery}
       <h1 class="text-center text-2xl font-bold text-gray-800">
-        「{searchQuery}」の検索結果: {totalResults}件
+        {search_results_for({ query: searchQuery, count: totalResults })}
       </h1>
     {:else}
       <h1 class="text-center text-2xl font-bold text-gray-800">
-        すべてのライブラリ ({totalResults}件)
+        {all_libraries_count({ count: totalResults })}
       </h1>
     {/if}
   </div>
@@ -73,7 +87,7 @@
                 clip-rule="evenodd"
               />
             </svg>
-            前へ
+            {previous()}
           </a>
         {/if}
       </div>
@@ -114,7 +128,7 @@
             href={`/user/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage + 1}`}
             class="inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
           >
-            次へ
+            {next()}
             <svg
               class="ml-3 h-5 w-5 text-gray-400"
               xmlns="http://www.w3.org/2000/svg"
@@ -149,12 +163,10 @@
         />
       </svg>
       <h3 class="mt-4 text-lg font-medium text-gray-900">
-        {searchQuery ? '検索結果が見つかりませんでした' : 'GASライブラリを検索'}
+        {searchQuery ? no_search_results() : search_gas_libraries()}
       </h3>
       <p class="mt-2 text-gray-500">
-        {searchQuery
-          ? '別のキーワードで検索してみてください。'
-          : '上の検索ボックスからライブラリを検索できます。'}
+        {searchQuery ? try_different_keywords() : search_from_box()}
       </p>
     </div>
   {/if}

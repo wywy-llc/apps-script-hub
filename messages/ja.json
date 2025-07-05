@@ -20,5 +20,16 @@
   "view_all_libraries": "すべてのライブラリを見る",
   "cta_title": "あなたのライブラリを公開しませんか？",
   "cta_description": "あなたが作成した便利なGASライブラリやツールをAppsScriptHubに登録して、GASコミュニティに貢献しましょう。",
-  "view_contribution_guide": "ライブラリ登録方法を見る"
+  "view_contribution_guide": "ライブラリ登録方法を見る",
+  "gas_library_search": "GASライブラリ検索",
+  "welcome_user": "ようこそ、{userName}さん",
+  "search_results_for": "「{query}」の検索結果: {count}件",
+  "all_libraries_count": "すべてのライブラリ ({count}件)",
+  "search_gas_libraries": "GASライブラリを検索",
+  "previous": "前へ",
+  "next": "次へ",
+  "no_search_results": "検索結果が見つかりませんでした",
+  "try_different_keywords": "別のキーワードで検索してみてください。",
+  "search_from_box": "上の検索ボックスからライブラリを検索できます。",
+  "copy_count_update_failed": "コピー回数の更新に失敗しました:"
 }

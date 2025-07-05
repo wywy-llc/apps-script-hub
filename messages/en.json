@@ -20,5 +20,16 @@
   "view_all_libraries": "View All Libraries",
   "cta_title": "Want to publish your library?",
   "cta_description": "Register your useful GAS libraries and tools on AppsScriptHub to contribute to the GAS community.",
-  "view_contribution_guide": "View Library Registration Guide"
+  "view_contribution_guide": "View Library Registration Guide",
+  "gas_library_search": "GAS Library Search",
+  "welcome_user": "Welcome, {userName}",
+  "search_results_for": "Search results for \"{query}\": {count} items",
+  "all_libraries_count": "All libraries ({count} items)",
+  "search_gas_libraries": "Search GAS libraries",
+  "previous": "Previous",
+  "next": "Next",
+  "no_search_results": "No search results found",
+  "try_different_keywords": "Please try different keywords.",
+  "search_from_box": "You can search for libraries from the search box above.",
+  "copy_count_update_failed": "Failed to update copy count:"
 }
