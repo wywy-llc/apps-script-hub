@@ -61,12 +61,23 @@ export function sanitizeHtml(html: string): string {
   }
 
   try {
+    // Add a hook to enforce `rel="noopener noreferrer"` for links with `target="_blank"`
+    DOMPurify.addHook('afterSanitizeAttributes', (node: HookEvent) => {
+      if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+        const rel = node.getAttribute('rel') || '';
+        if (!rel.includes('noopener')) {
+          node.setAttribute('rel', `${rel} noopener`.trim());
+        }
+        if (!rel.includes('noreferrer')) {
+          node.setAttribute('rel', `${rel} noreferrer`.trim());
+        }
+      }
+    });
+
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: SANITIZE_CONFIG.ALLOWED_TAGS,
       ALLOWED_ATTR: SANITIZE_CONFIG.ALLOWED_ATTR,
       ALLOWED_URI_REGEXP: SANITIZE_CONFIG.ALLOWED_URI_REGEXP,
-      // 外部リンクに属性を自動追加
-      ADD_ATTR: ['target', 'rel'],
       // 危険なコンテンツを削除
       SANITIZE_DOM: true,
       // テキストコンテンツを保持（マークダウンレンダリング用）
