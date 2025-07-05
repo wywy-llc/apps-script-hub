@@ -27,6 +27,7 @@ export async function setLocaleToEnglish(page: Page) {
   await page.addInitScript(() => {
     document.cookie = 'PARAGLIDE_LOCALE=en; path=/; max-age=34560000';
     // globalVariableストラテジーでも英語に設定
+    // cspell:disable-next-line
     (globalThis as Record<string, unknown>).__paraglide = { locale: 'en' };
   });
 }
