@@ -1,6 +1,6 @@
 <script lang="ts">
-  import '../app.css';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
+  import '../app.css';
 
   // ルートレイアウト - 最小限の設定のみ
   // 各サブディレクトリで独自のレイアウトを定義
@@ -9,6 +9,6 @@
 </script>
 
 {@render children()}
-s
+
 <!-- グローバルトーストコンテナ -->
 <ToastContainer />
