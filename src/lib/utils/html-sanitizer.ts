@@ -69,8 +69,8 @@ export function sanitizeHtml(html: string): string {
       ADD_ATTR: ['target', 'rel'],
       // 危険なコンテンツを削除
       SANITIZE_DOM: true,
-      // 空のタグを削除
-      KEEP_CONTENT: false,
+      // テキストコンテンツを保持（マークダウンレンダリング用）
+      KEEP_CONTENT: true,
     });
   } catch (error) {
     console.error('HTMLサニタイズエラー:', error);
