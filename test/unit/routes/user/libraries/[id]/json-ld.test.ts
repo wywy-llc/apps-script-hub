@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import type { Library, LibrarySummaryRecord } from '$lib/server/db/schema';
+import { describe, expect, it } from 'vitest';
+import type { Library, LibrarySummaryRecord } from '../../../../../../src/lib/server/db/schema';
 
 // JSON-LD生成関数のテスト用実装
 function generateKeywords(
@@ -72,29 +72,20 @@ function generateJsonLd(
     },
     license: library.licenseUrl,
     about: library.repositoryUrl,
-    dateCreated: library.createdAt.toISOString(),
-    dateModified: library.updatedAt.toISOString(),
+    dateModified: library.lastCommitAt.toISOString(),
     ...(library.starCount && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: Math.min(5, Math.max(1, Math.round((library.starCount / 100) * 5))),
-        bestRating: 5,
-        worstRating: 1,
-        ratingCount: library.starCount,
+      interactionStatistic: {
+        '@type': 'InteractionCounter',
+        interactionType: 'https://schema.org/LikeAction',
+        userInteractionCount: library.starCount,
       },
     }),
     downloadUrl: library.repositoryUrl,
     keywords: generateKeywords(librarySummary, currentLocale),
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-    },
     publisher: {
       '@type': 'Organization',
-      name: 'AppsScriptHub',
-      url: baseUrl,
+      name: 'wywy LLC',
+      url: 'https://wywy.jp/',
     },
   };
 
@@ -171,7 +162,7 @@ describe('JSON-LD構造化データ', () => {
     expect(jsonLdContent.applicationCategory).toBe('DeveloperApplication');
     expect(jsonLdContent.author.name).toBe('Test Author');
     expect(jsonLdContent.about).toBe('https://github.com/test/repo');
-    expect(jsonLdContent.aggregateRating.ratingValue).toBe(5);
+    expect(jsonLdContent.interactionStatistic?.userInteractionCount).toBe(100);
   });
 
   it('英語ロケールでJSON-LDが正しく生成される', () => {
@@ -224,7 +215,7 @@ describe('JSON-LD構造化データ', () => {
     expect(keywords).toEqual(uniqueKeywords);
   });
 
-  it('starCountが0の場合にaggregateRatingが含まれない', () => {
+  it('starCountが0の場合にinteractionStatisticが含まれない', () => {
     const libraryWithoutStars = {
       ...mockLibrary,
       starCount: 0,
@@ -232,8 +223,8 @@ describe('JSON-LD構造化データ', () => {
 
     const jsonLdContent = generateJsonLd(libraryWithoutStars, mockLibrarySummary, 'ja');
 
-    // aggregateRatingが含まれていないことを確認
-    expect(jsonLdContent.aggregateRating).toBeUndefined();
+    // interactionStatisticが含まれていないことを確認
+    expect(jsonLdContent.interactionStatistic).toBeUndefined();
   });
 
   it('generateKeywords関数単体のテスト', () => {
