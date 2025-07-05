@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { ERROR_MESSAGES } from '../../../../../src/lib/constants/error-messages.js';
 import { db, testConnection } from '../../../../../src/lib/server/db/index.js';
 import { CreateLibraryService } from '../../../../../src/lib/server/services/create-library-service.js';
 import { FetchGithubLicenseService } from '../../../../../src/lib/server/services/fetch-github-license-service.js';
@@ -156,7 +157,7 @@ describe('CreateLibraryService', () => {
     mockTestConnection.mockResolvedValue(false);
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
-      'データベース接続に失敗しました。'
+      ERROR_MESSAGES.DATABASE_CONNECTION_FAILED
     );
 
     // AI要約生成は呼び出されないことを確認
@@ -178,7 +179,7 @@ describe('CreateLibraryService', () => {
     mockDb.select = mockSelect;
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
-      'このGASスクリプトIDは既に登録されています。'
+      ERROR_MESSAGES.SCRIPT_ID_ALREADY_REGISTERED
     );
 
     // AI要約生成は呼び出されないことを確認
@@ -189,7 +190,7 @@ describe('CreateLibraryService', () => {
     mockGitHubApiUtils.fetchLastCommitDate.mockResolvedValue(null);
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
-      '最終コミット日時の取得に失敗しました。'
+      ERROR_MESSAGES.LAST_COMMIT_DATE_FETCH_FAILED
     );
 
     // AI要約生成は呼び出されないことを確認

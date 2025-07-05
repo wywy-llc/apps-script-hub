@@ -2,13 +2,13 @@
 
 /**
  * E2Eテスト実行スクリプト
- * テスト用データベースのセットアップ → Playwrightテスト実行 → クリーンアップ
+ * Playwrightテスト実行 → クリーンアップ
+ * （データベースセットアップはPlaywrightのglobalSetupで実行）
  */
 
 import { spawn } from 'child_process';
 import { config } from 'dotenv';
 import { cleanupTestDatabase } from './cleanup-test-db.js';
-import { setupTestDatabase } from './setup-test-db.js';
 
 // 環境変数を読み込み（メッセージ非表示）
 config({ quiet: true });
@@ -71,10 +71,7 @@ async function runE2ETests() {
   }
 
   try {
-    // 1. テスト用データベースをセットアップ
-    await setupTestDatabase();
-
-    // 2. Playwrightテストを実行
+    // Playwrightテストを実行（データベースセットアップはglobalSetupで実行）
     console.log('🎭 Playwrightテストを実行中...');
     await runCommand('npx', ['playwright', 'test']);
 
@@ -83,7 +80,7 @@ async function runE2ETests() {
     console.error('❌ E2Eテストに失敗しました:', error);
     throw error;
   } finally {
-    // 3. テスト用データベースをクリーンアップ（成功・失敗に関わらず実行）
+    // テスト用データベースをクリーンアップ（成功・失敗に関わらず実行）
     try {
       await cleanupTestDatabase();
     } catch (cleanupError) {

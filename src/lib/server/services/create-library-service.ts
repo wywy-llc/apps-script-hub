@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '$lib/constants/error-messages.js';
 import { db, testConnection } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
@@ -22,13 +23,13 @@ export class CreateLibraryService {
     const [owner, repo] = params.repoUrl.split('/');
 
     if (!owner || !repo) {
-      throw new Error('GitHub リポジトリURLの形式が正しくありません。');
+      throw new Error(ERROR_MESSAGES.INVALID_REPOSITORY_URL);
     }
 
     // データベース接続テスト
     const isConnected = await testConnection();
     if (!isConnected) {
-      throw new Error('データベース接続に失敗しました。');
+      throw new Error(ERROR_MESSAGES.DATABASE_CONNECTION_FAILED);
     }
 
     // scriptIdが既に登録されているかチェック
@@ -39,7 +40,7 @@ export class CreateLibraryService {
       .limit(1);
 
     if (existingScriptId.length > 0) {
-      throw new Error('このGASスクリプトIDは既に登録されています。');
+      throw new Error(ERROR_MESSAGES.SCRIPT_ID_ALREADY_REGISTERED);
     }
 
     // repositoryUrlが既に登録されているかチェック
@@ -51,7 +52,7 @@ export class CreateLibraryService {
       .limit(1);
 
     if (existingRepositoryUrl.length > 0) {
-      throw new Error('このリポジトリは既に登録されています。');
+      throw new Error(ERROR_MESSAGES.REPOSITORY_ALREADY_REGISTERED);
     }
 
     // GitHub から情報を取得
@@ -62,7 +63,7 @@ export class CreateLibraryService {
     ]);
 
     if (!lastCommitAt) {
-      throw new Error('最終コミット日時の取得に失敗しました。');
+      throw new Error(ERROR_MESSAGES.LAST_COMMIT_DATE_FETCH_FAILED);
     }
 
     // ライブラリを作成

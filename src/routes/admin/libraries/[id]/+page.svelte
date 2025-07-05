@@ -3,6 +3,7 @@
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
   import type { LibraryStatus } from '$lib/constants/library-status.js';
   import type { ActionData, PageData } from './$types';
+  import * as m from '$lib/paraglide/messages.js';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -183,8 +184,8 @@
 </script>
 
 <svelte:head>
-  <title>管理画面 - ライブラリ詳細 - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの詳細情報と管理機能" />
+  <title>{m.library_detail_title()} - AppsScriptHub</title>
+  <meta name="description" content="AppsScriptHub admin - Library details and management" />
 </svelte:head>
 
 <main>

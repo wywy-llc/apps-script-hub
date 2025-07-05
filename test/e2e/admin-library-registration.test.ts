@@ -13,7 +13,7 @@ test.describe('Admin Screen - Library Registration', () => {
     await page.goto('/admin/libraries/new');
 
     // ページタイトルの確認
-    await expect(page).toHaveTitle(/新規ライブラリ追加/);
+    await expect(page).toHaveTitle(/Add New Library/);
 
     // 2. フォームに入力
     // repositoryUrlからowner/repo形式を抽出
@@ -70,7 +70,7 @@ test.describe('Admin Screen - Library Registration', () => {
     await expect(page.locator('button.bg-green-600:has-text("Publish")')).toBeVisible();
 
     // 7. ライブラリ詳細情報が正常に表示されているか確認（GitHubから取得されたかの確認）
-    await expect(page.locator('h2:has-text("概要")')).toBeVisible();
+    await expect(page.locator('h2:has-text("Overview")')).toBeVisible();
   });
 
   test('フォームバリデーション - 必須項目未入力', async ({ page }) => {

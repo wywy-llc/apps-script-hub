@@ -80,5 +80,7 @@
   "notifications": "通知メッセージ",
   "library_management": "ライブラリ管理",
   "publish": "公開する",
-  "unpublish": "未公開に戻す"
+  "unpublish": "未公開に戻す",
+  "library_registration_success": "ライブラリが正常に登録されました。詳細ページに移動します...",
+  "library_registration_title": "新規ライブラリ追加"
 }

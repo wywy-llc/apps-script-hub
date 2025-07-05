@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { clearTestData } from '../scripts/clear-test-data.js';
 
 /**
@@ -15,4 +16,17 @@ export async function clearTestDataBeforeTest() {
     console.error('❌ テストデータのクリアに失敗しました:', error);
     throw error;
   }
+}
+
+/**
+ * E2Eテスト用に言語を英語に設定する
+ * @param page Playwrightページオブジェクト
+ */
+export async function setLocaleToEnglish(page: Page) {
+  // Paraglide JSのクッキーを英語に設定
+  await page.addInitScript(() => {
+    document.cookie = 'PARAGLIDE_LOCALE=en; path=/; max-age=34560000';
+    // globalVariableストラテジーでも英語に設定
+    (globalThis as Record<string, unknown>).__paraglide = { locale: 'en' };
+  });
 }

@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '$lib/constants/error-messages.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types.js';
@@ -9,18 +10,18 @@ export const actions: Actions = {
     const repoUrl = formData.get('repoUrl')?.toString();
 
     if (!scriptId?.trim()) {
-      return fail(400, { message: 'GAS スクリプトIDを入力してください' });
+      return fail(400, { message: ERROR_MESSAGES.SCRIPT_ID_REQUIRED });
     }
 
     if (!repoUrl?.trim()) {
-      return fail(400, { message: 'GitHub リポジトリURLを入力してください' });
+      return fail(400, { message: ERROR_MESSAGES.REPOSITORY_URL_REQUIRED });
     }
 
     // バリデーション
     const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
     if (!githubRepoPattern.test(repoUrl)) {
       return fail(400, {
-        message: 'GitHub リポジトリURLの形式が正しくありません',
+        message: ERROR_MESSAGES.INVALID_REPOSITORY_URL,
       });
     }
 

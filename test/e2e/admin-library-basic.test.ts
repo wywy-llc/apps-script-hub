@@ -51,7 +51,7 @@ test.describe('Admin Screen - Library Functions (Basic)', () => {
     ).toBeVisible();
 
     // 7. ライブラリ詳細情報が正常に表示されているか確認
-    await expect(page.locator('h2:has-text("概要")')).toBeVisible();
+    await expect(page.locator('h2:has-text("Overview")')).toBeVisible();
 
     // 8. 管理者機能ボタンの確認
     await expect(page.locator('button:has-text("Execute Scraping")')).toBeVisible();

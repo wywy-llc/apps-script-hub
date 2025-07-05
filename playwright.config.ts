@@ -23,6 +23,7 @@ export default defineConfig({
       PLAYWRIGHT_TEST_MODE: 'true',
       OPENAI_API_KEY: 'mock-api-key-for-e2e-testing',
       GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
+      PARAGLIDE_LOCALE: 'en',
     },
   },
   testDir: 'test/e2e',
