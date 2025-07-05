@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ToastContainer from '$lib/components/ToastContainer.svelte';
   import '../app.css';
 
   // ルートレイアウト - 最小限の設定のみ
@@ -8,3 +9,6 @@
 </script>
 
 {@render children()}
+
+<!-- グローバルトーストコンテナ -->
+<ToastContainer />

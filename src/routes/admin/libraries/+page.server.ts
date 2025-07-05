@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { library } from '$lib/server/db/schema';
+import { library, librarySummary } from '$lib/server/db/schema';
 import {
   BulkGASLibrarySearchService,
   type LibrarySaveCallback,
@@ -106,10 +106,10 @@ export const actions: Actions = {
               authorUrl: libraryData.authorUrl,
               authorName: libraryData.authorName,
               description: libraryData.description,
-              readmeContent: libraryData.readmeContent || '',
               licenseType: libraryData.licenseType || 'unknown',
               licenseUrl: libraryData.licenseUrl || 'unknown',
               starCount: libraryData.starCount || 0,
+              copyCount: 0,
               lastCommitAt: libraryData.lastCommitAt,
               status: 'pending',
               createdAt: new Date(),
@@ -164,6 +164,52 @@ export const actions: Actions = {
       console.error('自動検索・一括追加エラー:', error);
       return fail(500, {
         error: '自動検索・一括追加処理中にエラーが発生しました。',
+      });
+    }
+  },
+
+  /**
+   * ライブラリ削除アクション
+   * ライブラリとその関連する要約データを削除
+   */
+  delete: async ({ request }) => {
+    try {
+      const formData = await request.formData();
+      const libraryId = formData.get('libraryId') as string;
+
+      // パラメータの基本検証
+      if (!libraryId?.trim()) {
+        return fail(400, { error: 'ライブラリIDが指定されていません。' });
+      }
+
+      // ライブラリの存在確認
+      const existingLibrary = await db
+        .select({ id: library.id, name: library.name })
+        .from(library)
+        .where(eq(library.id, libraryId))
+        .limit(1);
+
+      if (existingLibrary.length === 0) {
+        return fail(404, { error: '指定されたライブラリが見つかりません。' });
+      }
+
+      // トランザクションで関連データを削除
+      await db.transaction(async tx => {
+        // 1. 関連するライブラリ要約を削除
+        await tx.delete(librarySummary).where(eq(librarySummary.libraryId, libraryId));
+
+        // 2. ライブラリ本体を削除
+        await tx.delete(library).where(eq(library.id, libraryId));
+      });
+
+      return {
+        success: true,
+        message: `ライブラリ「${existingLibrary[0].name}」を削除しました。`,
+      };
+    } catch (error) {
+      console.error('ライブラリ削除エラー:', error);
+      return fail(500, {
+        error: 'ライブラリの削除処理中にエラーが発生しました。',
       });
     }
   },

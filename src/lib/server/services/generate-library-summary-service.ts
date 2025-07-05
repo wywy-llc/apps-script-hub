@@ -56,6 +56,20 @@ function getE2EMockSummary(githubUrl: string): LibrarySummary {
             },
           },
         ],
+        usageExample: {
+          ja: `// OAuth2認証ライブラリの基本的な使用例
+const oauth = new OAuth2Lib();
+// 認証URLを生成
+const authUrl = oauth.getAuthUrl('client_id', 'redirect_uri');
+// アクセストークンを取得
+const token = oauth.getAccessToken('auth_code');`,
+          en: `// Basic usage example of OAuth2 authentication library
+const oauth = new OAuth2Lib();
+// Generate authentication URL
+const authUrl = oauth.getAuthUrl('client_id', 'redirect_uri');
+// Get access token
+const token = oauth.getAccessToken('auth_code');`,
+        },
       },
     };
   }
@@ -107,6 +121,20 @@ function getE2EMockSummary(githubUrl: string): LibrarySummary {
           },
         },
       ],
+      usageExample: {
+        ja: `// テストライブラリの基本的な使用例
+const testLib = new TestLibrary();
+// モックデータを設定
+testLib.setMockData('sample_data');
+// テストを実行
+const result = testLib.runTest();`,
+        en: `// Basic usage example of test library
+const testLib = new TestLibrary();
+// Set mock data
+testLib.setMockData('sample_data');
+// Run test
+const result = testLib.runTest();`,
+      },
     },
   };
 }
@@ -134,7 +162,7 @@ export class GenerateLibrarySummaryService {
     const prompt = this.buildPrompt(params);
 
     const response = await client.chat.completions.create({
-      model: 'o4-mini',
+      model: 'o3',
       messages: [
         {
           role: 'user',
@@ -238,8 +266,25 @@ export class GenerateLibrarySummaryService {
                       additionalProperties: false,
                     },
                   },
+                  usageExample: {
+                    type: 'object',
+                    properties: {
+                      ja: {
+                        type: 'string',
+                        description:
+                          'Markdown形式で記述された、コードとその解説。コードブロック（```javascript）を使用すること。',
+                      },
+                      en: {
+                        type: 'string',
+                        description:
+                          'Code and its explanation in Markdown format. Use code blocks (```javascript).',
+                      },
+                    },
+                    required: ['ja', 'en'],
+                    additionalProperties: false,
+                  },
                 },
-                required: ['coreProblem', 'mainBenefits'],
+                required: ['coreProblem', 'mainBenefits', 'usageExample'],
                 additionalProperties: false,
               },
             },
@@ -270,14 +315,67 @@ export class GenerateLibrarySummaryService {
    * @returns 構築されたプロンプト
    */
   private static buildPrompt(params: LibrarySummaryParams): string {
-    return `GitHub URLからGoogle Apps Scriptライブラリの要約JSONを生成してください。
+    return `
+# Role
+あなたは、Google Apps Script (GAS) ライブラリの価値を開発者視点で見抜き、その本質を的確に言語化する専門家です。
 
-**要求:**
-- mainBenefitsは1-3個
-- 各テキストは簡潔に
-- GitHubの実際の情報のみ使用
-- 完全なJSONのみ出力（説明不要）
+# Goal
+提供されたGitHubリポジトリを分析・推論し、他の開発者がライブラリの採用を迅速かつ正確に判断できる、高品質なJSONデータを生成します。
 
-**GithubリポジトリURL:** ${params.githubUrl}`;
+# Input
+- GitHub Repository URL: ${params.githubUrl}
+
+# Reasoning Process
+以下の思考プロセスに従って、JSONオブジェクトを段階的に構築してください。
+
+### Step 1: 全体分析 (High-Level Analysis)
+リポジトリ全体、特にREADMEを読み込み、ライブラリの全体像を把握します。
+- **Output:** \`libraryName\`, \`tags\`
+
+### Step 2: 提供価値の定義 (Core Value Proposition)
+ライブラリの存在意義を明確にします。
+- **\`purpose\`:** **このライブラリが「何をするものか？」** を一文で定義します。
+- **\`coreProblem\`:** **このライブラリが「なぜ必要なのか？」** を、ライブラリが無い場合の課題や複雑さを基に一文で定義します。
+
+### Step 3: 対象ユーザー像の解像度向上 (Target User Profile)
+最も恩恵を受けるユーザー像を具体的に推論します。
+- 以下の3軸を考慮し、**一行の文章**に統合してください。
+  - **レベル (Level):** GAS初心者、中級者、上級者など
+  - **課題 (Problem):** どんな目的や課題を持つか (例: API連携の効率化)
+  - **文脈 (Context):** 何を開発しているか (例: 社内ツール、公開アドオン)
+- **Output:** \`targetUsers\`
+
+### Step 4: 主要な利点の抽出 (Key Benefits)
+ライブラリの価値を3つ挙げます。
+- **\`title\`:** 利点を端的に表すタイトル。
+- **\`description\`:** その利点が「どのように」実現されるかの技術的な説明。
+- **Output:** \`mainBenefits\`
+
+### Step 5: 段階的なコード例の作成 (Tiered Code Examples)
+READMEのコード例を基盤とし、**Step 3で定義した対象ユーザー**を意識して、以下の3段階のコード例をマークダウン形式で出力します。
+- 各レベルにはH3見出し(\`###\`)を付けてください。
+- **各レベルに、コードブロックと、そのコードを解説する文章の両方を含めてください。**
+  - **1. 入門 (Introduction):**
+      - **目的:** 最小限のコードで、ライブラリが「動く」ことを示す。
+      - **内容:** コピペですぐに試せる、最も簡単なコードスニペット。
+  - **2. 基礎 (Basic/Fundamental):**
+      - **目的:** 中心の課題を解決する、最も標準的な使い方を示す。
+      - **内容:** 引数や戻り値の扱いが明確にわかる、実用的なコード。
+  - **3. 実践 (Best Practice):**
+      - **目的:** 「解決する課題」と「主な特徴」をコードで示す。
+      - **内容:** 実務を想定した洗練されたコード。
+- **共通要件:**
+    - 各レベルの見出しは、\`### レベル - 内容を表すタイトル\` という形式にしてください。（例: \`### 【基礎】スプレッドシートのデータをJSON形式でS3にアップする\`）
+    - コードは**ES6+構文**の\`javascript\`コードブロックで記述します。
+    - コードブロック内には、処理の流れがわかるような**インラインコメントを必ず含めてください。**
+- **Output:** \`usageExample\`
+
+### Step 6: 最終生成 (Finalization)
+上記ステップで得られたすべての要素を、スキーマに従って完全なJSONオブジェクトに組み立てます。
+- **要件:** 全てのテキストフィールドは、日本語(ja)と英語(en)の両方で生成してください。
+
+# Output Constraints
+- 応答には**JSONオブジェクトのみ**を、その他の説明などを一切含めずに出力してください。
+`;
   }
 }

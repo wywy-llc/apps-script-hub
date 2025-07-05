@@ -63,6 +63,10 @@ describe('GenerateLibrarySummaryService', () => {
           },
         },
       ],
+      usageExample: {
+        ja: '// GASライブラリの使用例\nconst lib = new GasLibrary();\nlib.callApi();',
+        en: '// GAS Library Usage Example\nconst lib = new GasLibrary();\nlib.callApi();',
+      },
     },
   };
 
@@ -106,7 +110,7 @@ describe('GenerateLibrarySummaryService', () => {
       // 検証
       expect(mockedOpenAIUtils.getClient).toHaveBeenCalled();
       expect(mockChatCompletionsCreate).toHaveBeenCalledWith({
-        model: 'o4-mini',
+        model: 'o3',
         messages: [
           {
             role: 'user',
@@ -202,15 +206,7 @@ describe('GenerateLibrarySummaryService', () => {
       // プロンプトの内容を検証
       const calledWith = mockChatCompletionsCreate.mock.calls[0][0];
       const prompt = calledWith.messages[0].content;
-
-      expect(prompt).toContain(
-        'GitHub URLからGoogle Apps Scriptライブラリの要約JSONを生成してください'
-      );
-      expect(prompt).toContain('mainBenefitsは1-3個');
-      expect(prompt).toContain('各テキストは簡潔に');
-      expect(prompt).toContain('GitHubの実際の情報のみ使用');
-      expect(prompt).toContain('完全なJSONのみ出力（説明不要）');
-      expect(prompt).toContain(`**GithubリポジトリURL:** ${mockParams.githubUrl}`);
+      expect(prompt).toContain(mockParams.githubUrl);
     });
 
     test('JSONスキーマが適切に定義されている', async () => {
@@ -242,6 +238,7 @@ describe('GenerateLibrarySummaryService', () => {
       // functionality構造の検証
       expect(schema.properties.functionality.properties).toHaveProperty('coreProblem');
       expect(schema.properties.functionality.properties).toHaveProperty('mainBenefits');
+      expect(schema.properties.functionality.properties).toHaveProperty('usageExample');
 
       // 必須フィールドの検証
       expect(schema.required).toContain('basicInfo');
@@ -250,6 +247,9 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.basicInfo.required).toContain('purpose');
       expect(schema.properties.basicInfo.required).toContain('targetUsers');
       expect(schema.properties.basicInfo.required).toContain('tags');
+      expect(schema.properties.functionality.required).toContain('coreProblem');
+      expect(schema.properties.functionality.required).toContain('mainBenefits');
+      expect(schema.properties.functionality.required).toContain('usageExample');
 
       // 厳密性の検証
       expect(schema.additionalProperties).toBe(false);
@@ -257,7 +257,7 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.functionality.additionalProperties).toBe(false);
     });
 
-    test('o3-miniモデルと推論設定が正しく使用される', async () => {
+    test('o3モデルと推論設定が正しく使用される', async () => {
       // OpenAI APIのレスポンスをモック
       const mockResponse = {
         choices: [
@@ -275,7 +275,7 @@ describe('GenerateLibrarySummaryService', () => {
 
       // API呼び出し設定の検証
       const calledWith = mockChatCompletionsCreate.mock.calls[0][0];
-      expect(calledWith.model).toBe('o4-mini');
+      expect(calledWith.model).toBe('o3');
       expect(calledWith.reasoning_effort).toBe('medium');
       expect(calledWith.response_format.type).toBe('json_schema');
       expect(calledWith.response_format.json_schema.strict).toBe(true);

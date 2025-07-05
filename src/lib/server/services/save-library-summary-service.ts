@@ -49,6 +49,8 @@ export class SaveLibrarySummaryService {
       coreProblemJa: summary.functionality.coreProblem.ja,
       coreProblemEn: summary.functionality.coreProblem.en,
       mainBenefits: summary.functionality.mainBenefits,
+      usageExampleJa: summary.functionality.usageExample.ja,
+      usageExampleEn: summary.functionality.usageExample.en,
     };
 
     if (existing.length > 0) {

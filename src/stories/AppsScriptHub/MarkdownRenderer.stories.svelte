@@ -2,8 +2,11 @@
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
 
-  // マークダウンレンダリングコンポーネントのStorybook設定
-  // marked.js と highlight.js を使用した高機能なマークダウンレンダリング
+  /**
+   * マークダウンレンダリングコンポーネントのStorybook設定
+   * marked.js と highlight.js を使用した高機能なマークダウンレンダリング
+   * SSRセーフでXSS対策済み
+   */
   const { Story } = defineMeta({
     title: 'AppsScriptHub/MarkdownRenderer',
     component: MarkdownRenderer,
@@ -17,12 +20,16 @@
         control: 'text',
         description: '追加するCSSクラス',
       },
+      repositoryUrl: {
+        control: 'text',
+        description: 'GitHubリポジトリURL（相対リンクの解決に使用）',
+      },
     },
     parameters: {
       docs: {
         description: {
           component:
-            'marked.js と highlight.js を使用したマークダウンレンダリングコンポーネント。シンタックスハイライト、GitHub風スタイリング、GFMサポート。',
+            'marked.js と highlight.js を使用したマークダウンレンダリングコンポーネント。SSRセーフ、XSS対策済み、シンタックスハイライト、GitHub風スタイリング、GFMサポート。',
         },
       },
     },
@@ -145,6 +152,55 @@ function myFunction() {
 
 MIT License
 `;
+
+  // リポジトリリンクテスト用マークダウン
+  const markdownWithLinks = `# リンクテスト
+
+## 相対リンク
+- [README](README.md) - 相対リンクテスト
+- [ドキュメント](docs/usage.md) - ドキュメントへのリンク
+- [画像](images/screenshot.png) - 画像への相対リンク
+
+## 絶対リンク
+- [GitHub](https://github.com) - 外部リンク（新しいタブで開く）
+- [公式サイト](https://example.com) - 外部サイトへのリンク
+
+## アンカーリンク
+- [セクション1](#section1) - ページ内リンク
+- [セクション2](#section2) - ページ内リンク
+
+\`\`\`javascript
+// コードブロック内のリンクはそのまま表示
+// https://github.com/user/repo
+console.log('テストコード');
+\`\`\`
+`;
+
+  // セキュリティテスト用マークダウン（安全なもの）
+  const securityTestMarkdown = `# セキュリティテスト
+
+このコンテンツはHTMLサニタイズ機能をテストします。
+
+## 通常のマークダウン
+これは**通常の太字**と*斜体*です。
+
+## コードブロック
+\`\`\`javascript
+const message = 'Hello World';
+console.log(message);
+\`\`\`
+
+## リスト
+- 項目1
+- 項目2
+- 項目3
+
+## 表
+| 名前 | 値 |
+|------|-----|
+| test | value |
+| demo | sample |
+`;
 </script>
 
 <!-- Basic Example -->
@@ -231,6 +287,26 @@ npm run build
   </div>
 </Story>
 
+<!-- Repository Links -->
+<Story
+  name="Repository Links"
+  args={{ content: markdownWithLinks, repositoryUrl: 'https://github.com/user/example-repo' }}
+>
+  <div class="mx-auto max-w-4xl">
+    <MarkdownRenderer
+      content={markdownWithLinks}
+      repositoryUrl="https://github.com/user/example-repo"
+    />
+  </div>
+</Story>
+
+<!-- Security Test -->
+<Story name="Security Test" args={{ content: securityTestMarkdown }}>
+  <div class="mx-auto max-w-4xl">
+    <MarkdownRenderer content={securityTestMarkdown} />
+  </div>
+</Story>
+
 <!-- Custom Class -->
 <Story name="Custom Class">
   <div class="mx-auto max-w-4xl">
@@ -238,7 +314,15 @@ npm run build
       content="# カスタムクラス付きの例
 
 この例では追加のCSSクラスが適用されています。"
-      class="rounded-lg border border-gray-300 shadow-sm"
+      class="border-blue-300 bg-blue-50"
     />
+  </div>
+</Story>
+
+<!-- Empty Content -->
+<Story name="Empty Content">
+  <div class="mx-auto max-w-4xl">
+    <MarkdownRenderer content="" />
+    <p class="mt-4 text-gray-500">空のコンテンツの場合の表示テスト</p>
   </div>
 </Story>

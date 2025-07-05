@@ -22,7 +22,6 @@ export const load: PageServerLoad = async ({ params }) => {
       authorUrl: library.authorUrl,
       authorName: library.authorName,
       description: library.description,
-      readmeContent: library.readmeContent,
       starCount: library.starCount,
       copyCount: library.copyCount,
       licenseType: library.licenseType,

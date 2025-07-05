@@ -94,30 +94,26 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
     // SaveLibrarySummaryService.existsのデフォルトモック（library_summaryが存在しない前提）
     mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
-
-    // GitHub API レスポンスのモック
-    const mockRepoResponse = {
-      ok: true,
-      json: () => Promise.resolve(mockRepoData),
-    };
-    const mockReadmeResponse = {
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          content: Buffer.from('# Test README').toString('base64'),
-        }),
-    };
-    mockFetch
-      .mockResolvedValueOnce(mockRepoResponse as unknown as Response)
-      .mockResolvedValueOnce(mockReadmeResponse as unknown as Response);
   });
 
   test('lastCommitAtが同じ場合、AI要約生成をスキップする', async () => {
     // pushed_atが既存のlastCommitAtと同じ
-    mockRepoData.pushed_at = sameLastCommitAt.toISOString();
+    const repoDataForTest = {
+      ...mockRepoData,
+      pushed_at: sameLastCommitAt.toISOString(),
+      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+    };
 
     // library_summaryが既に存在する場合をシミュレート
     mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
+
+    // このテスト用のfetchモックを設定
+    const mockRepoResponse = {
+      ok: true,
+      json: () => Promise.resolve(repoDataForTest),
+    };
+    mockFetch.mockClear();
+    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
 
     await UpdateLibraryFromGithubService.call(libraryId);
 
@@ -128,10 +124,22 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
   test('lastCommitAtが異なる場合、AI要約生成を実行する', async () => {
     // pushed_atが既存のlastCommitAtと異なる
-    mockRepoData.pushed_at = newLastCommitAt.toISOString();
+    const repoDataForTest = {
+      ...mockRepoData,
+      pushed_at: newLastCommitAt.toISOString(),
+      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+    };
 
     // library_summaryが既に存在していてもlastCommitAtに変化がある場合は生成する
     mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
+
+    // このテスト用のfetchモックを設定
+    const mockRepoResponse = {
+      ok: true,
+      json: () => Promise.resolve(repoDataForTest),
+    };
+    mockFetch.mockClear();
+    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
 
     const mockSummary = {
       basicInfo: {
@@ -158,17 +166,29 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
     // AI要約生成サービスが呼び出されることを確認
     expect(mockGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
-      githubUrl: mockRepoData.html_url,
+      githubUrl: repoDataForTest.html_url,
     });
     expect(mockSaveLibrarySummaryService.call).toHaveBeenCalledWith(libraryId, mockSummary);
   });
 
   test('library_summaryが存在しない場合、lastCommitAtに変化がなくてもAI要約生成を実行する', async () => {
     // pushed_atが既存のlastCommitAtと同じ
-    mockRepoData.pushed_at = sameLastCommitAt.toISOString();
+    const repoDataForTest = {
+      ...mockRepoData,
+      pushed_at: sameLastCommitAt.toISOString(),
+      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+    };
 
     // library_summaryが存在しない場合をシミュレート
     mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
+
+    // このテスト用のfetchモックを設定
+    const mockRepoResponse = {
+      ok: true,
+      json: () => Promise.resolve(repoDataForTest),
+    };
+    mockFetch.mockClear();
+    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
 
     const mockSummary = {
       basicInfo: {
@@ -195,7 +215,7 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
     // AI要約生成サービスが呼び出されることを確認
     expect(mockGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
-      githubUrl: mockRepoData.html_url,
+      githubUrl: repoDataForTest.html_url,
     });
     expect(mockSaveLibrarySummaryService.call).toHaveBeenCalledWith(libraryId, mockSummary);
   });

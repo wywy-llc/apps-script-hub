@@ -155,3 +155,5 @@ storybook-static/
 
 
 drizzle/
+
+.DS_Store

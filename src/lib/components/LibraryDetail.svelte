@@ -1,10 +1,10 @@
 <script lang="ts">
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
   import LibrarySummarySection from '$lib/components/LibrarySummarySection.svelte';
-  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
   import { truncateUrl } from '$lib/helpers/url.js';
+  import { toastStore } from '$lib/stores/toast-store.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
   interface Library {
@@ -15,7 +15,6 @@
     authorUrl: string;
     authorName: string;
     description: string;
-    readmeContent?: string;
     licenseType?: string;
     licenseUrl?: string;
     starCount?: number;
@@ -45,6 +44,8 @@
     scrapingMessage?: string;
     isStatusUpdateInProgress?: boolean;
     statusMessage?: string;
+    isAiSummaryInProgress?: boolean;
+    aiSummaryMessage?: string;
     displayCopyCount?: number;
     onCopyScriptId?: () => Promise<void>;
   }
@@ -61,6 +62,8 @@
     scrapingMessage = '',
     isStatusUpdateInProgress = false,
     statusMessage = '',
+    isAiSummaryInProgress = false,
+    aiSummaryMessage = '',
     displayCopyCount = library.copyCount || 0,
     onCopyScriptId,
   }: Props = $props();
@@ -75,7 +78,7 @@
     if (input && input.value) {
       try {
         await navigator.clipboard.writeText(input.value);
-        console.log('Copied!');
+        toastStore.success('コピーしました');
 
         // スクリプトIDがコピーされた場合はコールバックを実行
         if (elementId === 'script-id' && onCopyScriptId) {
@@ -83,7 +86,7 @@
         }
       } catch (err) {
         console.error('Copy failed', err);
-        alert('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
+        toastStore.error('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
         input.select();
         input.setSelectionRange(0, 99999);
       }
@@ -152,6 +155,50 @@
           {statusMessage}
         </div>
       {/if}
+
+      <!-- AI要約生成メッセージ -->
+      {#if aiSummaryMessage}
+        <div class="mb-6 rounded-md bg-purple-50 p-4 text-purple-800">
+          <div class="flex items-center">
+            {#if isAiSummaryInProgress}
+              <svg
+                class="mr-2 h-5 w-5 animate-spin text-purple-600"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            {:else}
+              <svg
+                class="mr-2 h-5 w-5 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            {/if}
+            {aiSummaryMessage}
+          </div>
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -170,48 +217,6 @@
       <!-- AI による要約セクション -->
       {#if librarySummary}
         <LibrarySummarySection {librarySummary} libraryName={library.name} {isAdminMode} />
-      {/if}
-
-      <!-- README セクション -->
-      {#if library.readmeContent}
-        <div class="mt-8">
-          <h2
-            class="mb-6 {isAdminMode
-              ? 'text-2xl font-bold'
-              : 'border-b pb-2 text-2xl font-semibold'}"
-          >
-            GitHub README
-          </h2>
-          {#if isAdminMode}
-            <div class="overflow-hidden rounded-lg bg-white shadow-md">
-              <div class="px-6">
-                <MarkdownRenderer
-                  content={library.readmeContent}
-                  repositoryUrl={library.repositoryUrl}
-                />
-              </div>
-            </div>
-          {:else}
-            <MarkdownRenderer
-              content={library.readmeContent}
-              repositoryUrl={library.repositoryUrl}
-              class="!p-0"
-            />
-          {/if}
-        </div>
-      {:else}
-        <div
-          class="mt-8 {isAdminMode
-            ? 'overflow-hidden rounded-lg bg-white shadow-md'
-            : 'rounded-lg bg-gray-50 p-8 text-center'}"
-        >
-          <div class={isAdminMode ? 'px-6 py-8 text-center text-gray-500' : 'text-gray-500'}>
-            <p>README が{isAdminMode ? '見つかりませんでした' : '利用できません'}。</p>
-            {#if isAdminMode}
-              <p class="mt-2 text-sm">スクレイピングを実行してREADMEを取得してください。</p>
-            {/if}
-          </div>
-        </div>
       {/if}
 
       {#if isAdminMode}

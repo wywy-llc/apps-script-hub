@@ -91,7 +91,6 @@ async function setupTestDatabase() {
         "author_url" text NOT NULL,
         "author_name" text NOT NULL,
         "description" text NOT NULL,
-        "readme_content" text NOT NULL,
         "star_count" integer DEFAULT 0 NOT NULL,
         "copy_count" integer DEFAULT 0 NOT NULL,
         "license_type" text NOT NULL,
@@ -118,6 +117,8 @@ async function setupTestDatabase() {
         "core_problem_ja" text,
         "core_problem_en" text,
         "main_benefits" jsonb,
+        "usage_example_ja" text,
+        "usage_example_en" text,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
         FOREIGN KEY ("library_id") REFERENCES "library"("id")

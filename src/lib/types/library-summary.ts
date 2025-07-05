@@ -35,6 +35,10 @@ export interface LibrarySummary {
         en: string;
       };
     }>;
+    usageExample: {
+      ja: string;
+      en: string;
+    };
   };
 }
 
@@ -71,6 +75,8 @@ export interface LibrarySummaryRecord {
       en: string;
     };
   }> | null;
+  usageExampleJa: string | null;
+  usageExampleEn: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

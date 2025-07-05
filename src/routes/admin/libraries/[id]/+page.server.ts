@@ -1,6 +1,7 @@
 import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-status.js';
 import { db } from '$lib/server/db/index.js';
 import { library, librarySummary } from '$lib/server/db/schema.js';
+import { UpdateLibraryFromGithubService } from '$lib/server/services/update-library-from-github-service.js';
 import { error, fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types.js';
@@ -22,7 +23,6 @@ export const load: PageServerLoad = async ({ params }) => {
       authorUrl: library.authorUrl,
       authorName: library.authorName,
       description: library.description,
-      readmeContent: library.readmeContent,
       starCount: library.starCount,
       copyCount: library.copyCount,
       licenseType: library.licenseType,
@@ -109,5 +109,47 @@ export const actions: Actions = {
       message: statusMessages[status as LibraryStatus],
       newStatus: status,
     };
+  },
+
+  /**
+   * AI要約を再生成する
+   */
+  generateAiSummary: async ({ params }) => {
+    const libraryId = params.id;
+
+    if (!libraryId) {
+      return fail(400, { error: 'ライブラリIDが不正です。' });
+    }
+
+    try {
+      // ライブラリの存在確認
+      const existingLibrary = await db
+        .select({
+          id: library.id,
+          name: library.name,
+        })
+        .from(library)
+        .where(eq(library.id, libraryId))
+        .limit(1);
+
+      if (existingLibrary.length === 0) {
+        return fail(404, { error: 'ライブラリが見つかりません。' });
+      }
+
+      const libraryData = existingLibrary[0];
+
+      // AI要約のみを生成
+      await UpdateLibraryFromGithubService.generateAiSummaryOnly(libraryId);
+
+      return {
+        success: true,
+        message: `ライブラリ「${libraryData.name}」のAI要約を再生成しました。`,
+      };
+    } catch (error) {
+      console.error('AI要約生成エラー:', error);
+      return fail(500, {
+        error: 'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+      });
+    }
   },
 };
