@@ -5,6 +5,7 @@
     TOAST_ICON_PATH,
     TOAST_STYLE_CLASS,
   } from '$lib/constants/toast.js';
+  import { close_toast } from '$lib/paraglide/messages.js';
   import { toastStore, type ToastMessage } from '$lib/stores/toast-store.js';
   import { onMount } from 'svelte';
 
@@ -104,7 +105,7 @@
       type="button"
       onclick={handleClose}
       class="inline-flex rounded-md focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-white focus:outline-none"
-      aria-label="トーストを閉じる"
+      aria-label={close_toast()}
     >
       <svg
         class="h-4 w-4 opacity-60 hover:opacity-100"

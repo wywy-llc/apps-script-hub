@@ -4,6 +4,7 @@
     LIBRARY_STATUS_CONFIRM_MESSAGES,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
+  import { publish, unpublish } from '$lib/paraglide/messages.js';
   interface LibraryForStatus {
     status: LibraryStatus;
   }
@@ -46,7 +47,7 @@
     disabled={isStatusUpdateInProgress}
     class={getButtonClass('green')}
   >
-    公開する
+    {publish()}
   </button>
 {:else if library.status === LIBRARY_STATUS.PUBLISHED}
   <button
@@ -55,6 +56,6 @@
     disabled={isStatusUpdateInProgress}
     class={getButtonClass('gray')}
   >
-    未公開に戻す
+    {unpublish()}
   </button>
 {/if}

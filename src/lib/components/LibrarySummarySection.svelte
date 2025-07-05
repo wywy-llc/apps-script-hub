@@ -3,6 +3,7 @@
   import type { Locale } from '$lib';
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
   import TagButton from '$lib/components/TagButton.svelte';
+  import * as m from '$lib/paraglide/messages.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
   interface Props {
@@ -33,7 +34,7 @@
       ? 'text-2xl font-bold'
       : 'border-b border-gray-200 pb-3 text-2xl font-semibold text-gray-900'}"
   >
-    AI による要約
+    {m.ai_summary()}
   </h2>
   <div
     class={isAdminMode
@@ -73,7 +74,7 @@
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
                 ></path>
               </svg>
-              対象ユーザー
+              {m.target_users()}
             </h4>
             <p class="text-sm leading-relaxed text-blue-800">
               {currentLocale === 'ja' ? librarySummary.targetUsersJa : librarySummary.targetUsersEn}
@@ -98,7 +99,7 @@
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
                 ></path>
               </svg>
-              解決する課題
+              {m.problems_solved()}
             </h4>
             <p class="text-sm leading-relaxed text-yellow-800">
               {currentLocale === 'ja' ? librarySummary.coreProblemJa : librarySummary.coreProblemEn}
@@ -124,7 +125,7 @@
                 d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
               ></path>
             </svg>
-            タグ
+            {m.tags()}
           </h4>
           <div class="flex flex-wrap gap-2">
             {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
@@ -132,8 +133,8 @@
                 size="sm"
                 class="shadow-sm"
                 onclick={() => searchByTag(tag)}
-                title="「{tag}」で検索"
-                aria-label="「{tag}」タグで検索"
+                title={m.search_by_tag_tooltip({ tag })}
+                aria-label={m.search_by_tag_aria({ tag })}
               >
                 {tag}
               </TagButton>
@@ -159,7 +160,7 @@
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               ></path>
             </svg>
-            主な特徴
+            {m.main_features()}
           </h4>
           <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
             {#each librarySummary.mainBenefits as benefit, index (index)}
@@ -200,7 +201,7 @@
                 d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
               ></path>
             </svg>
-            使用例
+            {m.usage_examples()}
           </h4>
           <MarkdownRenderer content={usageExample} class="shadow-sm" />
         </div>

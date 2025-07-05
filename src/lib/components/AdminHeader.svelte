@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app_title } from '$lib/paraglide/messages.js';
+  import { app_title, library_management } from '$lib/paraglide/messages.js';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
   import UserDropdown from './UserDropdown.svelte';
 
@@ -22,7 +22,7 @@
             href="/admin/libraries"
             class="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
           >
-            ライブラリ管理
+            {library_management()}
           </a>
         </nav>
       </div>
