@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { LibraryTestDataFactories } from '../factories/index.js';
 import { clearTestDataBeforeTest } from './test-utils.js';
 
-test.describe('管理者画面 - ライブラリAI要約生成', () => {
+test.describe('Admin Screen - Library AI Summary Generation', () => {
   test('新規ライブラリ登録時にAI要約が生成される', async ({ page }) => {
     // テスト前にデータをクリア
     await clearTestDataBeforeTest();
@@ -35,7 +35,9 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
     // 成功メッセージまたは詳細ページへのリダイレクトを待機
     try {
       await expect(
-        page.locator('text=ライブラリが正常に登録されました。詳細ページに移動します...')
+        page.locator(
+          'text=Library has been successfully registered. Redirecting to the details page...'
+        )
       ).toBeVisible({ timeout: 15000 });
     } catch {
       // リダイレクトされた場合は成功とみなす
@@ -44,19 +46,19 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
 
     // 詳細ページに到達していることを確認
     await expect(page).toHaveURL(/\/admin\/libraries\/[^/]+$/);
-    await expect(page).toHaveTitle(/ライブラリ詳細/);
+    await expect(page).toHaveTitle(/Library Details/);
 
     // ライブラリ名が表示されていることを確認
-    await expect(page.locator('dt:has-text("ライブラリ名") + dd')).toBeVisible();
+    await expect(page.locator('dt:has-text("Library Name") + dd')).toBeVisible();
 
     // スクリプトIDが正しく表示されていることを確認
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(
+    await expect(page.locator('dt:has-text("GAS Script ID") + dd')).toContainText(
       testData.scriptId
     );
 
     // GitHubリポジトリURLが正しく表示されていることを確認
     await expect(
-      page.locator(`dt:has-text("GitHub リポジトリURL") + dd a[href="${testData.repositoryUrl}"]`)
+      page.locator(`dt:has-text("GitHub Repository URL") + dd a[href="${testData.repositoryUrl}"]`)
     ).toBeVisible();
 
     // ライブラリ詳細ページが正常に表示されていることを確認
@@ -91,7 +93,9 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
     // 処理完了まで待機
     try {
       await expect(
-        page.locator('text=ライブラリが正常に登録されました。詳細ページに移動します...')
+        page.locator(
+          'text=Library has been successfully registered. Redirecting to the details page...'
+        )
       ).toBeVisible({ timeout: 15000 });
     } catch {
       await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
@@ -99,7 +103,7 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
 
     // 詳細ページの確認
     await expect(page).toHaveURL(/\/admin\/libraries\/[^/]+$/);
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(
+    await expect(page.locator('dt:has-text("GAS Script ID") + dd')).toContainText(
       testData.scriptId
     );
 
@@ -126,15 +130,15 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
     await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // スクレイピング実行ボタンを押してライブラリ情報を更新（AI要約再生成）
-    await expect(page.locator('button:has-text("スクレイピング実行")')).toBeVisible();
-    await page.click('button:has-text("スクレイピング実行")');
+    await expect(page.locator('button:has-text("Execute Scraping")')).toBeVisible();
+    await page.click('button:has-text("Execute Scraping")');
 
     // スクレイピング処理完了の確認
     // （モックなので高速で完了するはず）
     await page.waitForTimeout(2000);
 
     // ページが正常に表示されていることを確認
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(
+    await expect(page.locator('dt:has-text("GAS Script ID") + dd')).toContainText(
       initialData.scriptId
     );
 
@@ -161,7 +165,7 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
     await page.click('button[type="submit"]');
 
     // エラーメッセージの確認（AI要約生成は実行されない）
-    await expect(page.locator('text=指定されたGitHubリポジトリが見つかりません。')).toBeVisible({
+    await expect(page.locator('text=The specified GitHub repository was not found.')).toBeVisible({
       timeout: 10000,
     });
 
@@ -189,13 +193,13 @@ test.describe('管理者画面 - ライブラリAI要約生成', () => {
     await page.waitForURL(/\/admin\/libraries\/[^/]+$/, { timeout: 15000 });
 
     // 再度スクレイピングを実行してlibrary_summary未存在時のAI要約生成を確認
-    await page.click('button:has-text("スクレイピング実行")');
+    await page.click('button:has-text("Execute Scraping")');
 
     // 処理完了を待機
     await page.waitForTimeout(3000);
 
     // ライブラリが正常に更新されていることを確認
-    await expect(page.locator('dt:has-text("GAS スクリプトID") + dd')).toContainText(
+    await expect(page.locator('dt:has-text("GAS Script ID") + dd')).toContainText(
       testData.scriptId
     );
 
