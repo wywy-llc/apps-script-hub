@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
   import { copy_count_update_failed } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
+  import { onMount } from 'svelte';
   import type { PageData } from './$types.js';
 
   // ライブラリ詳細ページコンポーネント
@@ -45,6 +45,25 @@
     return library.description;
   };
 
+  // 重複のないキーワードを生成
+  const generateKeywords = () => {
+    const baseKeywords = ['JavaScript', 'Google Apps Script'];
+    let additionalKeywords: string[] = [];
+
+    if (librarySummary) {
+      if (currentLocale === 'ja' && librarySummary.tagsJa) {
+        additionalKeywords = librarySummary.tagsJa;
+      } else if (currentLocale === 'en' && librarySummary.tagsEn) {
+        additionalKeywords = librarySummary.tagsEn;
+      }
+    }
+
+    // 重複を除去してキーワードを結合
+    const allKeywords = [...baseKeywords, ...additionalKeywords];
+    const uniqueKeywords = [...new Set(allKeywords)];
+    return uniqueKeywords.join(', ');
+  };
+
   // JSON-LD構造化データを動的に生成
   const generateJsonLd = () => {
     const baseUrl = 'https://app-script-hub.example.com';
@@ -59,14 +78,13 @@
       url: pageUrl,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
-      programmingLanguage: 'JavaScript',
       author: {
         '@type': 'Person',
         name: library.authorName,
         url: library.authorUrl,
       },
-      codeRepository: library.repositoryUrl,
       license: library.licenseUrl,
+      about: library.repositoryUrl,
       dateCreated: library.createdAt.toISOString(),
       dateModified: library.updatedAt.toISOString(),
       ...(library.starCount && {
@@ -78,16 +96,8 @@
           ratingCount: library.starCount,
         },
       }),
-      downloadUrl: `https://script.google.com/d/${library.scriptId}/edit`,
-      installUrl: `https://script.google.com/d/${library.scriptId}/edit`,
-      ...(librarySummary?.tagsJa &&
-        currentLocale === 'ja' && {
-          keywords: librarySummary.tagsJa.join(', '),
-        }),
-      ...(librarySummary?.tagsEn &&
-        currentLocale === 'en' && {
-          keywords: librarySummary.tagsEn.join(', '),
-        }),
+      downloadUrl: library.repositoryUrl,
+      keywords: generateKeywords(),
       offers: {
         '@type': 'Offer',
         price: '0',
