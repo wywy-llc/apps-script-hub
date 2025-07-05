@@ -2,8 +2,9 @@
   import { enhance } from '$app/forms';
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
   import type { LibraryStatus } from '$lib/constants/library-status.js';
-  import type { ActionData, PageData } from './$types';
   import * as m from '$lib/paraglide/messages.js';
+  import Footer from '$lib/components/Footer.svelte';
+  import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -253,11 +254,5 @@
   </form>
 
   <!-- Footer -->
-  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
-    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div class="text-center text-sm text-gray-500">
-        &copy; 2025 wywy LLC. All rights reserved.
-      </div>
-    </div>
-  </footer>
+  <Footer variant="admin" />
 </main>

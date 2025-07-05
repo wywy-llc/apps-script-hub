@@ -6,6 +6,7 @@
     LIBRARY_STATUS_TEXT,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
+  import Footer from '$lib/components/Footer.svelte';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
@@ -639,11 +640,5 @@
   </div>
 
   <!-- Footer -->
-  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
-    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div class="text-center text-sm text-gray-500">
-        &copy; 2025 wywy LLC. All rights reserved.
-      </div>
-    </div>
-  </footer>
+  <Footer variant="admin" />
 </main>

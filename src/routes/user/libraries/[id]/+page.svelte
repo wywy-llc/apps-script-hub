@@ -1,6 +1,6 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
-  import { copy_count_update_failed } from '$lib/paraglide/messages.js';
+  import { company_name, copy_count_update_failed } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   import { onMount } from 'svelte';
   import type { PageData } from './$types.js';
@@ -69,22 +69,22 @@
     const baseUrl = 'https://app-script-hub.example.com';
     const pageUrl = `${baseUrl}/user/libraries/${library.id}`;
 
-    // Software Application Schema
+    // Software Source Code Schema
     const jsonLd = {
       '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
+      '@type': 'SoftwareSourceCode',
       name: getSeoTitle(),
       description: getSeoDescription(),
       url: pageUrl,
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Any',
+      programmingLanguage: 'JavaScript',
+      runtimePlatform: 'Google Apps Script',
+      codeRepository: library.repositoryUrl,
       author: {
         '@type': 'Person',
         name: library.authorName,
         url: library.authorUrl,
       },
       license: library.licenseUrl,
-      about: library.repositoryUrl,
       dateModified: library.lastCommitAt.toISOString(),
       ...(library.starCount && {
         interactionStatistic: {
@@ -93,11 +93,10 @@
           userInteractionCount: library.starCount,
         },
       }),
-      downloadUrl: library.repositoryUrl,
       keywords: generateKeywords(),
       publisher: {
         '@type': 'Organization',
-        name: 'wywy LLC',
+        name: company_name(),
         url: 'https://wywy.jp/',
       },
     };

@@ -56,22 +56,27 @@ function generateJsonLd(
     return library.description;
   };
 
-  // Software Application Schema
+  // 会社名をロケールに応じて取得
+  const getCompanyName = () => {
+    return currentLocale === 'ja' ? 'wywy合同会社' : 'wywy LLC';
+  };
+
+  // Software Source Code Schema
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
+    '@type': 'SoftwareSourceCode',
     name: getSeoTitle(),
     description: getSeoDescription(),
     url: pageUrl,
-    applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Any',
+    programmingLanguage: 'JavaScript',
+    runtimePlatform: 'Google Apps Script',
+    codeRepository: library.repositoryUrl,
     author: {
       '@type': 'Person',
       name: library.authorName,
       url: library.authorUrl,
     },
     license: library.licenseUrl,
-    about: library.repositoryUrl,
     dateModified: library.lastCommitAt.toISOString(),
     ...(library.starCount && {
       interactionStatistic: {
@@ -80,11 +85,10 @@ function generateJsonLd(
         userInteractionCount: library.starCount,
       },
     }),
-    downloadUrl: library.repositoryUrl,
     keywords: generateKeywords(librarySummary, currentLocale),
     publisher: {
       '@type': 'Organization',
-      name: 'wywy LLC',
+      name: getCompanyName(),
       url: 'https://wywy.jp/',
     },
   };
@@ -140,9 +144,14 @@ describe('JSON-LD構造化データ', () => {
 
     // 基本構造の確認
     expect(jsonLdContent['@context']).toBe('https://schema.org');
-    expect(jsonLdContent['@type']).toBe('SoftwareApplication');
+    expect(jsonLdContent['@type']).toBe('SoftwareSourceCode');
     expect(jsonLdContent.name).toBe('テストライブラリ - AppsScriptHub');
     expect(jsonLdContent.description).toBe('テストライブラリの説明');
+
+    // SoftwareSourceCode特有のプロパティ確認
+    expect(jsonLdContent.programmingLanguage).toBe('JavaScript');
+    expect(jsonLdContent.runtimePlatform).toBe('Google Apps Script');
+    expect(jsonLdContent.codeRepository).toBe('https://github.com/test/repo');
 
     // キーワードの重複排除確認
     const keywords = jsonLdContent.keywords.split(', ');
@@ -159,10 +168,11 @@ describe('JSON-LD構造化データ', () => {
     expect(jsonLdContent.url).toBe(
       'https://app-script-hub.example.com/user/libraries/test-library-id'
     );
-    expect(jsonLdContent.applicationCategory).toBe('DeveloperApplication');
     expect(jsonLdContent.author.name).toBe('Test Author');
-    expect(jsonLdContent.about).toBe('https://github.com/test/repo');
     expect(jsonLdContent.interactionStatistic?.userInteractionCount).toBe(100);
+
+    // 日本語ロケールでの会社名確認
+    expect(jsonLdContent.publisher.name).toBe('wywy合同会社');
   });
 
   it('英語ロケールでJSON-LDが正しく生成される', () => {
@@ -171,6 +181,12 @@ describe('JSON-LD構造化データ', () => {
     // 英語コンテンツの確認
     expect(jsonLdContent.name).toBe('Test Library - AppsScriptHub');
     expect(jsonLdContent.description).toBe('Test library description');
+
+    // SoftwareSourceCode特有のプロパティ確認
+    expect(jsonLdContent['@type']).toBe('SoftwareSourceCode');
+    expect(jsonLdContent.programmingLanguage).toBe('JavaScript');
+    expect(jsonLdContent.runtimePlatform).toBe('Google Apps Script');
+    expect(jsonLdContent.codeRepository).toBe('https://github.com/test/repo');
 
     // 英語タグが含まれていることを確認
     expect(jsonLdContent.keywords).toContain('test');
@@ -182,6 +198,9 @@ describe('JSON-LD構造化データ', () => {
     const keywords = jsonLdContent.keywords.split(', ');
     const uniqueKeywords = [...new Set(keywords)];
     expect(keywords).toEqual(uniqueKeywords);
+
+    // 英語ロケールでの会社名確認
+    expect(jsonLdContent.publisher.name).toBe('wywy LLC');
   });
 
   it('librarySummaryがない場合にフォールバック値が使用される', () => {
@@ -191,6 +210,9 @@ describe('JSON-LD構造化データ', () => {
     expect(jsonLdContent.name).toBe('Test Library - AppsScriptHub');
     expect(jsonLdContent.description).toBe('Test library description');
     expect(jsonLdContent.keywords).toBe('JavaScript, Google Apps Script');
+
+    // 日本語ロケールでの会社名確認（フォールバック時も適用）
+    expect(jsonLdContent.publisher.name).toBe('wywy合同会社');
   });
 
   it('キーワードに重複がある場合に正しく除去される', () => {
