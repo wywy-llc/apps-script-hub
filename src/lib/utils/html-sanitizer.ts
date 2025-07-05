@@ -54,6 +54,9 @@ const SANITIZE_CONFIG = {
  * @param html サニタイズ対象のHTML文字列
  * @returns サニタイズされたHTML文字列
  */
+// フック関数が一度だけ登録されることを保証するフラグ
+let hookRegistered = false;
+
 export function sanitizeHtml(html: string): string {
   // サーバーサイドでは何もしない（DOMPurifyはブラウザ環境でのみ動作）
   if (!browser) {
@@ -61,23 +64,33 @@ export function sanitizeHtml(html: string): string {
   }
 
   try {
-    // Add a hook to enforce `rel="noopener noreferrer"` for links with `target="_blank"`
-    DOMPurify.addHook('afterSanitizeAttributes', (node: HookEvent) => {
-      if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
-        const rel = node.getAttribute('rel') || '';
-        if (!rel.includes('noopener')) {
-          node.setAttribute('rel', `${rel} noopener`.trim());
+    // target="_blank"リンクのセキュリティ強化フックを一度だけ登録（実際のブラウザ環境でのみ）
+    if (!hookRegistered && typeof DOMPurify.addHook === 'function') {
+      DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
+        // target="_blank"のリンクにrel="noopener noreferrer"を強制
+        if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+          const currentRel = node.getAttribute('rel') || '';
+          const relTokens = currentRel.split(/\s+/).filter(Boolean);
+
+          if (!relTokens.includes('noopener')) {
+            relTokens.push('noopener');
+          }
+          if (!relTokens.includes('noreferrer')) {
+            relTokens.push('noreferrer');
+          }
+
+          node.setAttribute('rel', relTokens.join(' '));
         }
-        if (!rel.includes('noreferrer')) {
-          node.setAttribute('rel', `${rel} noreferrer`.trim());
-        }
-      }
-    });
+      });
+      hookRegistered = true;
+    }
 
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: SANITIZE_CONFIG.ALLOWED_TAGS,
       ALLOWED_ATTR: SANITIZE_CONFIG.ALLOWED_ATTR,
       ALLOWED_URI_REGEXP: SANITIZE_CONFIG.ALLOWED_URI_REGEXP,
+      // 外部リンクに自動的にrel属性を追加
+      ADD_ATTR: ['target', 'rel'],
       // 危険なコンテンツを削除
       SANITIZE_DOM: true,
       // テキストコンテンツを保持（マークダウンレンダリング用）
