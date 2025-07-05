@@ -1,8 +1,9 @@
 <script lang="ts">
   import { getLocale } from '$lib/paraglide/runtime.js'; // cspell:ignore paraglide
   import type { Locale } from '$lib';
-  import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
   import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+  import TagButton from '$lib/components/TagButton.svelte';
+  import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 
   interface Props {
     librarySummary: LibrarySummaryRecord;
@@ -19,6 +20,11 @@
   let usageExample = $derived(
     currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn
   );
+
+  // タグクリック時の検索機能
+  function searchByTag(tag: string) {
+    window.location.href = `/user/search?q=${encodeURIComponent(tag)}`;
+  }
 </script>
 
 <div class="mt-8">
@@ -122,11 +128,15 @@
           </h4>
           <div class="flex flex-wrap gap-2">
             {#each currentLocale === 'ja' ? librarySummary.tagsJa || [] : librarySummary.tagsEn || [] as tag, index (index)}
-              <span
-                class="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-xs font-medium text-blue-800 shadow-sm"
+              <TagButton
+                size="sm"
+                class="shadow-sm"
+                onclick={() => searchByTag(tag)}
+                title="「{tag}」で検索"
+                aria-label="「{tag}」タグで検索"
               >
                 {tag}
-              </span>
+              </TagButton>
             {/each}
           </div>
         </div>
