@@ -110,7 +110,7 @@
 
     try {
       const formData = new FormData();
-      const response = await fetch(`?/generateAiSummary`, {
+      const response = await fetch(`?generateAiSummary`, {
         method: 'POST',
         body: formData,
       });
