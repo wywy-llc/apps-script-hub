@@ -340,6 +340,51 @@
             </div>
           </div>
         </div>
+
+        <!-- SEO情報セクション -->
+        {#if librarySummary && (librarySummary.seoTitleJa || librarySummary.seoTitleEn || librarySummary.seoDescriptionJa || librarySummary.seoDescriptionEn)}
+          <div class="mt-8">
+            <h3 class="mb-4 text-xl font-bold text-gray-900">SEO情報</h3>
+            <div class="overflow-hidden rounded-lg bg-white shadow-md">
+              <div class="px-6 py-6">
+                <dl class="space-y-6">
+                  {#if librarySummary.seoTitleJa}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEOタイトル（日本語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoTitleJa}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoTitleEn}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEOタイトル（英語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoTitleEn}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoDescriptionJa}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEO説明文（日本語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoDescriptionJa}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if librarySummary.seoDescriptionEn}
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">SEO説明文（英語）</dt>
+                      <dd class="mt-1 text-base text-gray-900">
+                        {librarySummary.seoDescriptionEn}
+                      </dd>
+                    </div>
+                  {/if}
+                </dl>
+              </div>
+            </div>
+          </div>
+        {/if}
       {/if}
     </div>
 

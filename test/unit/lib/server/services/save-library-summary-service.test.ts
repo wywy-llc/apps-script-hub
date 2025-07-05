@@ -49,6 +49,16 @@ describe('SaveLibrarySummaryService', () => {
         en: '// Test Library Usage Example\nconst testLib = new TestLibrary();\ntestLib.runTest();',
       },
     },
+    seoInfo: {
+      title: {
+        ja: '【GAS】テストライブラリ - 簡単テスト',
+        en: 'GAS Test Library - Easy Testing',
+      },
+      description: {
+        ja: 'Google Apps Script用テストライブラリ。シンプルなAPIでテストを効率化。',
+        en: 'Test library for Google Apps Script. Streamline testing with simple API.',
+      },
+    },
   };
 
   test('ライブラリ要約を保存できる', async () => {

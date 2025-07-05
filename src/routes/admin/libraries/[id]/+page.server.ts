@@ -147,6 +147,7 @@ export const actions: Actions = {
       };
     } catch (error) {
       console.error('AI要約生成エラー:', error);
+      console.error('エラースタックトレース:', error instanceof Error ? error.stack : 'スタックトレース不明');
       return fail(500, {
         error: 'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
       });

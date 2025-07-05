@@ -68,6 +68,16 @@ describe('GenerateLibrarySummaryService', () => {
         en: '// GAS Library Usage Example\nconst lib = new GasLibrary();\nlib.callApi();',
       },
     },
+    seoInfo: {
+      title: {
+        ja: '【GAS】サンプルライブラリ - API連携',
+        en: 'GAS Sample Library - API Integration',
+      },
+      description: {
+        ja: 'Google Apps ScriptでAPI連携を簡素化するライブラリ。直感的なメソッドで開発効率を向上。',
+        en: 'Library to simplify API integration in Google Apps Script. Improve development efficiency with intuitive methods.',
+      },
+    },
   };
 
   // OpenAIクライアントのモック
@@ -127,8 +137,9 @@ describe('GenerateLibrarySummaryService', () => {
               properties: expect.objectContaining({
                 basicInfo: expect.any(Object),
                 functionality: expect.any(Object),
+                seoInfo: expect.any(Object),
               }),
-              required: ['basicInfo', 'functionality'],
+              required: ['basicInfo', 'functionality', 'seoInfo'],
             }),
           },
         },
@@ -240,9 +251,14 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.functionality.properties).toHaveProperty('mainBenefits');
       expect(schema.properties.functionality.properties).toHaveProperty('usageExample');
 
+      // seoInfo構造の検証
+      expect(schema.properties.seoInfo.properties).toHaveProperty('title');
+      expect(schema.properties.seoInfo.properties).toHaveProperty('description');
+
       // 必須フィールドの検証
       expect(schema.required).toContain('basicInfo');
       expect(schema.required).toContain('functionality');
+      expect(schema.required).toContain('seoInfo');
       expect(schema.properties.basicInfo.required).toContain('libraryName');
       expect(schema.properties.basicInfo.required).toContain('purpose');
       expect(schema.properties.basicInfo.required).toContain('targetUsers');
@@ -250,11 +266,14 @@ describe('GenerateLibrarySummaryService', () => {
       expect(schema.properties.functionality.required).toContain('coreProblem');
       expect(schema.properties.functionality.required).toContain('mainBenefits');
       expect(schema.properties.functionality.required).toContain('usageExample');
+      expect(schema.properties.seoInfo.required).toContain('title');
+      expect(schema.properties.seoInfo.required).toContain('description');
 
       // 厳密性の検証
       expect(schema.additionalProperties).toBe(false);
       expect(schema.properties.basicInfo.additionalProperties).toBe(false);
       expect(schema.properties.functionality.additionalProperties).toBe(false);
+      expect(schema.properties.seoInfo.additionalProperties).toBe(false);
     });
 
     test('o3モデルと推論設定が正しく使用される', async () => {

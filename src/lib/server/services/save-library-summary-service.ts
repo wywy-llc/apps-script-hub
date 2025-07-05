@@ -1,8 +1,8 @@
 import { db } from '$lib/server/db/index.js';
 import { librarySummary } from '$lib/server/db/schema.js';
-import { eq } from 'drizzle-orm';
 import { generateId } from '$lib/server/utils/generate-id.js';
 import type { LibrarySummary } from '$lib/types/library-summary.js';
+import { eq } from 'drizzle-orm';
 
 /**
  * ライブラリ要約情報をDBに保存するサービス
@@ -36,7 +36,7 @@ export class SaveLibrarySummaryService {
       .where(eq(librarySummary.libraryId, libraryId))
       .limit(1);
 
-    // basicInfoとfunctionalityからフラットなデータに変換
+    // basicInfo、functionality、seoInfoからフラットなデータに変換
     const flattenedData = {
       libraryNameJa: summary.basicInfo.libraryName.ja,
       libraryNameEn: summary.basicInfo.libraryName.en,
@@ -51,6 +51,10 @@ export class SaveLibrarySummaryService {
       mainBenefits: summary.functionality.mainBenefits,
       usageExampleJa: summary.functionality.usageExample.ja,
       usageExampleEn: summary.functionality.usageExample.en,
+      seoTitleJa: summary.seoInfo.title.ja,
+      seoTitleEn: summary.seoInfo.title.en,
+      seoDescriptionJa: summary.seoInfo.description.ja,
+      seoDescriptionEn: summary.seoInfo.description.en,
     };
 
     if (existing.length > 0) {

@@ -79,13 +79,22 @@
             }, 1000);
           }
         } else {
-          const error = await response.json();
-          scrapingMessage = error.message || 'スクレイピングに失敗しました。';
+          try {
+            const errorData = await response.json();
+            scrapingMessage = errorData.message || 'スクレイピングに失敗しました。';
+          } catch (parseError) {
+            console.error('レスポンス解析エラー:', parseError);
+            scrapingMessage = `スクレイピングに失敗しました。(HTTP ${response.status})`;
+          }
         }
       })
       .catch(error => {
         console.error('スクレイピングエラー:', error);
-        scrapingMessage = 'スクレイピングに失敗しました。';
+        console.error(
+          'エラースタックトレース:',
+          error instanceof Error ? error.stack : 'スタックトレース不明'
+        );
+        scrapingMessage = 'ネットワークエラーまたはサーバーエラーが発生しました。';
       })
       .finally(() => {
         isScrapingInProgress = false;
@@ -110,7 +119,7 @@
 
     try {
       const formData = new FormData();
-      const response = await fetch(`?generateAiSummary`, {
+      const response = await fetch(`?/generateAiSummary`, {
         method: 'POST',
         body: formData,
       });
@@ -128,12 +137,21 @@
           aiSummaryMessage = result.data?.error || 'AI要約の生成に失敗しました。';
         }
       } else {
-        const error = await response.json();
-        aiSummaryMessage = error.message || 'AI要約の生成に失敗しました。';
+        try {
+          const errorData = await response.json();
+          aiSummaryMessage = errorData.error || 'AI要約の生成に失敗しました。';
+        } catch (parseError) {
+          console.error('レスポンス解析エラー:', parseError);
+          aiSummaryMessage = `AI要約の生成に失敗しました。(HTTP ${response.status})`;
+        }
       }
     } catch (error) {
       console.error('AI要約生成エラー:', error);
-      aiSummaryMessage = 'AI要約の生成中にエラーが発生しました。';
+      console.error(
+        'エラースタックトレース:',
+        error instanceof Error ? error.stack : 'スタックトレース不明'
+      );
+      aiSummaryMessage = 'ネットワークエラーまたはサーバーエラーが発生しました。';
     } finally {
       isAiSummaryInProgress = false;
 
