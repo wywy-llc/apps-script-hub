@@ -109,8 +109,8 @@
   let renderedHtml = $derived(getRenderedHtml(content, repositoryUrl));
 </script>
 
-<div class="markdown-body rounded-lg border border-gray-200 bg-white p-6 shadow-sm {className}">
-  <!-- XSS対策済み: HTMLサニタイズ済みコンテンツ -->
+<div class="markdown-body rounded-lg border border-indigo-200 bg-white p-4 shadow-sm {className}">
+  <!-- XSS対策済み: DOMPurifyでサニタイズされたHTML -->
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   {@html renderedHtml}
 </div>

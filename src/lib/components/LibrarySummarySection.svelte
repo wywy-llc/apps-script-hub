@@ -2,16 +2,7 @@
   import { getLocale } from '$lib/paraglide/runtime.js'; // cspell:ignore paraglide
   import type { Locale } from '$lib';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
-  import { sanitizeMarkdownHtml, preprocessMarkdown } from '$lib/utils/html-sanitizer.js';
-  import 'github-markdown-css/github-markdown.css';
-  import hljs from 'highlight.js/lib/core';
-  import bash from 'highlight.js/lib/languages/bash';
-  import javascript from 'highlight.js/lib/languages/javascript';
-  import json from 'highlight.js/lib/languages/json';
-  import plaintext from 'highlight.js/lib/languages/plaintext';
-  import typescript from 'highlight.js/lib/languages/typescript';
-  import 'highlight.js/styles/github.css';
-  import { marked, type Tokens } from 'marked';
+  import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
   interface Props {
     librarySummary: LibrarySummaryRecord;
@@ -24,68 +15,10 @@
   // Paraglide の現在の言語設定を使用（自動的に更新される） // cspell:ignore Paraglide
   let currentLocale = $derived<Locale>(getLocale());
 
-  // highlight.jsの言語を登録（SSRセーフ）
-  hljs.registerLanguage('javascript', javascript);
-  hljs.registerLanguage('json', json);
-  hljs.registerLanguage('typescript', typescript);
-  hljs.registerLanguage('bash', bash);
-  hljs.registerLanguage('plaintext', plaintext);
-
-  /**
-   * SSRセーフなマークダウンレンダリング関数
-   * グローバル状態を変更せず、ローカルに設定を適用
-   * @param content - マークダウンテキスト
-   * @returns HTMLとしてレンダリングされた文字列
-   */
-  function renderMarkdownSafe(content: string): string {
-    if (!content) return '';
-
-    // カスタムレンダラーを定義（SSRセーフ）
-    const renderer = {
-      code(token: Tokens.Code) {
-        const code = token.text;
-        const lang = token.lang || 'plaintext';
-
-        try {
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          const highlighted = hljs.highlight(code, { language }).value;
-          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-        } catch (error) {
-          console.warn('Highlight.js error:', error);
-          // エラーの場合はプレーンテキストとして表示
-          return `<pre><code class="hljs">${code}</code></pre>`;
-        }
-      },
-    };
-
-    // marked.jsの設定をローカルに適用（グローバル状態を変更しない）
-    marked.use({
-      renderer,
-      breaks: true,
-      gfm: true,
-    });
-
-    return marked.parse(content) as string;
-  }
-
   // 使用例のマークダウンを取得
   let usageExample = $derived(
     currentLocale === 'ja' ? librarySummary.usageExampleJa : librarySummary.usageExampleEn
   );
-
-  // 使用例のマークダウンをHTMLに変換（SSRセーフ + XSS対策）
-  let usageExampleHtml = $derived.by(() => {
-    if (!usageExample) return '';
-
-    // マークダウンの前処理（エスケープ文字等の修正）
-    const preprocessedMarkdown = preprocessMarkdown(usageExample);
-
-    // SSRセーフなマークダウンレンダリング関数を使用
-    const renderedHtml = renderMarkdownSafe(preprocessedMarkdown);
-
-    // XSS対策: HTMLをサニタイズ
-    return sanitizeMarkdownHtml(renderedHtml);
-  });
 </script>
 
 <div class="mt-8">
@@ -241,7 +174,7 @@
       {/if}
 
       <!-- 使用例 -->
-      {#if librarySummary.usageExampleJa || librarySummary.usageExampleEn}
+      {#if usageExample}
         <div class="mb-6">
           <h4 class="mb-4 flex items-center text-base font-semibold text-indigo-800">
             <svg
@@ -259,11 +192,7 @@
             </svg>
             使用例
           </h4>
-          <div class="markdown-body rounded-lg border border-indigo-200 bg-white p-4 shadow-sm">
-            <!-- XSS対策済み: DOMPurifyでサニタイズされたHTML -->
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html usageExampleHtml}
-          </div>
+          <MarkdownRenderer content={usageExample} class="shadow-sm" />
         </div>
       {/if}
 
