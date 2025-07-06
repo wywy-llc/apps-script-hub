@@ -4,6 +4,9 @@ import { library } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET() {
+  // 現在時刻を一度だけ取得（一貫性のため）
+  const currentTimestamp = new Date().toISOString();
+
   // 公開済みの全ライブラリをデータベースから取得
   const publishedLibraries = await db
     .select({
@@ -25,7 +28,7 @@ export async function GET() {
 >
   <url>
     <loc>${APP_CONFIG.BASE_URL}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentTimestamp}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
@@ -35,7 +38,7 @@ export async function GET() {
       path => `
   <url>
     <loc>${APP_CONFIG.BASE_URL}${path}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentTimestamp}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>
   </url>`
