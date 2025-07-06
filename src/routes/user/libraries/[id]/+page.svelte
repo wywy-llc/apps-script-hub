@@ -1,10 +1,10 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
+  import { createAppUrl, getLogoUrl } from '$lib/constants/app.js';
   import { company_name, copy_count_update_failed } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   import { onMount } from 'svelte';
   import type { PageData } from './$types.js';
-  import { createAppUrl } from '$lib/constants/app.js';
 
   // ライブラリ詳細ページコンポーネント
   // 特定のGASライブラリの詳細情報、README、メソッド一覧を表示
@@ -30,7 +30,7 @@
     }
 
     // フォールバック
-    return `${library.name} - AppsScriptHub`;
+    return `${library.name} - Apps Script Hub`;
   };
 
   const getSeoDescription = () => {
@@ -203,24 +203,42 @@
 <svelte:head>
   <title>{getSeoTitle()}</title>
   <meta name="description" content={getSeoDescription()} />
+  <meta name="keywords" content={generateKeywords()} />
+  <meta name="author" content={library.authorName} />
 
   <!-- Open Graph tags -->
   <meta property="og:title" content={getSeoTitle()} />
   <meta property="og:description" content={getSeoDescription()} />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="article" />
   <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
-  <meta property="og:site_name" content="AppsScriptHub" />
+  <meta property="og:site_name" content="Apps Script Hub" />
+  <meta property="og:image" content={getLogoUrl()} />
+  <meta property="article:author" content={library.authorName} />
+  <meta property="article:section" content="Google Apps Script" />
+  <meta property="article:tag" content="Google Apps Script" />
+  <meta property="article:tag" content="GAS" />
+  <meta property="article:tag" content="ライブラリ" />
 
   <!-- Twitter Card tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta name="twitter:title" content={getSeoTitle()} />
   <meta name="twitter:description" content={getSeoDescription()} />
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:image" content={getLogoUrl()} />
+  <meta name="twitter:creator" content={`@${library.authorName}`} />
+
+  <!-- Additional SEO Meta Tags -->
+  <link rel="canonical" href={createAppUrl(`/user/libraries/${library.id}`)} />
 </svelte:head>
 
-<LibraryDetail
-  {library}
-  librarySummary={data.librarySummary}
-  isAdminMode={false}
-  {displayCopyCount}
-  onCopyScriptId={handleCopyScriptId}
-/>
+<main>
+  <article>
+    <LibraryDetail
+      {library}
+      librarySummary={data.librarySummary}
+      isAdminMode={false}
+      {displayCopyCount}
+      onCopyScriptId={handleCopyScriptId}
+    />
+  </article>
+</main>
