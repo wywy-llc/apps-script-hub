@@ -34,6 +34,19 @@ export {
   type UserTestData,
 } from './user-test-data.factory';
 
+// GitHubスクレイピング関連のfactory
+export {
+  DuplicateCheckerTestDataFactories,
+  GitHubRepositoryTestDataFactories,
+  LibrarySaveCallbackTestDataFactories,
+  SaveWithSummaryCallbackTestDataFactories,
+  ScrapeResultTestDataFactories,
+  ScraperConfigTestDataFactories,
+  type GitHubRepositoryTestData,
+  type ScrapeResultTestData,
+  type ScraperConfigTestData,
+} from './github-scraper-test-data.factory';
+
 /**
  * 使用例:
  *
