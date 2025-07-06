@@ -150,7 +150,7 @@
             </span>
           {:else}
             <a
-              href="/user/search?q={encodeURIComponent(searchQuery)}&page={pageNum}"
+              href={`/user/search?q=${encodeURIComponent(searchQuery)}&page=${pageNum}`}
               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
               aria-label="ページ {pageNum} へ"
             >
@@ -164,7 +164,7 @@
             >...</span
           >
           <a
-            href="/user/search?q={encodeURIComponent(searchQuery)}&page={totalPages}"
+            href={`/user/search?q=${encodeURIComponent(searchQuery)}&page=${totalPages}`}
             class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
             aria-label="最終ページ {totalPages} へ"
           >
