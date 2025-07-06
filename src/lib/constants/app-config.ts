@@ -10,6 +10,12 @@ export const APP_CONFIG = {
   LOGO_PATH: '/logo.png',
 } as const;
 
+// ライブラリスクレイピング設定
+export const LIBRARY_SCRAPING = {
+  // 最後のコミットがこの年数より古いライブラリはスキップする（年）
+  SKIP_THRESHOLD_YEARS: 2,
+} as const;
+
 // URL生成ヘルパー
 export const createAppUrl = (path: string = '') => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
