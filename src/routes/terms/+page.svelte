@@ -1,6 +1,7 @@
 <script lang="ts">
   import Footer from '$lib/components/Footer.svelte';
   import Header from '$lib/components/Header.svelte';
+  import { createFullUrl, getLogoUrl } from '$lib/constants/app.js';
   import * as m from '$lib/paraglide/messages.js';
 
   // 利用規約ページ
@@ -10,6 +11,28 @@
 <svelte:head>
   <title>{m.terms_page_title()} - AppsScriptHub</title>
   <meta name="description" content={m.terms_page_description()} />
+  <meta
+    name="keywords"
+    content="利用規約, 利用条件, AppsScriptHub, Google Apps Script, GAS, ライブラリ"
+  />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={createFullUrl('/terms')} />
+  <meta property="og:title" content={`${m.terms_page_title()} - AppsScriptHub`} />
+  <meta property="og:description" content={m.terms_page_description()} />
+  <meta property="og:image" content={getLogoUrl()} />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={createFullUrl('/terms')} />
+  <meta property="twitter:title" content={`${m.terms_page_title()} - AppsScriptHub`} />
+  <meta property="twitter:description" content={m.terms_page_description()} />
+  <meta property="twitter:image" content={getLogoUrl()} />
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="author" content="wywy LLC" />
+  <link rel="canonical" href={createFullUrl('/terms')} />
 </svelte:head>
 
 <!-- Header -->
