@@ -7,11 +7,11 @@ const config = {
   kit: {
     adapter: adapter({
       // Vercel最適化設定
-      runtime: 'nodejs20.x',
-      regions: ['nrt1'], // 東京リージョン (日本向け)
-      memory: 1024, // メモリ設定 (MB)
-      maxDuration: 10, // 10秒タイムアウト
-      split: false, // 単一関数として統合デプロイ
+      runtime: 'nodejs22.x',
+      regions: ['pdx1', 'iad1', 'hnd1'], // 東京リージョン (日本向け)
+      maxDuration: 300, // 300秒タイムアウト
+      split: true, // 関数を分割してデプロイ
+      edge: false, // エッジ関数ではなく、通常のサーバーレス関数としてデプロイ
       external: ['pg-native', 'cloudflare:sockets'],
     }),
   },
