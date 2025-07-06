@@ -1,6 +1,7 @@
 <script lang="ts">
   import { app_title, login } from '$lib/paraglide/messages.js';
   import Button from './Button.svelte';
+  import GoogleAnalytics from './GoogleAnalytics.svelte';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
 
   // 基本ヘッダーコンポーネント
@@ -26,3 +27,5 @@
     </div>
   </div>
 </header>
+
+<GoogleAnalytics />
