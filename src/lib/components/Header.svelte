@@ -12,7 +12,10 @@
     <div class="flex h-16 items-center justify-between">
       <!-- ロゴ -->
       <div class="flex items-center">
-        <a href="/" class="text-xl font-bold text-gray-900">{app_title()}</a>
+        <a href="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900">
+          <img src="/logo.png" alt={app_title()} class="h-8 w-8" />
+          <span>{app_title()}</span>
+        </a>
       </div>
 
       <!-- 右側のアクション -->

@@ -14,22 +14,36 @@
 </script>
 
 <div class="flex min-h-screen flex-col">
-  {#if isLoggedIn}
-    <UserHeader
-      user={user && 'name' in user && 'email' in user && 'picture' in user
-        ? {
-            name: String(user.name),
-            email: String(user.email),
-            image: typeof user.picture === 'string' ? user.picture : undefined,
-          }
-        : { name: '', email: '', image: '' }}
-      showAdminLink={false}
-    />
-  {:else}
-    <Header />
-  {/if}
-  <main class="flex-1">
+  <!-- Skip to main content link for accessibility -->
+  <a
+    href="#main-content"
+    class="sr-only z-50 rounded bg-blue-600 px-4 py-2 text-white focus:not-sr-only focus:absolute focus:top-4 focus:left-4"
+  >
+    メインコンテンツにスキップ
+  </a>
+
+  <header>
+    {#if isLoggedIn}
+      <UserHeader
+        user={user && 'name' in user && 'email' in user && 'picture' in user
+          ? {
+              name: String(user.name),
+              email: String(user.email),
+              image: typeof user.picture === 'string' ? user.picture : undefined,
+            }
+          : { name: '', email: '', image: '' }}
+        showAdminLink={false}
+      />
+    {:else}
+      <Header />
+    {/if}
+  </header>
+
+  <main class="flex-1" id="main-content">
     {@render children()}
   </main>
-  <Footer />
+
+  <footer>
+    <Footer />
+  </footer>
 </div>

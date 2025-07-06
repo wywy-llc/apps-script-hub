@@ -1,11 +1,13 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
   import {
     LIBRARY_STATUS_BADGE_CLASS,
     LIBRARY_STATUS_TEXT,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
+  import Footer from '$lib/components/Footer.svelte';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
@@ -175,8 +177,11 @@
 </script>
 
 <svelte:head>
-  <title>管理画面 - ライブラリ一覧 - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの承認・削除を管理" />
+  <title>管理画面 - ライブラリ一覧 - {APP_CONFIG.SITE_NAME}</title>
+  <meta
+    name="description"
+    content="{APP_CONFIG.SITE_NAME}管理者画面 - ライブラリの承認・削除を管理"
+  />
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -639,11 +644,5 @@
   </div>
 
   <!-- Footer -->
-  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
-    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div class="text-center text-sm text-gray-500">
-        &copy; 2025 wywy LLC. All rights reserved.
-      </div>
-    </div>
-  </footer>
+  <Footer variant="admin" />
 </main>
