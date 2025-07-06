@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { BulkGASLibrarySearchService } from '../../../../../src/lib/server/services/bulk-gas-library-search-service.js';
+import { CheckLibraryCommitStatusService } from '../../../../../src/lib/server/services/check-library-commit-status-service.js';
 import { GASLibraryScraper } from '../../../../../src/lib/server/services/gas-library-scraper.js';
+import { GenerateLibrarySummaryService } from '../../../../../src/lib/server/services/generate-library-summary-service.js';
+import { SaveLibrarySummaryService } from '../../../../../src/lib/server/services/save-library-summary-service.js';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
 import type { TagSearchResult } from '../../../../../src/lib/types/github-scraper.js';
 import {
   GitHubRepositoryTestDataFactories,
+  LibrarySummaryTestDataFactories,
   ScrapeResultTestDataFactories,
   ScraperConfigTestDataFactories,
 } from '../../../../factories/index.js';
@@ -12,9 +16,15 @@ import {
 // モックの設定
 vi.mock('../../../../../src/lib/server/utils/github-api-utils.js');
 vi.mock('../../../../../src/lib/server/services/gas-library-scraper.js');
+vi.mock('../../../../../src/lib/server/services/check-library-commit-status-service.js');
+vi.mock('../../../../../src/lib/server/services/generate-library-summary-service.js');
+vi.mock('../../../../../src/lib/server/services/save-library-summary-service.js');
 
 const mockedGitHubApiUtils = vi.mocked(GitHubApiUtils);
 const mockedGASLibraryScraper = vi.mocked(GASLibraryScraper);
+const mockedCheckLibraryCommitStatusService = vi.mocked(CheckLibraryCommitStatusService);
+const mockedGenerateLibrarySummaryService = vi.mocked(GenerateLibrarySummaryService);
+const mockedSaveLibrarySummaryService = vi.mocked(SaveLibrarySummaryService);
 
 describe('BulkGASLibrarySearchService', () => {
   const mockConfig = ScraperConfigTestDataFactories.default.build();
@@ -259,6 +269,260 @@ describe('BulkGASLibrarySearchService', () => {
       // 検証
       expect(result.successCount).toBe(2);
       expect(mockedGASLibraryScraper.call).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('callWithPageRangeAndSaveWithSummary', () => {
+    const mockSaveCallback = vi.fn();
+    const mockDuplicateChecker = vi.fn();
+
+    beforeEach(() => {
+      mockSaveCallback.mockClear();
+      mockDuplicateChecker.mockClear();
+      mockedCheckLibraryCommitStatusService.call.mockClear();
+      mockedGenerateLibrarySummaryService.call.mockClear();
+      mockedSaveLibrarySummaryService.call.mockClear();
+      mockedSaveLibrarySummaryService.exists.mockClear();
+    });
+
+    test('lastCommitAtが1年前以上の場合はスキップされる', async () => {
+      // 1年前以上の古い日付を設定
+      const twoYearsAgo = new Date();
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+      // GitHub検索のモック
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [testRepo1],
+        totalFound: 1,
+        processedCount: 1,
+      };
+      mockedGitHubApiUtils.searchRepositoriesByPageRange.mockResolvedValue(mockSearchResult);
+
+      // スクレイピング結果のモック（古いコミット日時）
+      const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
+      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo;
+      mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
+
+      // 重複チェッカー（重複なし）
+      mockDuplicateChecker.mockResolvedValue(false);
+
+      // テスト実行
+      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+        1,
+        1,
+        10,
+        mockDuplicateChecker,
+        mockSaveCallback,
+        true,
+        mockConfig
+      );
+
+      await vi.advanceTimersByTimeAsync(1000);
+      const result = await promise;
+
+      // 検証
+      expect(result.success).toBe(false); // 処理対象がスキップされたため失敗
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].error).toContain('スキップ');
+      expect(result.results[0].error).toContain('最後のコミットが1年前以上');
+      expect(result.results[0].error).toContain(testRepo1.name);
+
+      // 保存コールバックは呼ばれない
+      expect(mockSaveCallback).not.toHaveBeenCalled();
+    });
+
+    test('lastCommitAtが1年以内の場合は正常に処理される', async () => {
+      // 6ヶ月前の日付を設定
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      // GitHub検索のモック
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [testRepo1],
+        totalFound: 1,
+        processedCount: 1,
+      };
+      mockedGitHubApiUtils.searchRepositoriesByPageRange.mockResolvedValue(mockSearchResult);
+
+      // スクレイピング結果のモック（最近のコミット日時）
+      const recentCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
+      recentCommitScrapeResult.data!.lastCommitAt = sixMonthsAgo;
+      mockedGASLibraryScraper.call.mockResolvedValue(recentCommitScrapeResult);
+
+      // 重複チェッカー（重複なし）
+      mockDuplicateChecker.mockResolvedValue(false);
+
+      // 保存コールバック（成功）
+      mockSaveCallback.mockResolvedValue({ success: true, id: 'test-library-id' });
+
+      // AI要約関連のモック
+      mockedCheckLibraryCommitStatusService.call.mockResolvedValue({
+        isNew: true,
+        shouldUpdate: false,
+        libraryId: undefined,
+      });
+      const mockSummary = LibrarySummaryTestDataFactories.default.build();
+      mockedGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
+      mockedSaveLibrarySummaryService.call.mockResolvedValue(undefined);
+
+      // テスト実行
+      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+        1,
+        1,
+        10,
+        mockDuplicateChecker,
+        mockSaveCallback,
+        true,
+        mockConfig
+      );
+
+      await vi.advanceTimersByTimeAsync(1000);
+      const result = await promise;
+
+      // 検証
+      expect(result.success).toBe(true);
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].success).toBe(true);
+      expect(result.successCount).toBe(1);
+      expect(result.errorCount).toBe(0);
+
+      // 保存コールバックが呼ばれる
+      expect(mockSaveCallback).toHaveBeenCalledWith(recentCommitScrapeResult.data, true);
+
+      // AI要約生成も実行される
+      expect(mockedGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
+        githubUrl: testRepo1.html_url,
+      });
+      expect(mockedSaveLibrarySummaryService.call).toHaveBeenCalledWith(
+        'test-library-id',
+        mockSummary
+      );
+    });
+
+    test('verboseモードでスキップ理由がログ出力される', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      // 1年前以上の古い日付を設定
+      const twoYearsAgo = new Date();
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+      // GitHub検索のモック
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [testRepo1],
+        totalFound: 1,
+        processedCount: 1,
+      };
+      mockedGitHubApiUtils.searchRepositoriesByPageRange.mockResolvedValue(mockSearchResult);
+
+      // スクレイピング結果のモック（古いコミット日時）
+      const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
+      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo;
+      mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
+
+      // 重複チェッカー（重複なし）
+      mockDuplicateChecker.mockResolvedValue(false);
+
+      const verboseConfig = ScraperConfigTestDataFactories.verbose.build();
+
+      // テスト実行
+      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+        1,
+        1,
+        10,
+        mockDuplicateChecker,
+        mockSaveCallback,
+        true,
+        verboseConfig
+      );
+
+      await vi.advanceTimersByTimeAsync(1000);
+      await promise;
+
+      // 検証
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`⏭️  ${testRepo1.name}: 最後のコミットが1年前以上のためスキップ`)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test('複数リポジトリで一部スキップ、一部処理される', async () => {
+      // 古い日付と新しい日付を準備
+      const twoYearsAgo = new Date();
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      // GitHub検索のモック（2つのリポジトリ）
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [testRepo1, testRepo2],
+        totalFound: 2,
+        processedCount: 2,
+      };
+      mockedGitHubApiUtils.searchRepositoriesByPageRange.mockResolvedValue(mockSearchResult);
+
+      // スクレイピング結果のモック
+      const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
+      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo; // 古いコミット
+
+      const recentCommitScrapeResult = ScrapeResultTestDataFactories.successWithOAuth.build();
+      recentCommitScrapeResult.data!.lastCommitAt = sixMonthsAgo; // 新しいコミット
+
+      mockedGASLibraryScraper.call
+        .mockResolvedValueOnce(oldCommitScrapeResult)
+        .mockResolvedValueOnce(recentCommitScrapeResult);
+
+      // 重複チェッカー（重複なし）
+      mockDuplicateChecker.mockResolvedValue(false);
+
+      // 保存コールバック（成功）
+      mockSaveCallback.mockResolvedValue({ success: true, id: 'test-library-id' });
+
+      // AI要約関連のモック
+      mockedCheckLibraryCommitStatusService.call.mockResolvedValue({
+        isNew: true,
+        shouldUpdate: false,
+        libraryId: undefined,
+      });
+      const mockSummary = LibrarySummaryTestDataFactories.oauth.build();
+      mockedGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
+      mockedSaveLibrarySummaryService.call.mockResolvedValue(undefined);
+
+      // テスト実行
+      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+        1,
+        1,
+        10,
+        mockDuplicateChecker,
+        mockSaveCallback,
+        true,
+        mockConfig
+      );
+
+      await vi.advanceTimersByTimeAsync(2000);
+      const result = await promise;
+
+      // 検証
+      expect(result.success).toBe(true); // 1つでも成功すればtrue
+      expect(result.results).toHaveLength(2);
+      expect(result.successCount).toBe(1); // 1つだけ成功
+      expect(result.errorCount).toBe(1); // 1つはスキップでエラー
+
+      // 1つ目はスキップ
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].error).toContain('スキップ');
+
+      // 2つ目は成功
+      expect(result.results[1].success).toBe(true);
+
+      // 保存コールバックは1回だけ呼ばれる（新しいコミットのみ）
+      expect(mockSaveCallback).toHaveBeenCalledTimes(1);
+      expect(mockSaveCallback).toHaveBeenCalledWith(recentCommitScrapeResult.data, true);
     });
   });
 });
