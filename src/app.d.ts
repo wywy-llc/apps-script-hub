@@ -17,6 +17,12 @@ declare global {
     }
   }
 
+  // Google Analytics gtag型定義
+  interface Window {
+    dataLayer: unknown[];
+    gtag: (...args: unknown[]) => void;
+  }
+
   namespace NodeJS {
     interface ProcessEnv {
       DATABASE_URL: string;
