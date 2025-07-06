@@ -1,4 +1,5 @@
 import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
+import { LIBRARY_SCRAPING } from '$lib/constants/app-config.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import type {
   BulkScrapeResult,
@@ -540,17 +541,19 @@ export class BulkGASLibrarySearchService {
                 continue;
               }
 
-              // lastCommitAtが1年前以上の場合はスキップ
-              const oneYearAgo = new Date();
-              oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-              if (scrapeResult.data.lastCommitAt < oneYearAgo) {
+              // lastCommitAtが2年前以上の場合はスキップ
+              const thresholdDate = new Date();
+              thresholdDate.setFullYear(
+                thresholdDate.getFullYear() - LIBRARY_SCRAPING.SKIP_THRESHOLD_YEARS
+              );
+              if (scrapeResult.data.lastCommitAt < thresholdDate) {
                 pageResults.push({
                   success: false,
-                  error: `スキップ: ${repo.name} (最後のコミットが1年前以上: ${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`,
+                  error: `スキップ: ${repo.name} (最後のコミットが${LIBRARY_SCRAPING.SKIP_THRESHOLD_YEARS}年前以上: ${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`,
                 });
                 if (config.verbose) {
                   console.log(
-                    `  ⏭️  ${repo.name}: 最後のコミットが1年前以上のためスキップ (${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`
+                    `  ⏭️  ${repo.name}: 最後のコミットが${LIBRARY_SCRAPING.SKIP_THRESHOLD_YEARS}年前以上のためスキップ (${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`
                   );
                 }
                 continue;

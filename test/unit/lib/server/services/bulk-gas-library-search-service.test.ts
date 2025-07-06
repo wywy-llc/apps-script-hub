@@ -285,10 +285,10 @@ describe('BulkGASLibrarySearchService', () => {
       mockedSaveLibrarySummaryService.exists.mockClear();
     });
 
-    test('lastCommitAtが1年前以上の場合はスキップされる', async () => {
-      // 1年前以上の古い日付を設定
-      const twoYearsAgo = new Date();
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    test('lastCommitAtが2年前以上の場合はスキップされる', async () => {
+      // 2年前以上の古い日付を設定
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
 
       // GitHub検索のモック
       const mockSearchResult: TagSearchResult = {
@@ -301,7 +301,7 @@ describe('BulkGASLibrarySearchService', () => {
 
       // スクレイピング結果のモック（古いコミット日時）
       const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
-      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo;
+      oldCommitScrapeResult.data!.lastCommitAt = threeYearsAgo;
       mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
 
       // 重複チェッカー（重複なし）
@@ -326,14 +326,14 @@ describe('BulkGASLibrarySearchService', () => {
       expect(result.results).toHaveLength(1);
       expect(result.results[0].success).toBe(false);
       expect(result.results[0].error).toContain('スキップ');
-      expect(result.results[0].error).toContain('最後のコミットが1年前以上');
+      expect(result.results[0].error).toContain('最後のコミットが2年前以上');
       expect(result.results[0].error).toContain(testRepo1.name);
 
       // 保存コールバックは呼ばれない
       expect(mockSaveCallback).not.toHaveBeenCalled();
     });
 
-    test('lastCommitAtが1年以内の場合は正常に処理される', async () => {
+    test('lastCommitAtが2年以内の場合は正常に処理される', async () => {
       // 6ヶ月前の日付を設定
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -405,9 +405,9 @@ describe('BulkGASLibrarySearchService', () => {
     test('verboseモードでスキップ理由がログ出力される', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-      // 1年前以上の古い日付を設定
-      const twoYearsAgo = new Date();
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      // 2年前以上の古い日付を設定
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
 
       // GitHub検索のモック
       const mockSearchResult: TagSearchResult = {
@@ -420,7 +420,7 @@ describe('BulkGASLibrarySearchService', () => {
 
       // スクレイピング結果のモック（古いコミット日時）
       const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
-      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo;
+      oldCommitScrapeResult.data!.lastCommitAt = threeYearsAgo;
       mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
 
       // 重複チェッカー（重複なし）
@@ -444,7 +444,7 @@ describe('BulkGASLibrarySearchService', () => {
 
       // 検証
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`⏭️  ${testRepo1.name}: 最後のコミットが1年前以上のためスキップ`)
+        expect.stringContaining(`⏭️  ${testRepo1.name}: 最後のコミットが2年前以上のためスキップ`)
       );
 
       consoleSpy.mockRestore();
@@ -452,8 +452,8 @@ describe('BulkGASLibrarySearchService', () => {
 
     test('複数リポジトリで一部スキップ、一部処理される', async () => {
       // 古い日付と新しい日付を準備
-      const twoYearsAgo = new Date();
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -468,7 +468,7 @@ describe('BulkGASLibrarySearchService', () => {
 
       // スクレイピング結果のモック
       const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
-      oldCommitScrapeResult.data!.lastCommitAt = twoYearsAgo; // 古いコミット
+      oldCommitScrapeResult.data!.lastCommitAt = threeYearsAgo; // 古いコミット
 
       const recentCommitScrapeResult = ScrapeResultTestDataFactories.successWithOAuth.build();
       recentCommitScrapeResult.data!.lastCommitAt = sixMonthsAgo; // 新しいコミット
