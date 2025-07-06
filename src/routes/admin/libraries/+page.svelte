@@ -1,13 +1,13 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import Footer from '$lib/components/Footer.svelte';
   import { APP_CONFIG } from '$lib/constants/app-config.js';
   import {
     LIBRARY_STATUS_BADGE_CLASS,
     LIBRARY_STATUS_TEXT,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
-  import Footer from '$lib/components/Footer.svelte';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
@@ -300,7 +300,7 @@
                 name="startPage"
                 type="number"
                 min="1"
-                max="10"
+                max="100"
                 bind:value={startPage}
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={bulkAddInProgress}

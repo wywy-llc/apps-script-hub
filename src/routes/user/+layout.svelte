@@ -1,5 +1,6 @@
 <script lang="ts">
   import Footer from '$lib/components/Footer.svelte';
+  import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
   import Header from '$lib/components/Header.svelte';
   import UserHeader from '$lib/components/UserHeader.svelte';
 
@@ -38,6 +39,7 @@
       <Header />
     {/if}
   </header>
+  <GoogleAnalytics />
 
   <main class="flex-1" id="main-content">
     {@render children()}
