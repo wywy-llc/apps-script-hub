@@ -69,7 +69,6 @@
             <li class="mb-1">{m.privacy_section_2_point_1()}</li>
             <li class="mb-1">{m.privacy_section_2_point_2()}</li>
             <li class="mb-1">{m.privacy_section_2_point_3()}</li>
-            <li class="mb-1">{m.privacy_section_2_point_4()}</li>
           </ul>
 
           <!-- Section 2: 個人情報の利用目的 -->
