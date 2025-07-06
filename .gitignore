@@ -154,6 +154,4 @@ storybook-static/
 .env.local
 
 
-drizzle/
-
 .DS_Store
