@@ -127,8 +127,8 @@ export const actions: Actions = {
         }
       };
 
-      // GASタグによる一括スクレイピング実行（ページごとにDB保存）
-      const result = await BulkGASLibrarySearchService.callWithPageRangeAndSave(
+      // GASタグによる一括スクレイピング実行（ページごとにDB保存 + AI要約生成）
+      const result = await BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
         startPage,
         endPage,
         perPage,

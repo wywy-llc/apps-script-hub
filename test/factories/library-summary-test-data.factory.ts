@@ -58,6 +58,16 @@ const defaultLibrarySummaryData: LibrarySummary = {
       en: '// Test Library Usage Example\nconst testLib = new TestLibrary();\ntestLib.runMockTest();\n// Check test result\nconst result = testLib.getResult();',
     },
   },
+  seoInfo: {
+    title: {
+      ja: 'テストライブラリ - Google Apps Script用テスト支援ライブラリ',
+      en: 'Test Library - Testing Support Library for Google Apps Script',
+    },
+    description: {
+      ja: 'E2Eテストやユニットテストを効率化するGoogle Apps Script用のテストライブラリ。モックデータとテスト自動化機能を提供。',
+      en: 'Testing library for Google Apps Script that streamlines E2E and unit testing. Provides mock data and test automation features.',
+    },
+  },
 };
 
 // OAuth認証ライブラリのテストデータ
@@ -122,6 +132,16 @@ const oauthLibrarySummaryData: LibrarySummary = {
       en: '// OAuth2 Authentication Implementation\nconst auth = new OAuth2Service();\nauth.authorize("google", "your-client-id", "your-client-secret");\n// Get token\nconst token = auth.getToken();',
     },
   },
+  seoInfo: {
+    title: {
+      ja: 'OAuth2認証ライブラリ - Google Apps Script用認証システム',
+      en: 'OAuth2 Authentication Library - Authentication System for Google Apps Script',
+    },
+    description: {
+      ja: 'Google Apps ScriptでOAuth2認証を簡単に実装。Google、GitHub、Slack等の主要プロバイダに対応した安全な認証ライブラリ。',
+      en: 'Easy OAuth2 authentication implementation for Google Apps Script. Secure authentication library supporting major providers like Google, GitHub, and Slack.',
+    },
+  },
 };
 
 // ユーティリティライブラリのテストデータ
@@ -174,6 +194,16 @@ const utilityLibrarySummaryData: LibrarySummary = {
     usageExample: {
       ja: '// ユーティリティライブラリの使用例\nconst util = new UtilityLibrary();\n// 文字列処理\nconst result = util.formatString("hello world");\n// 日付処理\nconst date = util.formatDate(new Date());',
       en: '// Utility Library Usage Example\nconst util = new UtilityLibrary();\n// String processing\nconst result = util.formatString("hello world");\n// Date processing\nconst date = util.formatDate(new Date());',
+    },
+  },
+  seoInfo: {
+    title: {
+      ja: 'GASユーティリティライブラリ - Google Apps Script開発効率化ツール',
+      en: 'GAS Utility Library - Development Efficiency Tool for Google Apps Script',
+    },
+    description: {
+      ja: 'Google Apps Script開発を効率化する便利な機能をまとめたユーティリティライブラリ。文字列処理、日付処理、データ変換等の機能を提供。',
+      en: 'Utility library with convenient functions to streamline Google Apps Script development. Provides string processing, date handling, data conversion and more.',
     },
   },
 };

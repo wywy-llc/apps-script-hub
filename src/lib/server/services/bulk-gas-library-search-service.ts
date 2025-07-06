@@ -540,6 +540,22 @@ export class BulkGASLibrarySearchService {
                 continue;
               }
 
+              // lastCommitAtが1年前以上の場合はスキップ
+              const oneYearAgo = new Date();
+              oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+              if (scrapeResult.data.lastCommitAt < oneYearAgo) {
+                pageResults.push({
+                  success: false,
+                  error: `スキップ: ${repo.name} (最後のコミットが1年前以上: ${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`,
+                });
+                if (config.verbose) {
+                  console.log(
+                    `  ⏭️  ${repo.name}: 最後のコミットが1年前以上のためスキップ (${scrapeResult.data.lastCommitAt.toLocaleDateString('ja-JP')})`
+                  );
+                }
+                continue;
+              }
+
               // 重複チェック
               const isDuplicate = await duplicateChecker(scrapeResult.data.scriptId);
               if (isDuplicate) {
