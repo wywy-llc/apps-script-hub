@@ -4,7 +4,7 @@
 
   // 本番環境でのみGoogleアナリティクスを読み込む
   const shouldLoadGA = browser && !dev && env.PUBLIC_GOOGLE_ANALYTICS_ID;
-  const trackingId = env.PUBLIC_GOOGLE_ANALYTICS_ID || 'G-DQ4L0NYB3W';
+  const trackingId = env.PUBLIC_GOOGLE_ANALYTICS_ID;
 </script>
 
 <svelte:head>
