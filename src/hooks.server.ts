@@ -1,19 +1,19 @@
+import { env } from '$env/dynamic/private';
 import type { Locale } from '$lib';
 import {
   extractLocaleFromRequest,
   overwriteServerAsyncLocalStorage,
 } from '$lib/paraglide/runtime.js';
 import * as auth from '$lib/server/auth';
-import type { Handle } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { SvelteKitAuth } from '@auth/sveltekit';
-import Google from '@auth/sveltekit/providers/google';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
-import { nanoid } from 'nanoid';
+import { SvelteKitAuth } from '@auth/sveltekit';
+import Google from '@auth/sveltekit/providers/google';
+import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
 import { eq } from 'drizzle-orm';
-import { env } from '$env/dynamic/private';
+import { nanoid } from 'nanoid';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
   // Auth.jsのセッション情報を取得
@@ -99,6 +99,7 @@ const { handle: authHandle } = SvelteKitAuth({
     }),
   ],
   secret: env.AUTH_SECRET,
+  trustHost: true,
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === 'google' && profile?.email && profile.sub) {
