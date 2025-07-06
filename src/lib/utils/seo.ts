@@ -1,4 +1,4 @@
-import { createAppUrl } from '$lib/constants/app-config.js';
+import { createAppUrl, APP_CONFIG } from '$lib/constants/app-config.js';
 import { company_name } from '$lib/paraglide/messages.js';
 import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 import type { LibraryEntity } from '$lib/types/index.js';
@@ -20,7 +20,7 @@ export function generateSeoTitle(
   librarySummary: LibrarySummaryRecord | null,
   currentLocale: string
 ): string {
-  if (!librarySummary) return `${library.name} - AppsScriptHub`;
+  if (!librarySummary) return `${library.name} - ${APP_CONFIG.SITE_NAME}`;
 
   if (currentLocale === 'ja' && librarySummary.seoTitleJa) {
     return librarySummary.seoTitleJa;
@@ -29,7 +29,7 @@ export function generateSeoTitle(
   }
 
   // フォールバック
-  return `${library.name} - Apps Script Hub`;
+  return `${library.name} - ${APP_CONFIG.SITE_NAME}`;
 }
 
 /**
