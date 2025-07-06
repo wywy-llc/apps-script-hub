@@ -2,7 +2,7 @@
   import { enhance } from '$app/forms';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { APP_CONFIG } from '$lib/constants/app-config.js';
+  import { APP_CONFIG, PAGINATION } from '$lib/constants/app-config.js';
   import {
     LIBRARY_STATUS_BADGE_CLASS,
     LIBRARY_STATUS_TEXT,
@@ -27,9 +27,9 @@
   let statusUpdateInProgress: Record<string, boolean> = {};
   let showBulkAddForm = $state(false);
   let bulkAddInProgress = $state(false);
-  let startPage = $state(1);
-  let endPage = $state(1);
-  let perPage = $state(100);
+  let startPage = $state(PAGINATION.MIN_PAGE);
+  let endPage = $state(PAGINATION.MIN_PAGE);
+  let perPage = $state(PAGINATION.PER_PAGE_OPTIONS[3]); // 100件/ページ
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
@@ -112,9 +112,9 @@
   function toggleBulkAddForm() {
     showBulkAddForm = !showBulkAddForm;
     if (!showBulkAddForm) {
-      startPage = 1;
-      endPage = 1;
-      perPage = 100;
+      startPage = PAGINATION.MIN_PAGE;
+      endPage = PAGINATION.MIN_PAGE;
+      perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
     }
   }
 
@@ -275,9 +275,9 @@
             await update();
             bulkAddInProgress = false;
             if (result.type === 'success') {
-              startPage = 1;
-              endPage = 1;
-              perPage = 100;
+              startPage = PAGINATION.MIN_PAGE;
+              endPage = PAGINATION.MIN_PAGE;
+              perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();
@@ -299,8 +299,8 @@
                 id="startPage"
                 name="startPage"
                 type="number"
-                min="1"
-                max="100"
+                min={PAGINATION.MIN_PAGE}
+                max={PAGINATION.MAX_PAGE}
                 bind:value={startPage}
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={bulkAddInProgress}
@@ -316,8 +316,8 @@
                 id="endPage"
                 name="endPage"
                 type="number"
-                min="1"
-                max="10"
+                min={PAGINATION.MIN_PAGE}
+                max={PAGINATION.MAX_PAGE}
                 bind:value={endPage}
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={bulkAddInProgress}
@@ -336,10 +336,9 @@
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={bulkAddInProgress}
               >
-                <option value={10}>10件/ページ</option>
-                <option value={25}>25件/ページ</option>
-                <option value={50}>50件/ページ</option>
-                <option value={100}>100件/ページ</option>
+                {#each PAGINATION.PER_PAGE_OPTIONS as option}
+                  <option value={option}>{option}件/ページ</option>
+                {/each}
               </select>
             </div>
           </div>
@@ -351,7 +350,7 @@
               {Math.max(0, (endPage - startPage + 1) * perPage)}件 (ページ {startPage} 〜 {endPage}, {perPage}件/ページ)
             </p>
             <p class="mt-1 text-xs text-gray-500">
-              GitHub APIの制限により、最大1000件までの取得となります。
+              GitHub APIの制限により、最大{PAGINATION.MAX_TOTAL_RESULTS}件までの取得となります。
             </p>
           </div>
 
