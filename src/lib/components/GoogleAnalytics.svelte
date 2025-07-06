@@ -3,7 +3,7 @@
   import { env } from '$env/dynamic/public';
   import { onMount } from 'svelte';
 
-  const trackingId = env.PUBLIC_GOOGLE_ANALYTICS_ID || 'G-DQ4L0NYB3W';
+  const trackingId = env.PUBLIC_GOOGLE_ANALYTICS_ID;
 
   onMount(() => {
     if (!browser || !trackingId) return;
