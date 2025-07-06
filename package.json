@@ -16,6 +16,8 @@
     "test:unit": "vitest",
     "test": "npm run lint && npm run check && npm run test:unit -- --run && npm run test:e2e",
     "test:e2e": "node test/scripts/run-e2e-tests.js",
+    "test:e2e:setup": "node test/scripts/setup-test-db.js",
+    "test:e2e:cleanup": "node test/scripts/cleanup-test-db.js",
     "db:push": "drizzle-kit push",
     "db:push:force": "drizzle-kit push --force",
     "db:generate": "drizzle-kit generate",
