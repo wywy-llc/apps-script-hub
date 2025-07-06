@@ -16,6 +16,17 @@ export const LIBRARY_SCRAPING = {
   SKIP_THRESHOLD_YEARS: 2,
 } as const;
 
+// ページング設定
+export const PAGINATION = {
+  // 管理画面での一括検索時のページ範囲制限
+  MIN_PAGE: 1,
+  MAX_PAGE: 100,
+  // 1ページあたりの件数選択肢
+  PER_PAGE_OPTIONS: [10, 25, 50, 100],
+  // 最大検索総件数
+  MAX_TOTAL_RESULTS: 1000,
+} as const;
+
 // URL生成ヘルパー
 export const createAppUrl = (path: string = '') => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
