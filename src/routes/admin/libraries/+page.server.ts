@@ -1,3 +1,4 @@
+import { PAGINATION } from '$lib/constants/app-config';
 import { db } from '$lib/server/db';
 import { library, librarySummary } from '$lib/server/db/schema';
 import {
@@ -57,29 +58,33 @@ export const actions: Actions = {
         return fail(400, { error: 'ページ範囲の値が不正です。' });
       }
 
-      if (startPage < 1 || startPage > 10) {
-        return fail(400, { error: '開始ページは1から10の間で入力してください。' });
+      if (startPage < PAGINATION.MIN_PAGE || startPage > PAGINATION.MAX_PAGE) {
+        return fail(400, {
+          error: `開始ページは${PAGINATION.MIN_PAGE}から${PAGINATION.MAX_PAGE}の間で入力してください。`,
+        });
       }
 
-      if (endPage < 1 || endPage > 10) {
-        return fail(400, { error: '終了ページは1から10の間で入力してください。' });
+      if (endPage < PAGINATION.MIN_PAGE || endPage > PAGINATION.MAX_PAGE) {
+        return fail(400, {
+          error: `終了ページは${PAGINATION.MIN_PAGE}から${PAGINATION.MAX_PAGE}の間で入力してください。`,
+        });
       }
 
       if (startPage > endPage) {
         return fail(400, { error: '開始ページは終了ページ以下である必要があります。' });
       }
 
-      if (![10, 25, 50, 100].includes(perPage)) {
+      if (!(PAGINATION.PER_PAGE_OPTIONS as readonly number[]).includes(perPage)) {
         return fail(400, {
-          error: '1ページあたりの件数は10, 25, 50, 100のいずれかを選択してください。',
+          error: `1ページあたりの件数は${PAGINATION.PER_PAGE_OPTIONS.join(', ')}のいずれかを選択してください。`,
         });
       }
 
       // 総検索件数の計算と制限チェック
       const totalResults = (endPage - startPage + 1) * perPage;
-      if (totalResults > 1000) {
+      if (totalResults > PAGINATION.MAX_TOTAL_RESULTS) {
         return fail(400, {
-          error: '検索総件数が1000件を超えています。ページ範囲を調整してください。',
+          error: `検索総件数が${PAGINATION.MAX_TOTAL_RESULTS}件を超えています。ページ範囲を調整してください。`,
         });
       }
 
