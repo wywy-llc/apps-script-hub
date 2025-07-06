@@ -1,6 +1,17 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
+  import { createAppUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import { copy_count_update_failed } from '$lib/paraglide/messages.js';
+  import { getLocale } from '$lib/paraglide/runtime.js';
+  import {
+    addJsonLdToHead,
+    generateJsonLd,
+    generateKeywords,
+    generateSeoDescription,
+    generateSeoTitle,
+    removeJsonLdFromHead,
+  } from '$lib/utils/seo.js';
+  import { onMount } from 'svelte';
   import type { PageData } from './$types.js';
 
   // ライブラリ詳細ページコンポーネント
@@ -11,7 +22,27 @@
   }
 
   let { data }: Props = $props();
-  const { library } = data;
+  const { library, librarySummary } = data;
+
+  // 現在のロケールを取得
+  const currentLocale = getLocale();
+
+  // SEO関連のデータを取得
+  const getSeoTitle = () => generateSeoTitle(library, librarySummary, currentLocale);
+  const getSeoDescription = () => generateSeoDescription(library, librarySummary, currentLocale);
+  const getSeoKeywords = () => generateKeywords(librarySummary, currentLocale);
+  const getJsonLd = () => generateJsonLd(library, librarySummary, currentLocale);
+
+  // コンポーネントマウント時にJSON-LDを動的に追加
+  onMount(() => {
+    // JSON-LDを追加
+    addJsonLdToHead(getJsonLd());
+
+    // クリーンアップ関数を返す
+    return () => {
+      removeJsonLdFromHead();
+    };
+  });
 
   // データベースのコピー回数を表示用の状態として管理
   let displayCopyCount = $state(library.copyCount);
@@ -87,14 +118,44 @@
 </script>
 
 <svelte:head>
-  <title>{library.name} - AppsScriptHub</title>
-  <meta name="description" content={library.description} />
+  <title>{getSeoTitle()}</title>
+  <meta name="description" content={getSeoDescription()} />
+  <meta name="keywords" content={getSeoKeywords()} />
+  <meta name="author" content={library.authorName} />
+
+  <!-- Open Graph tags -->
+  <meta property="og:title" content={getSeoTitle()} />
+  <meta property="og:description" content={getSeoDescription()} />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
+  <meta property="og:site_name" content="Apps Script Hub" />
+  <meta property="og:image" content={getLogoUrl()} />
+  <meta property="article:author" content={library.authorName} />
+  <meta property="article:section" content="Google Apps Script" />
+  <meta property="article:tag" content="Google Apps Script" />
+  <meta property="article:tag" content="GAS" />
+  <meta property="article:tag" content="ライブラリ" />
+
+  <!-- Twitter Card tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
+  <meta name="twitter:title" content={getSeoTitle()} />
+  <meta name="twitter:description" content={getSeoDescription()} />
+  <meta name="twitter:image" content={getLogoUrl()} />
+  <meta name="twitter:creator" content={`@${library.authorName}`} />
+
+  <!-- Additional SEO Meta Tags -->
+  <link rel="canonical" href={createAppUrl(`/user/libraries/${library.id}`)} />
 </svelte:head>
 
-<LibraryDetail
-  {library}
-  librarySummary={data.librarySummary}
-  isAdminMode={false}
-  {displayCopyCount}
-  onCopyScriptId={handleCopyScriptId}
-/>
+<main>
+  <article>
+    <LibraryDetail
+      {library}
+      librarySummary={data.librarySummary}
+      isAdminMode={false}
+      {displayCopyCount}
+      onCopyScriptId={handleCopyScriptId}
+    />
+  </article>
+</main>

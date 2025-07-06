@@ -1,8 +1,10 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
-  import type { ActionData } from './$types';
   import * as m from '$lib/paraglide/messages.js';
+  import Footer from '$lib/components/Footer.svelte';
+  import type { ActionData } from './$types';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
 
   // 管理者画面 - 新規ライブラリ追加ページ
   // GitHubリポジトリから情報を自動取得してライブラリを登録
@@ -35,8 +37,11 @@
 </script>
 
 <svelte:head>
-  <title>{m.library_registration_title()} - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub admin - Register new libraries to the system" />
+  <title>{m.library_registration_title()} - {APP_CONFIG.SITE_NAME}</title>
+  <meta
+    name="description"
+    content="{APP_CONFIG.SITE_NAME} admin - Register new libraries to the system"
+  />
 </svelte:head>
 
 <div class="bg-gray-50">
@@ -208,11 +213,5 @@
   </main>
 
   <!-- Footer -->
-  <footer class="mt-12 border-t border-gray-200 bg-gray-50">
-    <div class="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div class="text-center text-sm text-gray-500">
-        &copy; 2025 wywy LLC. All rights reserved.
-      </div>
-    </div>
-  </footer>
+  <Footer variant="admin" />
 </div>
