@@ -336,7 +336,7 @@
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={bulkAddInProgress}
               >
-                {#each PAGINATION.PER_PAGE_OPTIONS as option}
+                {#each PAGINATION.PER_PAGE_OPTIONS as option (option)}
                   <option value={option}>{option}件/ページ</option>
                 {/each}
               </select>
