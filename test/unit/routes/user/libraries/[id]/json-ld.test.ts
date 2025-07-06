@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { APP_CONFIG } from '../../../../../../src/lib/constants/app';
+import { APP_CONFIG } from '../../../../../../src/lib/constants/app-config';
 import type { Library, LibrarySummaryRecord } from '../../../../../../src/lib/server/db/schema';
 
 // JSON-LD生成関数のテスト用実装

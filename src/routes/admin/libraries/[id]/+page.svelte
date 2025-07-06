@@ -5,6 +5,7 @@
   import * as m from '$lib/paraglide/messages.js';
   import Footer from '$lib/components/Footer.svelte';
   import type { ActionData, PageData } from './$types';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -185,8 +186,11 @@
 </script>
 
 <svelte:head>
-  <title>{m.library_detail_title()} - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub admin - Library details and management" />
+  <title>{m.library_detail_title()} - {APP_CONFIG.SITE_NAME}</title>
+  <meta
+    name="description"
+    content="{APP_CONFIG.SITE_NAME} admin - Library details and management"
+  />
 </svelte:head>
 
 <main>

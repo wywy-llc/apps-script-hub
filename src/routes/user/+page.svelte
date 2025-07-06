@@ -2,7 +2,7 @@
   import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { createFullUrl, getLogoUrl } from '$lib/constants/app.js';
+  import { createFullUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import {
     featured_libraries,
     gas_library_search,

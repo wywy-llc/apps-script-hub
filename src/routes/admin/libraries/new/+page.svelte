@@ -4,6 +4,7 @@
   import * as m from '$lib/paraglide/messages.js';
   import Footer from '$lib/components/Footer.svelte';
   import type { ActionData } from './$types';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
 
   // 管理者画面 - 新規ライブラリ追加ページ
   // GitHubリポジトリから情報を自動取得してライブラリを登録
@@ -36,8 +37,11 @@
 </script>
 
 <svelte:head>
-  <title>{m.library_registration_title()} - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub admin - Register new libraries to the system" />
+  <title>{m.library_registration_title()} - {APP_CONFIG.SITE_NAME}</title>
+  <meta
+    name="description"
+    content="{APP_CONFIG.SITE_NAME} admin - Register new libraries to the system"
+  />
 </svelte:head>
 
 <div class="bg-gray-50">

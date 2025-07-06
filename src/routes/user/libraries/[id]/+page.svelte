@@ -1,6 +1,6 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
-  import { createAppUrl, getLogoUrl } from '$lib/constants/app.js';
+  import { createAppUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import { copy_count_update_failed } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   import {

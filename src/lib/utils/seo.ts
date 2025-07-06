@@ -1,4 +1,4 @@
-import { createAppUrl } from '$lib/constants/app.js';
+import { createAppUrl } from '$lib/constants/app-config.js';
 import { company_name } from '$lib/paraglide/messages.js';
 import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
 import type { LibraryEntity } from '$lib/types/index.js';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { createFullUrl, getLogoUrl } from '$lib/constants/app.js';
+  import { createFullUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import {
     all_libraries_count,
     meta_keywords_home,

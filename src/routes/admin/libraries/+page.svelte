@@ -1,6 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
   import {
     LIBRARY_STATUS_BADGE_CLASS,
     LIBRARY_STATUS_TEXT,
@@ -176,8 +177,11 @@
 </script>
 
 <svelte:head>
-  <title>管理画面 - ライブラリ一覧 - AppsScriptHub</title>
-  <meta name="description" content="AppsScriptHub管理者画面 - ライブラリの承認・削除を管理" />
+  <title>管理画面 - ライブラリ一覧 - {APP_CONFIG.SITE_NAME}</title>
+  <meta
+    name="description"
+    content="{APP_CONFIG.SITE_NAME}管理者画面 - ライブラリの承認・削除を管理"
+  />
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

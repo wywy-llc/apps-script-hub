@@ -1,6 +1,7 @@
 <script lang="ts">
   import { signOut } from '@auth/sveltekit/client';
   import Button from '$lib/components/Button.svelte';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
 
   async function handleSignOut() {
     await signOut({ redirectTo: '/' });
@@ -8,7 +9,7 @@
 </script>
 
 <svelte:head>
-  <title>アクセス権限不足 - Apps Script Hub</title>
+  <title>アクセス権限不足 - {APP_CONFIG.SITE_NAME}</title>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
