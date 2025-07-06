@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { APP_CONFIG } from '../../../../../../src/lib/constants/app';
 import type { Library, LibrarySummaryRecord } from '../../../../../../src/lib/server/db/schema';
 
 // JSON-LD生成関数のテスト用実装
@@ -28,7 +29,7 @@ function generateJsonLd(
   librarySummary: LibrarySummaryRecord | null,
   currentLocale: string
 ) {
-  const baseUrl = 'https://app-script-hub.example.com';
+  const baseUrl = APP_CONFIG.BASE_URL;
   const pageUrl = `${baseUrl}/user/libraries/${library.id}`;
 
   // SEO用のtitleとdescriptionを動的に取得
@@ -165,9 +166,7 @@ describe('JSON-LD構造化データ', () => {
     expect(jsonLdContent.keywords).toContain('Google Apps Script');
 
     // その他のプロパティ確認
-    expect(jsonLdContent.url).toBe(
-      'https://app-script-hub.example.com/user/libraries/test-library-id'
-    );
+    expect(jsonLdContent.url).toBe(`${APP_CONFIG.BASE_URL}/user/libraries/test-library-id`);
     expect(jsonLdContent.author.name).toBe('Test Author');
     expect(jsonLdContent.interactionStatistic?.userInteractionCount).toBe(100);
 

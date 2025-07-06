@@ -183,5 +183,8 @@
   "privacy_contact_company": "wywy合同会社",
   "privacy_contact_address": "〒150-0021 東京都渋谷区恵比寿西2丁目4番8号ウィンド恵比寿ビル8F",
   "privacy_contact_web": "Web：https://wywy.jp/",
-  "privacy_contact_email": "email: yuki_fujisawa@wywy.jp"
+  "privacy_contact_email": "email: yuki_fujisawa@wywy.jp",
+  "meta_title_home": "Apps Script Hub | GASライブラリの検索・共有プラットフォーム",
+  "meta_description_home": "Google Apps Script（GAS）開発を加速させるライブラリやツールが、ここに。Apps Script Hubは、世界中の開発者が作成した便利なコードを検索・共有できるオープンなコミュニティです。",
+  "meta_keywords_home": "Google Apps Script, GAS, ライブラリ, ツール, 自動化, 開発, 効率化, オープンソース, JavaScript, スプレッドシート, Gmail"
 }

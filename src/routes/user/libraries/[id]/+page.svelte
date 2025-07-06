@@ -4,6 +4,7 @@
   import { getLocale } from '$lib/paraglide/runtime.js';
   import { onMount } from 'svelte';
   import type { PageData } from './$types.js';
+  import { createAppUrl } from '$lib/constants/app.js';
 
   // ライブラリ詳細ページコンポーネント
   // 特定のGASライブラリの詳細情報、README、メソッド一覧を表示
@@ -66,8 +67,7 @@
 
   // JSON-LD構造化データを動的に生成
   const generateJsonLd = () => {
-    const baseUrl = 'https://app-script-hub.example.com';
-    const pageUrl = `${baseUrl}/user/libraries/${library.id}`;
+    const pageUrl = createAppUrl(`/user/libraries/${library.id}`);
 
     // Software Source Code Schema
     const jsonLd = {
@@ -208,10 +208,7 @@
   <meta property="og:title" content={getSeoTitle()} />
   <meta property="og:description" content={getSeoDescription()} />
   <meta property="og:type" content="website" />
-  <meta
-    property="og:url"
-    content="https://app-script-hub.example.com/user/libraries/{library.id}"
-  />
+  <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta property="og:site_name" content="AppsScriptHub" />
 
   <!-- Twitter Card tags -->

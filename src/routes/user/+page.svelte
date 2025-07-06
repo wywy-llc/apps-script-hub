@@ -3,20 +3,46 @@
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
   import {
-    app_title,
     featured_libraries,
     view_all_libraries,
     gas_library_search,
     welcome_user,
+    meta_title_home,
+    meta_description_home,
+    meta_keywords_home,
   } from '$lib/paraglide/messages.js';
+  import { createFullUrl, getLogoUrl } from '$lib/constants/app.js';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>{gas_library_search()} - {app_title()}</title>
-  <meta name="description" content="Google Apps Scriptライブラリの検索とダウンロード" />
+  <title>{meta_title_home()}</title>
+  <meta name="description" content={meta_description_home()} />
+  <meta name="keywords" content={meta_keywords_home()} />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={createFullUrl('HOME')} />
+  <meta property="og:title" content={meta_title_home()} />
+  <meta property="og:description" content={meta_description_home()} />
+  <meta property="og:image" content={getLogoUrl()} />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={createFullUrl('HOME')} />
+  <meta property="twitter:title" content={meta_title_home()} />
+  <meta property="twitter:description" content={meta_description_home()} />
+  <meta property="twitter:image" content={getLogoUrl()} />
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="author" content="wywy LLC" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3B82F6" />
+  <link rel="canonical" href={createFullUrl('HOME')} />
 </svelte:head>
 
 <!-- GASライブラリ検索ヘッダー -->
