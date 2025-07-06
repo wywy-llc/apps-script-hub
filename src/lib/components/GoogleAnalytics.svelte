@@ -28,7 +28,7 @@
 
     // 初期化スクリプトの追加（内容のあるスクリプトタグを作成）
     const initScript = document.createElement('script');
-    initScript.innerHTML = `
+    initScript.textContent = `
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
