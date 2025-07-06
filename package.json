@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "npm run paraglide:compile && vite dev",
     "build": "npm run paraglide:compile && vite build",
+    "deploy:vercel": "npm run paraglide:compile && vite build && npm run db:push:production",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -18,7 +19,11 @@
     "test:e2e:setup": "node test/scripts/setup-test-db.js",
     "test:e2e:cleanup": "node test/scripts/cleanup-test-db.js",
     "db:push": "drizzle-kit push",
+    "db:push:production": "drizzle-kit push --force",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "db:check": "drizzle-kit check",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide"
