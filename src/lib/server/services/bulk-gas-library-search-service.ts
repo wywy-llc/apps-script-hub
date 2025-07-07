@@ -1,5 +1,6 @@
-import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
 import { LIBRARY_SCRAPING } from '$lib/constants/app-config.js';
+import { type GitHubSearchSortOption } from '$lib/constants/github-search.js';
+import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import type {
   BulkScrapeResult,
@@ -461,6 +462,7 @@ export class BulkGASLibrarySearchService {
    * @param perPage - 1ページあたりの件数
    * @param duplicateChecker - 重複チェック関数
    * @param saveCallback - ライブラリ保存コールバック関数
+   * @param sortOption - 並び順オプション（省略時はデフォルト）
    * @param generateSummary - AI要約を生成するかどうか（デフォルト: true）
    * @param config - スクレイパー設定（省略時はデフォルト設定を使用）
    * @returns 一括スクレイピング結果
@@ -471,6 +473,7 @@ export class BulkGASLibrarySearchService {
     perPage: number,
     duplicateChecker: (scriptId: string) => Promise<boolean>,
     saveCallback: LibrarySaveWithSummaryCallback,
+    sortOption?: GitHubSearchSortOption,
     generateSummary: boolean = true,
     config: ScraperConfig = DEFAULT_SCRAPER_CONFIG
   ): Promise<BulkScrapeResult> {
@@ -497,7 +500,8 @@ export class BulkGASLibrarySearchService {
             config,
             currentPage,
             currentPage, // 1ページのみ
-            perPage
+            perPage,
+            sortOption
           );
 
           if (!searchResult.success) {

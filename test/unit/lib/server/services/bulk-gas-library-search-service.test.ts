@@ -314,6 +314,7 @@ describe('BulkGASLibrarySearchService', () => {
         10,
         mockDuplicateChecker,
         mockSaveCallback,
+        undefined, // sortOption
         true,
         mockConfig
       );
@@ -375,6 +376,7 @@ describe('BulkGASLibrarySearchService', () => {
         10,
         mockDuplicateChecker,
         mockSaveCallback,
+        undefined, // sortOption
         true,
         mockConfig
       );
@@ -435,6 +437,7 @@ describe('BulkGASLibrarySearchService', () => {
         10,
         mockDuplicateChecker,
         mockSaveCallback,
+        undefined, // sortOption
         true,
         verboseConfig
       );
@@ -500,6 +503,7 @@ describe('BulkGASLibrarySearchService', () => {
         10,
         mockDuplicateChecker,
         mockSaveCallback,
+        undefined, // sortOption
         true,
         mockConfig
       );

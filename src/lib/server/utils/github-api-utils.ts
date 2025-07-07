@@ -1,4 +1,8 @@
 import { GITHUB_TOKEN } from '$env/static/private';
+import {
+  GITHUB_SEARCH_SORT_OPTIONS,
+  type GitHubSearchSortOption,
+} from '$lib/constants/github-search.js';
 import type {
   GitHubReadmeResponse,
   GitHubRepository,
@@ -282,13 +286,15 @@ export class GitHubApiUtils {
    * @param startPage - 開始ページ（1から開始）
    * @param endPage - 終了ページ
    * @param perPage - 1ページあたりの件数（10, 25, 50, 100）
+   * @param sortOption - 並び順オプション（省略時はデフォルト）
    * @returns ページ範囲指定検索結果
    */
   public static async searchRepositoriesByPageRange(
     config: ScraperConfig,
     startPage: number,
     endPage: number,
-    perPage: number
+    perPage: number,
+    sortOption?: GitHubSearchSortOption
   ): Promise<TagSearchResult> {
     try {
       // gasTagsが空の場合はデフォルトタグを使用
@@ -322,6 +328,11 @@ export class GitHubApiUtils {
         query = `${tagTerms} in:topics`;
       }
 
+      // 並び順パラメータを適用
+      const sortParams = sortOption
+        ? GITHUB_SEARCH_SORT_OPTIONS[sortOption]
+        : GITHUB_SEARCH_SORT_OPTIONS.UPDATED_DESC;
+
       const totalPages = endPage - startPage + 1;
       const allRepositories: GitHubRepository[] = [];
       let totalFound = 0;
@@ -332,6 +343,7 @@ export class GitHubApiUtils {
         console.log('Valid tags:', validTags);
         console.log('Limited tags:', limitedTags);
         console.log('GitHub Search Query:', query);
+        console.log('Sort params:', sortParams);
         console.log(
           `ページ範囲指定検索: ${startPage} - ${endPage} (${perPage}件/ページ, ${totalPages}ページ)`
         );
@@ -341,7 +353,7 @@ export class GitHubApiUtils {
       for (let page = startPage; page <= endPage; page++) {
         const searchUrl = `${this.GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(
           query
-        )}&sort=stars&order=desc&per_page=${perPage}&page=${page}`;
+        )}&sort=${sortParams.value}&order=${sortParams.order}&per_page=${perPage}&page=${page}`;
 
         if (config.verbose) {
           console.log(`ページ ${page}/${endPage} を検索中: ${searchUrl}`);

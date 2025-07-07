@@ -1,4 +1,8 @@
 import { PAGINATION } from '$lib/constants/app-config';
+import {
+  GITHUB_SEARCH_SORT_OPTIONS,
+  type GitHubSearchSortOption,
+} from '$lib/constants/github-search';
 import { db } from '$lib/server/db';
 import { library, librarySummary } from '$lib/server/db/schema';
 import {
@@ -43,15 +47,22 @@ export const actions: Actions = {
       const startPageStr = formData.get('startPage') as string;
       const endPageStr = formData.get('endPage') as string;
       const perPageStr = formData.get('perPage') as string;
+      const sortOptionStr = formData.get('sortOption') as string;
 
       // パラメータの基本検証
-      if (!startPageStr?.trim() || !endPageStr?.trim() || !perPageStr?.trim()) {
+      if (
+        !startPageStr?.trim() ||
+        !endPageStr?.trim() ||
+        !perPageStr?.trim() ||
+        !sortOptionStr?.trim()
+      ) {
         return fail(400, { error: 'ページ範囲の設定が不正です。' });
       }
 
       const startPage = parseInt(startPageStr, 10);
       const endPage = parseInt(endPageStr, 10);
       const perPage = parseInt(perPageStr, 10);
+      const sortOption = sortOptionStr as GitHubSearchSortOption;
 
       // 数値範囲の検証
       if (isNaN(startPage) || isNaN(endPage) || isNaN(perPage)) {
@@ -77,6 +88,13 @@ export const actions: Actions = {
       if (!(PAGINATION.PER_PAGE_OPTIONS as readonly number[]).includes(perPage)) {
         return fail(400, {
           error: `1ページあたりの件数は${PAGINATION.PER_PAGE_OPTIONS.join(', ')}のいずれかを選択してください。`,
+        });
+      }
+
+      // 並び順の検証
+      if (!GITHUB_SEARCH_SORT_OPTIONS[sortOption]) {
+        return fail(400, {
+          error: '並び順の設定が不正です。',
         });
       }
 
@@ -138,7 +156,8 @@ export const actions: Actions = {
         endPage,
         perPage,
         duplicateChecker,
-        saveCallback
+        saveCallback,
+        sortOption
       );
 
       // 結果メッセージの生成
