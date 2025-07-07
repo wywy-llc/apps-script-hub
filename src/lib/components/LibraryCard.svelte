@@ -94,8 +94,8 @@
     <div class="flex items-center justify-between text-xs text-gray-500">
       <span>
         {last_updated()}: {currentLocale === 'ja'
-          ? new Date(library.updatedAt).toLocaleDateString('ja-JP')
-          : new Date(library.updatedAt).toLocaleDateString('en-US')}
+          ? new Date(library.lastCommitAt).toLocaleDateString('ja-JP')
+          : new Date(library.lastCommitAt).toLocaleDateString('en-US')}
       </span>
       <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-1">
