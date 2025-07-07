@@ -51,7 +51,15 @@
         </h3>
         {#if librarySummary.purposeJa || librarySummary.purposeEn}
           <p class="text-sm leading-relaxed text-gray-700">
-            {currentLocale === 'ja' ? librarySummary.purposeJa : librarySummary.purposeEn}
+            {#if currentLocale === 'ja'}
+              {librarySummary.purposeJa?.includes('公開情報が不足')
+                ? librarySummary.seoDescriptionJa
+                : librarySummary.purposeJa}
+            {:else}
+              {librarySummary.purposeEn?.includes('public information are insufficient')
+                ? librarySummary.seoDescriptionEn
+                : librarySummary.purposeEn}
+            {/if}
           </p>
         {/if}
       </div>
