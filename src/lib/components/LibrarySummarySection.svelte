@@ -56,7 +56,7 @@
                 ? librarySummary.seoDescriptionJa
                 : librarySummary.purposeJa}
             {:else}
-              {librarySummary.purposeEn?.includes('public information are insufficient')
+              {librarySummary.purposeEn?.includes('public information')
                 ? librarySummary.seoDescriptionEn
                 : librarySummary.purposeEn}
             {/if}
