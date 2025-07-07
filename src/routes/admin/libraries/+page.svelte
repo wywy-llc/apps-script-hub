@@ -4,6 +4,10 @@
   import Footer from '$lib/components/Footer.svelte';
   import { APP_CONFIG, PAGINATION } from '$lib/constants/app-config.js';
   import {
+    DEFAULT_GITHUB_SEARCH_SORT,
+    GITHUB_SEARCH_SORT_CHOICES,
+  } from '$lib/constants/github-search.js';
+  import {
     LIBRARY_STATUS_BADGE_CLASS,
     LIBRARY_STATUS_TEXT,
     type LibraryStatus,
@@ -30,6 +34,7 @@
   let startPage = $state(PAGINATION.MIN_PAGE);
   let endPage = $state(PAGINATION.MIN_PAGE);
   let perPage = $state(PAGINATION.PER_PAGE_OPTIONS[3]); // 100件/ページ
+  let sortOption = $state(DEFAULT_GITHUB_SEARCH_SORT);
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
@@ -115,6 +120,7 @@
       startPage = PAGINATION.MIN_PAGE;
       endPage = PAGINATION.MIN_PAGE;
       perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
+      sortOption = DEFAULT_GITHUB_SEARCH_SORT;
     }
   }
 
@@ -278,6 +284,7 @@
               startPage = PAGINATION.MIN_PAGE;
               endPage = PAGINATION.MIN_PAGE;
               perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
+              sortOption = DEFAULT_GITHUB_SEARCH_SORT;
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();
@@ -340,6 +347,29 @@
                   <option value={option}>{option}件/ページ</option>
                 {/each}
               </select>
+            </div>
+          </div>
+
+          <!-- 並び順設定 -->
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label for="sortOption" class="mb-1 block text-sm font-medium text-gray-700">
+                並び順
+              </label>
+              <select
+                id="sortOption"
+                name="sortOption"
+                bind:value={sortOption}
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={bulkAddInProgress}
+              >
+                {#each GITHUB_SEARCH_SORT_CHOICES as choice (choice.key)}
+                  <option value={choice.key}>{choice.label}</option>
+                {/each}
+              </select>
+              <p class="mt-1 text-xs text-gray-500">
+                {GITHUB_SEARCH_SORT_CHOICES.find(c => c.key === sortOption)?.description}
+              </p>
             </div>
           </div>
 
