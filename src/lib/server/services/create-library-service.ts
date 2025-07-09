@@ -20,11 +20,17 @@ export class CreateLibraryService {
    * @returns 作成されたライブラリのID
    */
   static async call(params: { scriptId: string; repoUrl: string }): Promise<string> {
-    const [owner, repo] = params.repoUrl.split('/');
+    const fullRepoUrl = params.repoUrl.startsWith('https://github.com/')
+      ? params.repoUrl
+      : `https://github.com/${params.repoUrl}`;
 
-    if (!owner || !repo) {
+    const parsedUrl = GitHubApiUtils.parseGitHubUrl(fullRepoUrl);
+
+    if (!parsedUrl) {
       throw new Error(ERROR_MESSAGES.INVALID_REPOSITORY_URL);
     }
+
+    const { owner, repo } = parsedUrl;
 
     // データベース接続テスト
     const isConnected = await testConnection();
@@ -44,7 +50,7 @@ export class CreateLibraryService {
     }
 
     // repositoryUrlが既に登録されているかチェック
-    const repositoryUrl = `https://github.com/${params.repoUrl}`;
+    const repositoryUrl = fullRepoUrl;
     const existingRepositoryUrl = await db
       .select()
       .from(library)

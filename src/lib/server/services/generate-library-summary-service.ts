@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { OpenAIUtils } from '$lib/server/utils/openai-utils.js';
 import type { LibrarySummary, LibrarySummaryParams } from '$lib/types/library-summary.js';
 
@@ -177,9 +178,23 @@ export class GenerateLibrarySummaryService {
       return getE2EMockSummary(params.githubUrl);
     }
 
+    // GitHubからREADMEを取得
+    let readmeContent = '';
+    const ownerAndRepo = GitHubApiUtils.parseGitHubUrl(params.githubUrl);
+
+    if (ownerAndRepo) {
+      try {
+        const readme = await GitHubApiUtils.fetchReadme(ownerAndRepo.owner, ownerAndRepo.repo);
+        readmeContent = readme || '';
+      } catch (error) {
+        console.warn('README取得に失敗しました:', error);
+        readmeContent = '';
+      }
+    }
+
     const client = OpenAIUtils.getClient();
 
-    const prompt = this.buildPrompt(params);
+    const prompt = this.buildPrompt(params, readmeContent);
 
     const response = await client.chat.completions.create({
       model: 'o3',
@@ -369,9 +384,10 @@ export class GenerateLibrarySummaryService {
   /**
    * プロンプトを構築する
    * @param params ライブラリ要約生成パラメータ
+   * @param readmeContent README.mdの内容
    * @returns 構築されたプロンプト
    */
-  private static buildPrompt(params: LibrarySummaryParams): string {
+  private static buildPrompt(params: LibrarySummaryParams, readmeContent: string): string {
     return `
 # Role
 あなたは、Google Apps Script (GAS) ライブラリの価値を開発者視点で見抜き、その本質を的確に言語化する専門家です。
@@ -381,6 +397,13 @@ export class GenerateLibrarySummaryService {
 
 # Input
 - GitHub Repository URL: ${params.githubUrl}
+- GitHub README.md
+
+## GitHub README
+
+\`\`\`
+${readmeContent || 'README.mdが見つからないか、内容を取得できませんでした。'}
+\`\`\`
 
 # Critical Rules
 

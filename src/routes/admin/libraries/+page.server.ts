@@ -3,6 +3,7 @@ import {
   GITHUB_SEARCH_SORT_OPTIONS,
   type GitHubSearchSortOption,
 } from '$lib/constants/github-search';
+import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config';
 import { db } from '$lib/server/db';
 import { library, librarySummary } from '$lib/server/db/schema';
 import {
@@ -48,15 +49,17 @@ export const actions: Actions = {
       const endPageStr = formData.get('endPage') as string;
       const perPageStr = formData.get('perPage') as string;
       const sortOptionStr = formData.get('sortOption') as string;
+      const selectedTags = formData.getAll('selectedTags') as string[];
 
       // パラメータの基本検証
       if (
         !startPageStr?.trim() ||
         !endPageStr?.trim() ||
         !perPageStr?.trim() ||
-        !sortOptionStr?.trim()
+        !sortOptionStr?.trim() ||
+        !selectedTags?.length
       ) {
-        return fail(400, { error: 'ページ範囲の設定が不正です。' });
+        return fail(400, { error: 'ページ範囲またはタグの設定が不正です。' });
       }
 
       const startPage = parseInt(startPageStr, 10);
@@ -150,6 +153,12 @@ export const actions: Actions = {
         }
       };
 
+      // カスタムスクレイパー設定（選択されたタグのみ使用）
+      const customConfig = {
+        ...DEFAULT_SCRAPER_CONFIG,
+        gasTags: selectedTags,
+      };
+
       // GASタグによる一括スクレイピング実行（ページごとにDB保存 + AI要約生成）
       const result = await BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
         startPage,
@@ -157,7 +166,9 @@ export const actions: Actions = {
         perPage,
         duplicateChecker,
         saveCallback,
-        sortOption
+        sortOption,
+        true, // generateSummary
+        customConfig
       );
 
       // 結果メッセージの生成

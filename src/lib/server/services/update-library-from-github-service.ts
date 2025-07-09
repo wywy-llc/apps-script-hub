@@ -1,5 +1,6 @@
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import { eq } from 'drizzle-orm';
 import { FetchGithubLicenseService } from './fetch-github-license-service';
 import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
@@ -23,12 +24,13 @@ export class UpdateLibraryFromGithubService {
     }
 
     const libraryData = result[0];
-    const repoUrl = new URL(libraryData.repositoryUrl);
-    const [, owner, repo] = repoUrl.pathname.split('/');
+    const parsedUrl = GitHubApiUtils.parseGitHubUrl(libraryData.repositoryUrl);
 
-    if (!owner || !repo) {
+    if (!parsedUrl) {
       throw new Error('GitHub リポジトリURLが正しくありません。');
     }
+
+    const { owner, repo } = parsedUrl;
 
     // GitHub リポジトリ情報を取得
     const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);

@@ -1,3 +1,4 @@
+import { DEFAULT_SCRIPT_ID_PATTERNS } from '$lib/constants/scraper-config.js';
 import type { ScraperConfig } from '$lib/types/github-scraper.js';
 
 /**
@@ -8,14 +9,7 @@ export class GASScriptIdExtractor {
   /**
    * デフォルトのスクリプトID抽出パターン
    */
-  public static readonly DEFAULT_SCRIPT_ID_PATTERNS = [
-    /スクリプトID[：:\s]*([A-Za-z0-9_-]{20,})/gi,
-    /Script[\s]*ID[：:\s]*([A-Za-z0-9_-]{20,})/gi,
-    /script[\s]*id[：:\s]*['"`]([A-Za-z0-9_-]{20,})['"`]/gi,
-    /https:\/\/script\.google\.com\/macros\/d\/([A-Za-z0-9_-]{20,})/gi,
-    /script\.google\.com\/.*?\/([A-Za-z0-9_-]{20,})/gi,
-    /\b1[A-Za-z0-9_-]{20,}\b/g,
-  ];
+  public static readonly DEFAULT_SCRIPT_ID_PATTERNS = DEFAULT_SCRIPT_ID_PATTERNS;
 
   /**
    * READMEからGASスクリプトIDを抽出

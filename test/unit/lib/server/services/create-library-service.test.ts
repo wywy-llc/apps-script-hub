@@ -55,6 +55,7 @@ describe('CreateLibraryService', () => {
     mockFetchGithubRepoService.call.mockResolvedValue(mockRepoInfo);
     mockFetchGithubLicenseService.call.mockResolvedValue(mockLicenseInfo);
     mockGitHubApiUtils.fetchLastCommitDate.mockResolvedValue(mockLastCommitAt);
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     // データベースモックの設定
     const mockSelect = vi.fn();
@@ -113,6 +114,7 @@ describe('CreateLibraryService', () => {
   test('AI要約生成でエラーが発生してもライブラリ作成は続行される', async () => {
     // AI要約生成でエラーを発生させる
     mockGenerateLibrarySummaryService.call.mockRejectedValue(new Error('AI要約生成エラー'));
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     // ライブラリ作成を実行
     const result = await CreateLibraryService.call(mockParams);
@@ -133,6 +135,7 @@ describe('CreateLibraryService', () => {
     // AI要約生成は成功させる
     const mockSummary = LibrarySummaryTestDataFactories.default.build();
     mockGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     // AI要約保存でエラーを発生させる
     mockSaveLibrarySummaryService.call.mockRejectedValue(new Error('AI要約保存エラー'));
@@ -155,6 +158,7 @@ describe('CreateLibraryService', () => {
 
   test('データベース接続に失敗した場合はエラーをスローする', async () => {
     mockTestConnection.mockResolvedValue(false);
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
       ERROR_MESSAGES.DATABASE_CONNECTION_FAILED
@@ -177,6 +181,7 @@ describe('CreateLibraryService', () => {
     mockLimit.mockResolvedValueOnce([{ id: 'existing-id' }]); // 重複データあり
 
     mockDb.select = mockSelect;
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
       ERROR_MESSAGES.SCRIPT_ID_ALREADY_REGISTERED
@@ -188,6 +193,7 @@ describe('CreateLibraryService', () => {
 
   test('最終コミット日時の取得に失敗した場合はエラーをスローする', async () => {
     mockGitHubApiUtils.fetchLastCommitDate.mockResolvedValue(null);
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
 
     await expect(CreateLibraryService.call(mockParams)).rejects.toThrow(
       ERROR_MESSAGES.LAST_COMMIT_DATE_FETCH_FAILED

@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/private';
 import { GITHUB_TOKEN } from '$env/static/private';
 import {
   GITHUB_SEARCH_SORT_OPTIONS,
@@ -29,6 +30,12 @@ export class GitHubApiUtils {
       'X-GitHub-Api-Version': '2022-11-28',
     };
 
+    // E2Eテストモードの場合はモック用ヘッダーを返す
+    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+      headers['Authorization'] = 'token mock-github-token-for-e2e';
+      return headers;
+    }
+
     if (!GITHUB_TOKEN) {
       throw new Error(
         'GITHUB_TOKENが設定されていません。GitHub APIへのアクセスには認証トークンが必要です。'
@@ -55,6 +62,65 @@ export class GitHubApiUtils {
    * GitHub APIからREADMEを取得
    */
   public static async fetchReadme(owner: string, repo: string): Promise<string | undefined> {
+    // E2Eテストモードの場合はモックデータを返す
+    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+      console.log(`🤖 [E2E Mock] README取得中: ${owner}/${repo} (モックデータを使用)`);
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // 特定のテストケース用のモックREADME
+      if (owner === 'googleworkspace' && repo === 'apps-script-oauth2') {
+        return `# Google Apps Script OAuth2 Library
+
+This library provides OAuth2 authentication for Google Apps Script.
+
+## Installation
+
+Add the library to your script:
+1. Go to Libraries in your Apps Script project
+2. Add the following script ID: 1B7FSrTXhS9L-WnAa8_ZdHiM-JWD4dBZ1KBFRkJx0L
+
+## Usage
+
+\`\`\`javascript
+function authenticate() {
+  const oauth = new OAuth2({
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'your-redirect-uri'
+  });
+  
+  const authUrl = oauth.getAuthorizationUrl();
+  console.log('Visit this URL:', authUrl);
+}
+\`\`\`
+
+## Features
+
+- Easy OAuth2 implementation
+- Secure token management
+- Automatic token refresh
+`;
+      }
+
+      // デフォルトのモックREADME
+      return `# ${repo}
+
+Mock README for E2E testing.
+
+## Installation
+
+This is a mock library for testing purposes.
+
+## Usage
+
+\`\`\`javascript
+// Mock usage example
+const lib = new MockLibrary();
+lib.doSomething();
+\`\`\`
+`;
+    }
+
     try {
       const headers = this.createHeaders();
       const response = await fetch(`${this.GITHUB_API_BASE}/repos/${owner}/${repo}/readme`, {
@@ -466,6 +532,17 @@ export class GitHubApiUtils {
    * リポジトリの最終コミット日時を取得
    */
   public static async fetchLastCommitDate(owner: string, repo: string): Promise<Date | null> {
+    // E2Eテストモードの場合はモックデータを返す
+    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+      console.log(`🤖 [E2E Mock] コミット日時取得中: ${owner}/${repo} (モックデータを使用)`);
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // モックコミット日時を返す（現在時刻から数日前）
+      const mockCommitDate = new Date();
+      mockCommitDate.setDate(mockCommitDate.getDate() - 3); // 3日前
+      return mockCommitDate;
+    }
+
     try {
       const headers = this.createHeaders();
 
