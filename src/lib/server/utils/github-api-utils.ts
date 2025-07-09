@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { GITHUB_TOKEN } from '$env/static/private';
+import { ERROR_MESSAGES } from '$lib/constants/error-messages.js';
 import {
   GITHUB_SEARCH_SORT_OPTIONS,
   type GitHubSearchSortOption,
@@ -31,7 +32,11 @@ export class GitHubApiUtils {
     };
 
     // E2Eテストモードの場合はモック用ヘッダーを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+    // ユニットテストでは実際のAPIを呼び出すため、Playwrightによる実際のE2Eテストのみモックを適用
+    if (
+      (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') &&
+      process.env.VITEST !== 'true'
+    ) {
       headers['Authorization'] = 'token mock-github-token-for-e2e';
       return headers;
     }
@@ -51,9 +56,38 @@ export class GitHubApiUtils {
    */
   public static async fetchRepositoryInfo(owner: string, repo: string): Promise<GitHubRepository> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (
+      (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') &&
+      process.env.VITEST !== 'true'
+    ) {
       console.log(`🤖 [E2E Mock] リポジトリ情報取得中: ${owner}/${repo} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 50));
+
+      // 存在しないリポジトリのテストケース
+      if (owner === 'nonexistent-user-999999' && repo === 'nonexistent-repo-999999') {
+        throw new Error(ERROR_MESSAGES.REPOSITORY_NOT_FOUND);
+      }
+
+      // OAuth2ライブラリの特別なケース
+      if (owner === 'googleworkspace' && repo === 'apps-script-oauth2') {
+        return {
+          name: repo,
+          description: 'An OAuth2 library for Google Apps Script.',
+          html_url: `https://github.com/${owner}/${repo}`,
+          clone_url: `https://github.com/${owner}/${repo}.git`,
+          stargazers_count: 1500,
+          owner: {
+            login: owner,
+            html_url: `https://github.com/${owner}`,
+          },
+          license: {
+            name: 'Apache License 2.0',
+            url: 'https://www.apache.org/licenses/LICENSE-2.0',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+      }
 
       return {
         name: repo,
@@ -87,7 +121,10 @@ export class GitHubApiUtils {
    */
   public static async fetchReadme(owner: string, repo: string): Promise<string | undefined> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (
+      (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') &&
+      process.env.VITEST !== 'true'
+    ) {
       console.log(`🤖 [E2E Mock] README取得中: ${owner}/${repo} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -132,7 +169,10 @@ export class GitHubApiUtils {
     maxResults: number = 10
   ): Promise<TagSearchResult> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (
+      (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') &&
+      process.env.VITEST !== 'true'
+    ) {
       console.log(`🤖 [E2E Mock] タグ検索中: ${config.gasTags} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -525,9 +565,18 @@ export class GitHubApiUtils {
    */
   public static async fetchLastCommitDate(owner: string, repo: string): Promise<Date | null> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+    // ユニットテストでは実際のAPIを呼び出すため、Playwrightによる実際のE2Eテストのみモックを適用
+    if (
+      (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') &&
+      process.env.VITEST !== 'true'
+    ) {
       console.log(`🤖 [E2E Mock] コミット日時取得中: ${owner}/${repo} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 50));
+
+      // 存在しないリポジトリのテストケース
+      if (owner === 'nonexistent-user-999999' && repo === 'nonexistent-repo-999999') {
+        return null; // 存在しないリポジトリの場合はnullを返す
+      }
 
       // モックコミット日時を返す（現在時刻から数日前）
       const mockCommitDate = new Date();
