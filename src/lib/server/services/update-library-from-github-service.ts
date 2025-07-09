@@ -34,10 +34,12 @@ export class UpdateLibraryFromGithubService {
     const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
 
     if (!repoResponse.ok) {
+      const errorText = await repoResponse.text();
+      const errorInfo = `Status: ${repoResponse.status}, StatusText: ${repoResponse.statusText}, Response: ${errorText}`;
       if (repoResponse.status === 404) {
         throw new Error('指定されたGitHubリポジトリが見つかりません。');
       }
-      throw new Error('GitHubリポジトリの情報取得に失敗しました。');
+      throw new Error(`GitHubリポジトリの情報取得に失敗しました。${errorInfo}`);
     }
 
     const repoData = await repoResponse.json();
