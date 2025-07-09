@@ -31,7 +31,7 @@ export class GitHubApiUtils {
     };
 
     // E2Eテストモードの場合はモック用ヘッダーを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
       headers['Authorization'] = 'token mock-github-token-for-e2e';
       return headers;
     }
@@ -50,6 +50,30 @@ export class GitHubApiUtils {
    * GitHub APIからリポジトリ情報を取得
    */
   public static async fetchRepositoryInfo(owner: string, repo: string): Promise<GitHubRepository> {
+    // E2Eテストモードの場合はモックデータを返す
+    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+      console.log(`🤖 [E2E Mock] リポジトリ情報取得中: ${owner}/${repo} (モックデータを使用)`);
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      return {
+        name: repo,
+        description: `Mock description for ${repo}`,
+        html_url: `https://github.com/${owner}/${repo}`,
+        clone_url: `https://github.com/${owner}/${repo}.git`,
+        stargazers_count: 42,
+        owner: {
+          login: owner,
+          html_url: `https://github.com/${owner}`,
+        },
+        license: {
+          name: 'MIT License',
+          url: 'https://opensource.org/licenses/MIT',
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
     const headers = this.createHeaders();
     const response = await fetch(`${this.GITHUB_API_BASE}/repos/${owner}/${repo}`, { headers });
     if (!response.ok) {
@@ -63,7 +87,7 @@ export class GitHubApiUtils {
    */
   public static async fetchReadme(owner: string, repo: string): Promise<string | undefined> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
       console.log(`🤖 [E2E Mock] README取得中: ${owner}/${repo} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -107,6 +131,19 @@ export class GitHubApiUtils {
     config: ScraperConfig,
     maxResults: number = 10
   ): Promise<TagSearchResult> {
+    // E2Eテストモードの場合はモックデータを返す
+    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
+      console.log(`🤖 [E2E Mock] タグ検索中: ${config.gasTags} (モックデータを使用)`);
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      return {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+    }
+
     try {
       // gasTagsが空の場合はデフォルトタグを使用
       const tagsToUse =
@@ -488,7 +525,7 @@ export class GitHubApiUtils {
    */
   public static async fetchLastCommitDate(owner: string, repo: string): Promise<Date | null> {
     // E2Eテストモードの場合はモックデータを返す
-    if (env.PLAYWRIGHT_TEST_MODE === 'true') {
+    if (env.PLAYWRIGHT_TEST_MODE === 'true' || process.env.PLAYWRIGHT_TEST_MODE === 'true') {
       console.log(`🤖 [E2E Mock] コミット日時取得中: ${owner}/${repo} (モックデータを使用)`);
       await new Promise(resolve => setTimeout(resolve, 50));
 
