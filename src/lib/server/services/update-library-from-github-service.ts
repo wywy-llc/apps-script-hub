@@ -33,7 +33,8 @@ export class UpdateLibraryFromGithubService {
     const { owner, repo } = parsedUrl;
 
     // GitHub リポジトリ情報を取得
-    const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+    const headers = GitHubApiUtils.createHeaders();
+    const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
 
     if (!repoResponse.ok) {
       const errorText = await repoResponse.text();
