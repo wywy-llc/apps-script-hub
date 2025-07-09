@@ -8,41 +8,35 @@ vi.mock('../../../../../src/lib/server/db/index.js', () => ({
   },
 }));
 
-vi.mock('../../../../../src/lib/server/services/generate-library-summary-service.js', () => ({
-  GenerateLibrarySummaryService: {
-    call: vi.fn(),
+vi.mock('../../../../../src/lib/server/services/base/index.js', () => ({
+  BaseRepositoryService: {
+    findFirstOrThrow: vi.fn(),
   },
-}));
-
-vi.mock('../../../../../src/lib/server/services/save-library-summary-service.js', () => ({
-  SaveLibrarySummaryService: {
-    call: vi.fn(),
+  BaseGitHubOperations: {
+    parseGitHubUrl: vi.fn(),
+    fetchFullRepoData: vi.fn(),
+  },
+  BaseAiSummaryManager: {
     exists: vi.fn(),
-  },
-}));
-
-vi.mock('../../../../../src/lib/server/services/fetch-github-license-service.js', () => ({
-  FetchGithubLicenseService: {
-    call: vi.fn(),
+    generateForUpdate: vi.fn(),
+    generateManual: vi.fn(),
   },
 }));
 
 // importを後に配置
 import { db } from '../../../../../src/lib/server/db/index.js';
-import { FetchGithubLicenseService } from '../../../../../src/lib/server/services/fetch-github-license-service.js';
-import { GenerateLibrarySummaryService } from '../../../../../src/lib/server/services/generate-library-summary-service.js';
-import { SaveLibrarySummaryService } from '../../../../../src/lib/server/services/save-library-summary-service.js';
+import {
+  BaseAiSummaryManager,
+  BaseGitHubOperations,
+  BaseRepositoryService,
+} from '../../../../../src/lib/server/services/base/index.js';
 import { UpdateLibraryFromGithubService } from '../../../../../src/lib/server/services/update-library-from-github-service.js';
 
 // モックされたインスタンスを取得
 const mockDb = vi.mocked(db);
-const mockGenerateLibrarySummaryService = vi.mocked(GenerateLibrarySummaryService);
-const mockSaveLibrarySummaryService = vi.mocked(SaveLibrarySummaryService);
-const mockFetchGithubLicenseService = vi.mocked(FetchGithubLicenseService);
-
-// globalにfetchのモックを設定
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+const mockBaseRepositoryService = vi.mocked(BaseRepositoryService);
+const mockBaseGitHubOperations = vi.mocked(BaseGitHubOperations);
+const mockBaseAiSummaryManager = vi.mocked(BaseAiSummaryManager);
 
 describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
   const libraryId = 'test_lib_123';
@@ -57,17 +51,19 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
   };
 
   const mockRepoData = {
-    name: 'test-repo',
-    description: 'Test repository',
-    owner: { login: 'test-owner' },
-    html_url: 'https://github.com/test/repo',
-    stargazers_count: 10,
-    pushed_at: sameLastCommitAt.toISOString(),
-  };
-
-  const mockLicenseInfo = {
-    type: 'MIT',
-    url: 'https://opensource.org/licenses/MIT',
+    repoInfo: {
+      name: 'test-repo',
+      description: 'Test repository',
+      repositoryUrl: 'https://github.com/test/repo',
+      authorName: 'test-owner',
+      authorUrl: 'https://github.com/test-owner',
+      starCount: 10,
+    },
+    licenseInfo: {
+      type: 'MIT',
+      url: 'https://opensource.org/licenses/MIT',
+    },
+    lastCommitAt: sameLastCommitAt,
   };
 
   beforeEach(() => {
@@ -90,133 +86,70 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
     };
     mockDb.update.mockReturnValue(mockUpdateChain as unknown as ReturnType<typeof mockDb.update>);
 
-    mockFetchGithubLicenseService.call.mockResolvedValue(mockLicenseInfo);
-
-    // SaveLibrarySummaryService.existsのデフォルトモック（library_summaryが存在しない前提）
-    mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
+    // Base classのモック設定
+    mockBaseRepositoryService.findFirstOrThrow.mockResolvedValue(mockLibraryData);
+    mockBaseGitHubOperations.parseGitHubUrl.mockReturnValue({ owner: 'test', repo: 'repo' });
+    mockBaseGitHubOperations.fetchFullRepoData.mockResolvedValue(mockRepoData);
+    mockBaseAiSummaryManager.exists.mockResolvedValue(false);
+    mockBaseAiSummaryManager.generateForUpdate.mockResolvedValue(undefined);
   });
 
   test('lastCommitAtが同じ場合、AI要約生成をスキップする', async () => {
-    // pushed_atが既存のlastCommitAtと同じ
+    // lastCommitAtが既存のデータと同じ
     const repoDataForTest = {
       ...mockRepoData,
-      pushed_at: sameLastCommitAt.toISOString(),
-      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+      lastCommitAt: sameLastCommitAt,
     };
 
     // library_summaryが既に存在する場合をシミュレート
-    mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
-
-    // このテスト用のfetchモックを設定
-    const mockRepoResponse = {
-      ok: true,
-      json: () => Promise.resolve(repoDataForTest),
-    };
-    mockFetch.mockClear();
-    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
+    mockBaseAiSummaryManager.exists.mockResolvedValue(true);
+    mockBaseGitHubOperations.fetchFullRepoData.mockResolvedValue(repoDataForTest);
 
     await UpdateLibraryFromGithubService.call(libraryId);
 
     // AI要約生成サービスが呼び出されないことを確認
-    expect(mockGenerateLibrarySummaryService.call).not.toHaveBeenCalled();
-    expect(mockSaveLibrarySummaryService.call).not.toHaveBeenCalled();
+    expect(mockBaseAiSummaryManager.generateForUpdate).not.toHaveBeenCalled();
   });
 
   test('lastCommitAtが異なる場合、AI要約生成を実行する', async () => {
-    // pushed_atが既存のlastCommitAtと異なる
+    // lastCommitAtが既存のデータと異なる
     const repoDataForTest = {
       ...mockRepoData,
-      pushed_at: newLastCommitAt.toISOString(),
-      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+      lastCommitAt: newLastCommitAt,
     };
 
     // library_summaryが既に存在していてもlastCommitAtに変化がある場合は生成する
-    mockSaveLibrarySummaryService.exists.mockResolvedValue(true);
-
-    // このテスト用のfetchモックを設定
-    const mockRepoResponse = {
-      ok: true,
-      json: () => Promise.resolve(repoDataForTest),
-    };
-    mockFetch.mockClear();
-    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
-
-    const mockSummary = {
-      basicInfo: {
-        libraryName: { ja: 'テストライブラリ', en: 'Test Library' },
-        purpose: { ja: 'テスト用', en: 'For testing' },
-        targetUsers: { ja: 'テスト開発者', en: 'Test developers' },
-        tags: { ja: ['テスト'], en: ['test'] },
-      },
-      functionality: {
-        coreProblem: { ja: 'テストの複雑さ', en: 'Testing complexity' },
-        mainBenefits: [
-          {
-            title: { ja: 'シンプル', en: 'Simple' },
-            description: { ja: '簡単', en: 'Easy' },
-          },
-        ],
-      },
-    };
-
-    mockGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
-    mockSaveLibrarySummaryService.call.mockResolvedValue(undefined);
+    mockBaseAiSummaryManager.exists.mockResolvedValue(true);
+    mockBaseGitHubOperations.fetchFullRepoData.mockResolvedValue(repoDataForTest);
 
     await UpdateLibraryFromGithubService.call(libraryId);
 
     // AI要約生成サービスが呼び出されることを確認
-    expect(mockGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
-      githubUrl: repoDataForTest.html_url,
-    });
-    expect(mockSaveLibrarySummaryService.call).toHaveBeenCalledWith(libraryId, mockSummary);
+    expect(mockBaseAiSummaryManager.generateForUpdate).toHaveBeenCalledWith(
+      libraryId,
+      repoDataForTest.repoInfo.repositoryUrl,
+      'lastCommitAtが変更されたため'
+    );
   });
 
   test('library_summaryが存在しない場合、lastCommitAtに変化がなくてもAI要約生成を実行する', async () => {
-    // pushed_atが既存のlastCommitAtと同じ
+    // lastCommitAtが既存のデータと同じ
     const repoDataForTest = {
       ...mockRepoData,
-      pushed_at: sameLastCommitAt.toISOString(),
-      owner: { login: 'test-owner' }, // ownerオブジェクトを明示的に設定
+      lastCommitAt: sameLastCommitAt,
     };
 
     // library_summaryが存在しない場合をシミュレート
-    mockSaveLibrarySummaryService.exists.mockResolvedValue(false);
-
-    // このテスト用のfetchモックを設定
-    const mockRepoResponse = {
-      ok: true,
-      json: () => Promise.resolve(repoDataForTest),
-    };
-    mockFetch.mockClear();
-    mockFetch.mockResolvedValueOnce(mockRepoResponse as unknown as Response);
-
-    const mockSummary = {
-      basicInfo: {
-        libraryName: { ja: 'テストライブラリ', en: 'Test Library' },
-        purpose: { ja: 'テスト用', en: 'For testing' },
-        targetUsers: { ja: 'テスト開発者', en: 'Test developers' },
-        tags: { ja: ['テスト'], en: ['test'] },
-      },
-      functionality: {
-        coreProblem: { ja: 'テストの複雑さ', en: 'Testing complexity' },
-        mainBenefits: [
-          {
-            title: { ja: 'シンプル', en: 'Simple' },
-            description: { ja: '簡単', en: 'Easy' },
-          },
-        ],
-      },
-    };
-
-    mockGenerateLibrarySummaryService.call.mockResolvedValue(mockSummary);
-    mockSaveLibrarySummaryService.call.mockResolvedValue(undefined);
+    mockBaseAiSummaryManager.exists.mockResolvedValue(false);
+    mockBaseGitHubOperations.fetchFullRepoData.mockResolvedValue(repoDataForTest);
 
     await UpdateLibraryFromGithubService.call(libraryId);
 
     // AI要約生成サービスが呼び出されることを確認
-    expect(mockGenerateLibrarySummaryService.call).toHaveBeenCalledWith({
-      githubUrl: repoDataForTest.html_url,
-    });
-    expect(mockSaveLibrarySummaryService.call).toHaveBeenCalledWith(libraryId, mockSummary);
+    expect(mockBaseAiSummaryManager.generateForUpdate).toHaveBeenCalledWith(
+      libraryId,
+      repoDataForTest.repoInfo.repositoryUrl,
+      'library_summaryが存在しないため'
+    );
   });
 });

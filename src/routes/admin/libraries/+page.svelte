@@ -12,6 +12,7 @@
     LIBRARY_STATUS_TEXT,
     type LibraryStatus,
   } from '$lib/constants/library-status.js';
+  import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
   import type { ActionData, PageData } from './$types';
 
   // 管理者画面 - ライブラリ一覧ページ
@@ -38,6 +39,14 @@
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
+  let selectedTags = $state(resetSelectedTags()); // 初期値は全タグ選択
+
+  /**
+   * selectedTagsを初期値にリセット
+   */
+  function resetSelectedTags(): string[] {
+    return [...DEFAULT_SCRAPER_CONFIG.gasTags];
+  }
 
   async function handleStatusUpdate(libraryId: string, newStatus: LibraryStatus) {
     statusUpdateInProgress[libraryId] = true;
@@ -121,6 +130,7 @@
       endPage = PAGINATION.MIN_PAGE;
       perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
       sortOption = DEFAULT_GITHUB_SEARCH_SORT;
+      selectedTags = resetSelectedTags();
     }
   }
 
@@ -285,6 +295,7 @@
               endPage = PAGINATION.MIN_PAGE;
               perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
               sortOption = DEFAULT_GITHUB_SEARCH_SORT;
+              selectedTags = resetSelectedTags();
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();
@@ -350,6 +361,31 @@
             </div>
           </div>
 
+          <!-- GitHubタグ選択 -->
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <div class="mb-2 text-sm font-medium text-gray-700">検索対象タグ</div>
+              <div class="space-y-2">
+                {#each DEFAULT_SCRAPER_CONFIG.gasTags as tag (tag)}
+                  <label class="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="selectedTags"
+                      value={tag}
+                      bind:group={selectedTags}
+                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      disabled={bulkAddInProgress}
+                    />
+                    <span class="text-sm text-gray-700">{tag}</span>
+                  </label>
+                {/each}
+              </div>
+              <p class="mt-1 text-xs text-gray-500">
+                選択したタグを含むリポジトリを検索します。複数選択可能です。
+              </p>
+            </div>
+          </div>
+
           <!-- 並び順設定 -->
           <div class="grid grid-cols-1 gap-4">
             <div>
@@ -388,8 +424,8 @@
           <input type="hidden" name="maxResults" bind:value={maxResults} />
           <div class="mt-2 rounded-md bg-blue-50 p-3">
             <p class="text-xs text-blue-700">
-              <strong>📋 検索対象タグ:</strong> google-apps-script, apps-script, google-workspace, google-sheets,
-              clasp
+              <strong>📋 検索対象タグ:</strong>
+              {selectedTags.join(', ')}
             </p>
             <p class="mt-1 text-xs text-blue-600">
               <strong>🔍 処理内容:</strong> GitHubでタグ検索 → READMEからスクリプトID抽出 → 重複チェック
