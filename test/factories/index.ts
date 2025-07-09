@@ -40,11 +40,11 @@ export {
   GitHubRepositoryTestDataFactories,
   LibrarySaveCallbackTestDataFactories,
   SaveWithSummaryCallbackTestDataFactories,
-  ScrapeResultTestDataFactories,
   ScraperConfigTestDataFactories,
+  ScrapeResultTestDataFactories,
   type GitHubRepositoryTestData,
-  type ScrapeResultTestData,
   type ScraperConfigTestData,
+  type ScrapeResultTestData,
 } from './github-scraper-test-data.factory';
 
 /**

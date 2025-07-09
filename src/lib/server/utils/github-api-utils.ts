@@ -69,56 +69,11 @@ export class GitHubApiUtils {
 
       // 特定のテストケース用のモックREADME
       if (owner === 'googleworkspace' && repo === 'apps-script-oauth2') {
-        return `# Google Apps Script OAuth2 Library
-
-This library provides OAuth2 authentication for Google Apps Script.
-
-## Installation
-
-Add the library to your script:
-1. Go to Libraries in your Apps Script project
-2. Add the following script ID: 1B7FSrTXhS9L-WnAa8_ZdHiM-JWD4dBZ1KBFRkJx0L
-
-## Usage
-
-\`\`\`javascript
-function authenticate() {
-  const oauth = new OAuth2({
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret',
-    redirectUri: 'your-redirect-uri'
-  });
-  
-  const authUrl = oauth.getAuthorizationUrl();
-  console.log('Visit this URL:', authUrl);
-}
-\`\`\`
-
-## Features
-
-- Easy OAuth2 implementation
-- Secure token management
-- Automatic token refresh
-`;
+        return this.getOauth2LibraryMockReadme();
       }
 
       // デフォルトのモックREADME
-      return `# ${repo}
-
-Mock README for E2E testing.
-
-## Installation
-
-This is a mock library for testing purposes.
-
-## Usage
-
-\`\`\`javascript
-// Mock usage example
-const lib = new MockLibrary();
-lib.doSomething();
-\`\`\`
-`;
+      return this.getDefaultMockReadme(repo);
     }
 
     try {
@@ -565,5 +520,62 @@ lib.doSomething();
       console.error('コミット日時取得エラー:', error);
       return null;
     }
+  }
+
+  /**
+   * OAuth2ライブラリのモックREADMEを取得
+   */
+  private static getOauth2LibraryMockReadme(): string {
+    return `# Google Apps Script OAuth2 Library
+
+This library provides OAuth2 authentication for Google Apps Script.
+
+## Installation
+
+Add the library to your script:
+1. Go to Libraries in your Apps Script project
+2. Add the following script ID: 1B7FSrTXhS9L-WnAa8_ZdHiM-JWD4dBZ1KBFRkJx0L
+
+## Usage
+
+\`\`\`javascript
+function authenticate() {
+  const oauth = new OAuth2({
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'your-redirect-uri'
+  });
+  
+  const authUrl = oauth.getAuthorizationUrl();
+  console.log('Visit this URL:', authUrl);
+}
+\`\`\`
+
+## Features
+
+- Easy OAuth2 implementation
+- Secure token management
+- Automatic token refresh`;
+  }
+
+  /**
+   * デフォルトのモックREADMEを取得
+   */
+  private static getDefaultMockReadme(repo: string): string {
+    return `# ${repo}
+
+Mock README for E2E testing.
+
+## Installation
+
+This is a mock library for testing purposes.
+
+## Usage
+
+\`\`\`javascript
+// Mock usage example
+const lib = new MockLibrary();
+lib.doSomething();
+\`\`\``;
   }
 }
