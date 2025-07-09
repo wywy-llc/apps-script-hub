@@ -39,7 +39,14 @@
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
-  let selectedTags = $state([...DEFAULT_SCRAPER_CONFIG.gasTags]); // 初期値は全タグ選択
+  let selectedTags = $state(resetSelectedTags()); // 初期値は全タグ選択
+
+  /**
+   * selectedTagsを初期値にリセット
+   */
+  function resetSelectedTags(): string[] {
+    return [...DEFAULT_SCRAPER_CONFIG.gasTags];
+  }
 
   async function handleStatusUpdate(libraryId: string, newStatus: LibraryStatus) {
     statusUpdateInProgress[libraryId] = true;
@@ -123,7 +130,7 @@
       endPage = PAGINATION.MIN_PAGE;
       perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
       sortOption = DEFAULT_GITHUB_SEARCH_SORT;
-      selectedTags = [...DEFAULT_SCRAPER_CONFIG.gasTags]; // 初期値は全タグ選択
+      selectedTags = resetSelectedTags();
     }
   }
 
@@ -288,7 +295,7 @@
               endPage = PAGINATION.MIN_PAGE;
               perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
               sortOption = DEFAULT_GITHUB_SEARCH_SORT;
-              selectedTags = [...DEFAULT_SCRAPER_CONFIG.gasTags]; // 初期値は全タグ選択
+              selectedTags = resetSelectedTags();
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();
