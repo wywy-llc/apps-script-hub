@@ -44,6 +44,9 @@ export const library = pgTable('library', {
   status: text('status', { enum: ['pending', 'published'] })
     .notNull()
     .default('pending'),
+  // 申請者情報（ユーザー申請の場合のみ）
+  requesterId: text('requester_id').references(() => user.id),
+  requestNote: text('request_note'), // 申請時のメモ
   createdAt: timestamp('created_at', {
     withTimezone: true,
     mode: 'date',
