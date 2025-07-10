@@ -1,9 +1,9 @@
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
   // 認証チェック
@@ -30,8 +30,10 @@ export const actions: Actions = {
       return fail(400, { error: '全ての項目を入力してください。' });
     }
 
-    // GitHub URL形式の簡単なチェック
-    if (!repoUrl.match(/^[a-zA-Z0-9\-._]+\/[a-zA-Z0-9\-._]+$/)) {
+    // GitHub URL形式のチェック（GitHubの命名規則に準拠）
+    if (
+      !repoUrl.match(/^(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9\-._]+\/(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9\-._]+$/)
+    ) {
       return fail(400, { error: 'GitHub リポジトリURLの形式が正しくありません。' });
     }
 

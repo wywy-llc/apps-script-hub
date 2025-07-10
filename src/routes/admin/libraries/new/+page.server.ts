@@ -17,8 +17,9 @@ export const actions: Actions = {
       return fail(400, { message: ERROR_MESSAGES.REPOSITORY_URL_REQUIRED });
     }
 
-    // バリデーション
-    const githubRepoPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/;
+    // バリデーション（GitHubの命名規則に準拠）
+    const githubRepoPattern =
+      /^(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9\-._]+\/(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9\-._]+$/;
     if (!githubRepoPattern.test(repoUrl)) {
       return fail(400, {
         message: ERROR_MESSAGES.INVALID_REPOSITORY_URL,
