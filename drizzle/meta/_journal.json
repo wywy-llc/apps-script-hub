@@ -8,6 +8,13 @@
       "when": 1751803489224,
       "tag": "0000_white_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752162760685,
+      "tag": "0001_young_franklin_storm",
+      "breakpoints": true
     }
   ]
 }
