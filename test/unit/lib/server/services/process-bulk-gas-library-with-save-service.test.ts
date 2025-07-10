@@ -36,7 +36,7 @@ describe('ProcessBulkGASLibraryWithSaveService', () => {
   const mockConfig = ScraperConfigTestDataFactories.default.build();
   const testRepo1 = GitHubRepositoryTestDataFactories.default.build();
   const testRepo2 = GitHubRepositoryTestDataFactories.oauthLibrary.build();
-  const mockSaveCallback: LibrarySaveWithSummaryCallback = vi.fn();
+  const mockSaveCallback = vi.fn<LibrarySaveWithSummaryCallback>();
   const mockDuplicateChecker = vi.fn();
 
   beforeEach(() => {
