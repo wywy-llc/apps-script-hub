@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { BulkGASLibrarySearchService } from '../../../../../src/lib/server/services/bulk-gas-library-search-service.js';
+import { ProcessBulkGASLibraryService } from '../../../../../src/lib/server/services/process-bulk-gas-library-service.js';
 import { CheckLibraryCommitStatusService } from '../../../../../src/lib/server/services/check-library-commit-status-service.js';
-import { GASLibraryScraper } from '../../../../../src/lib/server/services/gas-library-scraper.js';
+import { CheckLibrarySummaryExistenceService } from '../../../../../src/lib/server/services/check-library-summary-existence-service.js';
+import { ScrapeGASLibraryService } from '../../../../../src/lib/server/services/scrape-gas-library-service.js';
 import { GenerateLibrarySummaryService } from '../../../../../src/lib/server/services/generate-library-summary-service.js';
 import { SaveLibrarySummaryService } from '../../../../../src/lib/server/services/save-library-summary-service.js';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
@@ -15,18 +16,20 @@ import {
 
 // モックの設定
 vi.mock('../../../../../src/lib/server/utils/github-api-utils.js');
-vi.mock('../../../../../src/lib/server/services/gas-library-scraper.js');
+vi.mock('../../../../../src/lib/server/services/scrape-gas-library-service.js');
 vi.mock('../../../../../src/lib/server/services/check-library-commit-status-service.js');
+vi.mock('../../../../../src/lib/server/services/check-library-summary-existence-service.js');
 vi.mock('../../../../../src/lib/server/services/generate-library-summary-service.js');
 vi.mock('../../../../../src/lib/server/services/save-library-summary-service.js');
 
 const mockedGitHubApiUtils = vi.mocked(GitHubApiUtils);
-const mockedGASLibraryScraper = vi.mocked(GASLibraryScraper);
+const mockedScrapeGASLibraryService = vi.mocked(ScrapeGASLibraryService);
 const mockedCheckLibraryCommitStatusService = vi.mocked(CheckLibraryCommitStatusService);
+const mockedCheckLibrarySummaryExistenceService = vi.mocked(CheckLibrarySummaryExistenceService);
 const mockedGenerateLibrarySummaryService = vi.mocked(GenerateLibrarySummaryService);
 const mockedSaveLibrarySummaryService = vi.mocked(SaveLibrarySummaryService);
 
-describe('BulkGASLibrarySearchService', () => {
+describe('ProcessBulkGASLibraryService', () => {
   const mockConfig = ScraperConfigTestDataFactories.default.build();
   const testRepo1 = GitHubRepositoryTestDataFactories.default.build();
   const testRepo2 = GitHubRepositoryTestDataFactories.oauthLibrary.build();
@@ -56,12 +59,12 @@ describe('BulkGASLibrarySearchService', () => {
       const mockScrapeResult1 = ScrapeResultTestDataFactories.success.build();
       const mockScrapeResult2 = ScrapeResultTestDataFactories.successWithOAuth.build();
 
-      mockedGASLibraryScraper.call
+      mockedScrapeGASLibraryService.call
         .mockResolvedValueOnce(mockScrapeResult1)
         .mockResolvedValueOnce(mockScrapeResult2);
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.call(2, undefined, mockConfig);
+      const promise = ProcessBulkGASLibraryService.call(2, undefined, mockConfig);
 
       // タイマーを進めてレート制限の待機時間をスキップ
       await vi.advanceTimersByTimeAsync(200);
@@ -70,9 +73,9 @@ describe('BulkGASLibrarySearchService', () => {
 
       // 検証
       expect(mockedGitHubApiUtils.searchRepositoriesByTags).toHaveBeenCalledWith(mockConfig, 2);
-      expect(mockedGASLibraryScraper.call).toHaveBeenCalledTimes(2);
-      expect(mockedGASLibraryScraper.call).toHaveBeenNthCalledWith(1, testRepo1.html_url);
-      expect(mockedGASLibraryScraper.call).toHaveBeenNthCalledWith(2, testRepo2.html_url);
+      expect(mockedScrapeGASLibraryService.call).toHaveBeenCalledTimes(2);
+      expect(mockedScrapeGASLibraryService.call).toHaveBeenNthCalledWith(1, testRepo1.html_url);
+      expect(mockedScrapeGASLibraryService.call).toHaveBeenNthCalledWith(2, testRepo2.html_url);
 
       expect(result.success).toBe(true);
       expect(result.results).toHaveLength(2);
@@ -94,13 +97,13 @@ describe('BulkGASLibrarySearchService', () => {
 
       // スクレイピング結果のモック（成功）
       const mockScrapeResult = ScrapeResultTestDataFactories.success.build();
-      mockedGASLibraryScraper.call.mockResolvedValue(mockScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(mockScrapeResult);
 
       // 重複チェック関数（重複と判定）
       const duplicateChecker = vi.fn().mockResolvedValue(true);
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.call(1, duplicateChecker, mockConfig);
+      const promise = ProcessBulkGASLibraryService.call(1, duplicateChecker, mockConfig);
       await vi.advanceTimersByTimeAsync(100);
       const result = await promise;
 
@@ -128,12 +131,12 @@ describe('BulkGASLibrarySearchService', () => {
       // スクレイピング結果のモック（1つ目は成功、2つ目はエラー）
       const mockScrapeResult = ScrapeResultTestDataFactories.success.build();
 
-      mockedGASLibraryScraper.call
+      mockedScrapeGASLibraryService.call
         .mockResolvedValueOnce(mockScrapeResult)
         .mockRejectedValueOnce(new Error('スクレイピングに失敗しました'));
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.call(2, undefined, mockConfig);
+      const promise = ProcessBulkGASLibraryService.call(2, undefined, mockConfig);
       await vi.advanceTimersByTimeAsync(200);
       const result = await promise;
 
@@ -158,7 +161,7 @@ describe('BulkGASLibrarySearchService', () => {
       mockedGitHubApiUtils.searchRepositoriesByTags.mockResolvedValue(mockSearchResult);
 
       // テスト実行
-      const result = await BulkGASLibrarySearchService.call(10, undefined, mockConfig);
+      const result = await ProcessBulkGASLibraryService.call(10, undefined, mockConfig);
 
       // 検証
       expect(result.success).toBe(false);
@@ -178,7 +181,7 @@ describe('BulkGASLibrarySearchService', () => {
       );
 
       // テスト実行
-      const result = await BulkGASLibrarySearchService.call(10, undefined, mockConfig);
+      const result = await ProcessBulkGASLibraryService.call(10, undefined, mockConfig);
 
       // 検証
       expect(result.success).toBe(false);
@@ -204,12 +207,12 @@ describe('BulkGASLibrarySearchService', () => {
       mockedGitHubApiUtils.searchRepositoriesByTags.mockResolvedValue(mockSearchResult);
 
       const mockScrapeResult = ScrapeResultTestDataFactories.success.build();
-      mockedGASLibraryScraper.call.mockResolvedValue(mockScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(mockScrapeResult);
 
       const verboseConfig = ScraperConfigTestDataFactories.verbose.build();
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.call(1, undefined, verboseConfig);
+      const promise = ProcessBulkGASLibraryService.call(1, undefined, verboseConfig);
       await vi.advanceTimersByTimeAsync(100);
       await promise;
 
@@ -229,7 +232,7 @@ describe('BulkGASLibrarySearchService', () => {
       mockedGitHubApiUtils.searchRepositoriesByTags.mockResolvedValue(mockSearchResult);
 
       // テスト実行（全パラメータデフォルト）
-      const result = await BulkGASLibrarySearchService.call();
+      const result = await ProcessBulkGASLibraryService.call();
 
       // 検証
       expect(mockedGitHubApiUtils.searchRepositoriesByTags).toHaveBeenCalledWith(
@@ -253,13 +256,13 @@ describe('BulkGASLibrarySearchService', () => {
       mockedGitHubApiUtils.searchRepositoriesByTags.mockResolvedValue(mockSearchResult);
 
       const mockScrapeResult = ScrapeResultTestDataFactories.success.build();
-      mockedGASLibraryScraper.call.mockResolvedValue(mockScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(mockScrapeResult);
 
       const configWithDelay = ScraperConfigTestDataFactories.default.build();
       configWithDelay.rateLimit.delayBetweenRequests = 500;
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.call(2, undefined, configWithDelay);
+      const promise = ProcessBulkGASLibraryService.call(2, undefined, configWithDelay);
 
       // 非同期処理とタイマーを全て進める
       await vi.runAllTimersAsync();
@@ -268,7 +271,7 @@ describe('BulkGASLibrarySearchService', () => {
 
       // 検証
       expect(result.successCount).toBe(2);
-      expect(mockedGASLibraryScraper.call).toHaveBeenCalledTimes(2);
+      expect(mockedScrapeGASLibraryService.call).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -282,7 +285,7 @@ describe('BulkGASLibrarySearchService', () => {
       mockedCheckLibraryCommitStatusService.call.mockClear();
       mockedGenerateLibrarySummaryService.call.mockClear();
       mockedSaveLibrarySummaryService.call.mockClear();
-      mockedSaveLibrarySummaryService.exists.mockClear();
+      mockedCheckLibrarySummaryExistenceService.call.mockClear();
     });
 
     test('lastCommitAtが2年前以上の場合はスキップされる', async () => {
@@ -302,13 +305,13 @@ describe('BulkGASLibrarySearchService', () => {
       // スクレイピング結果のモック（古いコミット日時）
       const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
       oldCommitScrapeResult.data!.lastCommitAt = threeYearsAgo;
-      mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(oldCommitScrapeResult);
 
       // 重複チェッカー（重複なし）
       mockDuplicateChecker.mockResolvedValue(false);
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+      const promise = ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
         1,
         1,
         10,
@@ -351,7 +354,7 @@ describe('BulkGASLibrarySearchService', () => {
       // スクレイピング結果のモック（最近のコミット日時）
       const recentCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
       recentCommitScrapeResult.data!.lastCommitAt = sixMonthsAgo;
-      mockedGASLibraryScraper.call.mockResolvedValue(recentCommitScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(recentCommitScrapeResult);
 
       // 重複チェッカー（重複なし）
       mockDuplicateChecker.mockResolvedValue(false);
@@ -370,7 +373,7 @@ describe('BulkGASLibrarySearchService', () => {
       mockedSaveLibrarySummaryService.call.mockResolvedValue(undefined);
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+      const promise = ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
         1,
         1,
         10,
@@ -423,7 +426,7 @@ describe('BulkGASLibrarySearchService', () => {
       // スクレイピング結果のモック（古いコミット日時）
       const oldCommitScrapeResult = ScrapeResultTestDataFactories.success.build();
       oldCommitScrapeResult.data!.lastCommitAt = threeYearsAgo;
-      mockedGASLibraryScraper.call.mockResolvedValue(oldCommitScrapeResult);
+      mockedScrapeGASLibraryService.call.mockResolvedValue(oldCommitScrapeResult);
 
       // 重複チェッカー（重複なし）
       mockDuplicateChecker.mockResolvedValue(false);
@@ -431,7 +434,7 @@ describe('BulkGASLibrarySearchService', () => {
       const verboseConfig = ScraperConfigTestDataFactories.verbose.build();
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+      const promise = ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
         1,
         1,
         10,
@@ -476,7 +479,7 @@ describe('BulkGASLibrarySearchService', () => {
       const recentCommitScrapeResult = ScrapeResultTestDataFactories.successWithOAuth.build();
       recentCommitScrapeResult.data!.lastCommitAt = sixMonthsAgo; // 新しいコミット
 
-      mockedGASLibraryScraper.call
+      mockedScrapeGASLibraryService.call
         .mockResolvedValueOnce(oldCommitScrapeResult)
         .mockResolvedValueOnce(recentCommitScrapeResult);
 
@@ -497,7 +500,7 @@ describe('BulkGASLibrarySearchService', () => {
       mockedSaveLibrarySummaryService.call.mockResolvedValue(undefined);
 
       // テスト実行
-      const promise = BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+      const promise = ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
         1,
         1,
         10,

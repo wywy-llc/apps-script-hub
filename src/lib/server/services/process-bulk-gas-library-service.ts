@@ -9,7 +9,8 @@ import type {
   ScraperConfig,
 } from '$lib/types/github-scraper.js';
 import { CheckLibraryCommitStatusService } from './check-library-commit-status-service.js';
-import { GASLibraryScraper } from './gas-library-scraper.js';
+import { CheckLibrarySummaryExistenceService } from './check-library-summary-existence-service.js';
+import { ScrapeGASLibraryService } from './scrape-gas-library-service.js';
 import { GenerateLibrarySummaryService } from './generate-library-summary-service.js';
 import { SaveLibrarySummaryService } from './save-library-summary-service.js';
 
@@ -29,13 +30,13 @@ export type LibrarySaveWithSummaryCallback = (
 ) => Promise<{ success: boolean; id?: string; error?: string }>;
 
 /**
- * GASライブラリ一括検索サービス
+ * GASライブラリ一括処理サービス
  * GitHubタグによる検索機能とライブラリの一括スクレイピングを提供
  *
  * 使用例:
- * const result = await BulkGASLibrarySearchService.call(10, duplicateChecker);
+ * const result = await ProcessBulkGASLibraryService.call(10, duplicateChecker);
  */
-export class BulkGASLibrarySearchService {
+export class ProcessBulkGASLibraryService {
   /**
    * GASタグでリポジトリを検索し、一括でスクレイピング
    *
@@ -81,7 +82,7 @@ export class BulkGASLibrarySearchService {
       // 各リポジトリを逐次処理
       for (const repo of searchResult.repositories) {
         try {
-          const result = await GASLibraryScraper.call(repo.html_url);
+          const result = await ScrapeGASLibraryService.call(repo.html_url);
 
           // 重複チェック
           if (result.success && result.data && duplicateChecker) {
@@ -198,7 +199,7 @@ export class BulkGASLibrarySearchService {
       // 各リポジトリを逐次処理
       for (const repo of searchResult.repositories) {
         try {
-          const result = await GASLibraryScraper.call(repo.html_url);
+          const result = await ScrapeGASLibraryService.call(repo.html_url);
 
           // 重複チェック
           if (result.success && result.data && duplicateChecker) {
@@ -340,7 +341,7 @@ export class BulkGASLibrarySearchService {
           for (const repo of searchResult.repositories) {
             try {
               // スクレイピング実行
-              const scrapeResult = await GASLibraryScraper.call(repo.html_url);
+              const scrapeResult = await ScrapeGASLibraryService.call(repo.html_url);
 
               if (!scrapeResult.success || !scrapeResult.data) {
                 pageResults.push(scrapeResult);
@@ -538,7 +539,7 @@ export class BulkGASLibrarySearchService {
           for (const repo of searchResult.repositories) {
             try {
               // スクレイピング実行
-              const scrapeResult = await GASLibraryScraper.call(repo.html_url);
+              const scrapeResult = await ScrapeGASLibraryService.call(repo.html_url);
 
               if (!scrapeResult.success || !scrapeResult.data) {
                 pageResults.push(scrapeResult);
@@ -587,7 +588,9 @@ export class BulkGASLibrarySearchService {
                   let summaryExists = false;
                   if (commitStatus.libraryId) {
                     // 既存ライブラリの場合、library_summaryの存在をチェック
-                    summaryExists = await SaveLibrarySummaryService.exists(commitStatus.libraryId);
+                    summaryExists = await CheckLibrarySummaryExistenceService.call(
+                      commitStatus.libraryId
+                    );
                   }
 
                   // 新規ライブラリ、lastCommitAtに変化、またはlibrary_summaryが存在しない場合

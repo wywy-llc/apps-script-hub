@@ -7,9 +7,9 @@ import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config';
 import { db } from '$lib/server/db';
 import { library, librarySummary } from '$lib/server/db/schema';
 import {
-  BulkGASLibrarySearchService,
+  ProcessBulkGASLibraryService,
   type LibrarySaveCallback,
-} from '$lib/server/services/bulk-gas-library-search-service.js';
+} from '$lib/server/services/process-bulk-gas-library-service.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -160,7 +160,7 @@ export const actions: Actions = {
       };
 
       // GASタグによる一括スクレイピング実行（ページごとにDB保存 + AI要約生成）
-      const result = await BulkGASLibrarySearchService.callWithPageRangeAndSaveWithSummary(
+      const result = await ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
         startPage,
         endPage,
         perPage,
