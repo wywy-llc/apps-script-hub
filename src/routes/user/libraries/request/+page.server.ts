@@ -78,6 +78,8 @@ export const actions: Actions = {
         licenseType: 'unknown',
         licenseUrl: '',
         lastCommitAt: new Date(),
+        requesterId: locals.user.id, // 申請者のユーザーID
+        requestNote: `ユーザー申請: ${scriptId} (${fullRepoUrl})`, // 申請メモ
         createdAt: new Date(),
         updatedAt: new Date(),
       });

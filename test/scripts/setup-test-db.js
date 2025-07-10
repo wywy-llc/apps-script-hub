@@ -69,7 +69,11 @@ async function setupTestDatabase() {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "user" (
         "id" text PRIMARY KEY NOT NULL,
-        "age" integer
+        "email" text NOT NULL UNIQUE,
+        "name" text NOT NULL,
+        "picture" text,
+        "google_id" text NOT NULL UNIQUE,
+        "created_at" timestamp with time zone DEFAULT now() NOT NULL
       );
     `);
 
@@ -97,8 +101,11 @@ async function setupTestDatabase() {
         "license_url" text NOT NULL,
         "last_commit_at" timestamp with time zone NOT NULL,
         "status" text DEFAULT 'pending' NOT NULL CHECK ("status" IN ('pending', 'published')),
+        "requester_id" text,
+        "request_note" text,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-        "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+        "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+        FOREIGN KEY ("requester_id") REFERENCES "user"("id")
       );
     `);
 

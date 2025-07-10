@@ -5,7 +5,7 @@ import {
 } from '$lib/constants/github-search';
 import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config';
 import { db } from '$lib/server/db';
-import { library, librarySummary } from '$lib/server/db/schema';
+import { library, librarySummary, user } from '$lib/server/db/schema';
 import {
   ProcessBulkGASLibraryWithSaveService,
   type LibrarySaveWithSummaryCallback,
@@ -15,7 +15,7 @@ import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async () => {
-  // ライブラリ一覧をデータベースから取得
+  // ライブラリ一覧をデータベースから取得（申請者情報も含む）
   const libraries = await db
     .select({
       id: library.id,
@@ -28,8 +28,13 @@ export const load = (async () => {
       starCount: library.starCount,
       description: library.description,
       lastCommitAt: library.lastCommitAt,
+      requesterId: library.requesterId,
+      requestNote: library.requestNote,
+      requesterName: user.name,
+      requesterEmail: user.email,
     })
     .from(library)
+    .leftJoin(user, eq(library.requesterId, user.id))
     .orderBy(desc(library.updatedAt));
 
   return {
@@ -142,6 +147,8 @@ export const actions: Actions = {
               copyCount: 0,
               lastCommitAt: libraryData.lastCommitAt,
               status: 'pending',
+              requesterId: undefined,
+              requestNote: undefined,
               createdAt: new Date(),
               updatedAt: new Date(),
             })

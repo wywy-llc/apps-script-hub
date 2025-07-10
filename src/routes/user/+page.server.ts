@@ -23,6 +23,8 @@ export const load: PageServerLoad = async ({ locals }) => {
       copyCount: library.copyCount,
       lastCommitAt: library.lastCommitAt,
       status: library.status,
+      requesterId: library.requesterId,
+      requestNote: library.requestNote,
       createdAt: library.createdAt,
       updatedAt: library.updatedAt,
       summary: {
@@ -70,6 +72,8 @@ export const load: PageServerLoad = async ({ locals }) => {
     copyCount: row.copyCount,
     lastCommitAt: row.lastCommitAt,
     status: row.status,
+    requesterId: row.requesterId,
+    requestNote: row.requestNote,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     librarySummary: row.summary?.id ? row.summary : null,
