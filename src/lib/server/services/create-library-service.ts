@@ -1,13 +1,12 @@
 import { ERROR_MESSAGES } from '$lib/constants/error-messages.js';
-import { db, testConnection } from '$lib/server/db/index.js';
-import { library } from '$lib/server/db/schema.js';
+import { testConnection } from '$lib/server/db/index.js';
+import { LibraryRepository } from '$lib/server/repositories/library-repository.js';
+import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import { ServiceErrorUtil } from '$lib/server/utils/service-error-util.js';
 import { nanoid } from 'nanoid';
-import {
-  BaseAiSummaryManager,
-  BaseGitHubOperations,
-  BaseRepositoryService,
-  BaseServiceErrorHandler,
-} from './base/index.js';
+import { FetchGitHubRepoDataService } from './fetch-github-repo-data-service.js';
+import { GenerateAiSummaryService } from './generate-ai-summary-service.js';
+import { ValidateLibraryUniquenessService } from './validate-library-uniqueness-service.js';
 
 /**
  * ライブラリを新規作成するサービス
@@ -20,35 +19,33 @@ export class CreateLibraryService {
    * @returns 作成されたライブラリのID
    */
   static async call(params: { scriptId: string; repoUrl: string }): Promise<string> {
-    const repositoryUrl = BaseGitHubOperations.normalizeGitHubUrl(params.repoUrl);
-    const { owner, repo } = BaseGitHubOperations.parseGitHubUrl(repositoryUrl);
+    // GitHub URLを正規化
+    const repositoryUrl = params.repoUrl.startsWith('https://github.com/')
+      ? params.repoUrl
+      : `https://github.com/${params.repoUrl}`;
+
+    // GitHub URLを解析
+    const parsedUrl = GitHubApiUtils.parseGitHubUrl(repositoryUrl);
+    ServiceErrorUtil.assertCondition(
+      !!parsedUrl,
+      'GitHub リポジトリURLが正しくありません',
+      'CreateLibraryService.call'
+    );
+    const { owner, repo } = parsedUrl!;
 
     // データベース接続テスト
     const isConnected = await testConnection();
-    BaseServiceErrorHandler.assertCondition(
+    ServiceErrorUtil.assertCondition(
       isConnected,
       ERROR_MESSAGES.DATABASE_CONNECTION_FAILED,
       'CreateLibraryService.call'
     );
 
     // 重複チェック
-    await BaseRepositoryService.ensureMultipleUnique([
-      {
-        table: library,
-        column: library.scriptId,
-        value: params.scriptId,
-        duplicateMessage: ERROR_MESSAGES.SCRIPT_ID_ALREADY_REGISTERED,
-      },
-      {
-        table: library,
-        column: library.repositoryUrl,
-        value: repositoryUrl,
-        duplicateMessage: ERROR_MESSAGES.REPOSITORY_ALREADY_REGISTERED,
-      },
-    ]);
+    await ValidateLibraryUniquenessService.call(params.scriptId, repositoryUrl);
 
     // GitHub から情報を取得
-    const { repoInfo, licenseInfo, lastCommitAt } = await BaseGitHubOperations.fetchFullRepoData(
+    const { repoInfo, licenseInfo, lastCommitAt } = await FetchGitHubRepoDataService.call(
       owner,
       repo
     );
@@ -57,7 +54,7 @@ export class CreateLibraryService {
     const libraryId = nanoid();
 
     // データベースに保存
-    await db.insert(library).values({
+    const createdLibrary = await LibraryRepository.create({
       id: libraryId,
       name: repoInfo.name,
       scriptId: params.scriptId,
@@ -74,19 +71,20 @@ export class CreateLibraryService {
     });
 
     console.log('📚 ライブラリ作成完了:', {
-      id: libraryId,
-      name: repoInfo.name,
-      author: repoInfo.authorName,
-      description: repoInfo.description,
-      starCount: repoInfo.starCount,
+      id: createdLibrary.id,
+      name: createdLibrary.name,
+      author: createdLibrary.authorName,
+      description: createdLibrary.description,
+      starCount: createdLibrary.starCount,
     });
 
     // 新規ライブラリにAIによる要約を生成してDBに保存
-    try {
-      await BaseAiSummaryManager.generateForNewLibrary(libraryId, repositoryUrl);
-    } catch (error) {
-      console.error('AI要約生成でエラーが発生しましたが、ライブラリ作成は続行します:', error);
-    }
+    await GenerateAiSummaryService.call({
+      libraryId,
+      githubUrl: repositoryUrl,
+      skipOnError: true,
+      logContext: '新規ライブラリのAI要約を生成',
+    });
 
     return libraryId;
   }
