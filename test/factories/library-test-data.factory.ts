@@ -50,6 +50,8 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     licenseUrl: 'https://github.com/googleworkspace/apps-script-oauth2/blob/main/LICENSE',
     lastCommitAt: new Date('2024-01-15T10:30:00Z'),
     status: LIBRARY_STATUS.PENDING,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
   alternative: () => ({
     name: 'sample-library',
@@ -64,6 +66,8 @@ export const LibraryTestDataFactories = createPresetFactories<LibraryTestData>({
     licenseUrl: 'https://github.com/example/sample-library/blob/main/LICENSE',
     lastCommitAt: new Date('2024-02-20T14:45:00Z'),
     status: LIBRARY_STATUS.PENDING,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
 });
 
@@ -85,6 +89,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     licenseUrl: 'https://github.com/gas-developer/GasLogger/blob/main/LICENSE',
     lastCommitAt: new Date('2024-03-10T09:15:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
   pending: () => ({
     name: 'PendingLibrary',
@@ -99,6 +105,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     licenseUrl: 'https://github.com/test-user/PendingLibrary/blob/main/LICENSE',
     lastCommitAt: new Date('2024-04-05T16:20:00Z'),
     status: LIBRARY_STATUS.PENDING,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
   gasDateFormatter: () => ({
     name: 'GasDateFormatter',
@@ -113,6 +121,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     licenseUrl: 'https://github.com/date-wizard/GasDateFormatter/blob/main/LICENSE',
     lastCommitAt: new Date('2024-05-12T11:30:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
   gasCalendarSync: () => ({
     name: 'GasCalendarSync',
@@ -127,6 +137,8 @@ export const LibraryStatusTestDataFactories = createPresetFactories<LibraryTestD
     licenseUrl: 'https://github.com/sync-expert/GasCalendarSync/blob/main/LICENSE',
     lastCommitAt: new Date('2024-06-08T13:45:00Z'),
     status: LIBRARY_STATUS.PUBLISHED,
+    requesterId: undefined,
+    requestNote: undefined,
   }),
 });
 
@@ -152,6 +164,8 @@ export const DatabaseLibraryDataFactory = createDatabaseFactory<DatabaseLibraryD
       licenseUrl: `https://github.com/googleworkspace/apps-script-oauth2-${timestamp}/blob/main/LICENSE`,
       lastCommitAt: new Date('2024-01-15T10:30:00Z'),
       status: LIBRARY_STATUS.PENDING,
+      requesterId: undefined,
+      requestNote: undefined,
     };
   },
   async (db, libraryData) => {

@@ -538,6 +538,12 @@
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
             >
+              申請者
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+            >
               ステータス
             </th>
             <th
@@ -588,6 +594,23 @@
                   {library.authorName}
                 </a>
               </td>
+              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
+                {#if library.requesterName}
+                  <div class="text-sm">
+                    <div class="font-medium text-gray-900">{library.requesterName}</div>
+                    <div class="text-gray-500">{library.requesterEmail}</div>
+                    {#if library.requestNote}
+                      <div class="mt-1 text-xs text-gray-400" title={library.requestNote}>
+                        {library.requestNote.length > 30
+                          ? library.requestNote.substring(0, 30) + '...'
+                          : library.requestNote}
+                      </div>
+                    {/if}
+                  </div>
+                {:else}
+                  <span class="text-sm text-gray-400">管理者追加</span>
+                {/if}
+              </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class={LIBRARY_STATUS_BADGE_CLASS[library.status]}>
                   {LIBRARY_STATUS_TEXT[library.status]}
@@ -598,6 +621,12 @@
               </td>
               <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
+                  <a
+                    href="/admin/libraries/{library.id}/edit"
+                    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                  >
+                    編集
+                  </a>
                   <StatusUpdateButtons
                     {library}
                     isStatusUpdateInProgress={statusUpdateInProgress[library.id] || false}

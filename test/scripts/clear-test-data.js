@@ -29,10 +29,10 @@ async function clearTestData() {
     await client.connect();
     const db = drizzle(client);
 
-    // library_summaryテーブルのデータをクリア（外部キー制約があるため先に削除）
+    // 外部キー制約を考慮した削除順序で全テーブルのデータをクリア
     await db.execute(sql`DELETE FROM "library_summary"`);
-    // libraryテーブルのデータをクリア
     await db.execute(sql`DELETE FROM "library"`);
+    await db.execute(sql`DELETE FROM "user"`);
   } catch (error) {
     console.error('❌ データクリアエラー:', error);
     throw error;

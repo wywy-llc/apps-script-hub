@@ -68,6 +68,8 @@ export class CreateLibraryService {
       licenseUrl: licenseInfo.url,
       lastCommitAt: lastCommitAt,
       status: 'pending',
+      requesterId: undefined,
+      requestNote: undefined,
     });
 
     console.log('📚 ライブラリ作成完了:', {

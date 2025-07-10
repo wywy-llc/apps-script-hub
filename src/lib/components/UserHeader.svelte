@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app_title } from '$lib/paraglide/messages.js';
+  import { app_title, gas_library_add } from '$lib/paraglide/messages.js';
   import LanguageSwitcher from './LanguageSwitcher.svelte';
   import UserDropdown from './UserDropdown.svelte';
 
@@ -23,6 +23,13 @@
 
       <!-- 右側のアクション -->
       <div class="flex items-center space-x-4">
+        <!-- ライブラリ申請リンク -->
+        <a
+          href="/user/libraries/request"
+          class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+        >
+          {gas_library_add()}
+        </a>
         <LanguageSwitcher />
         <UserDropdown {user} {showAdminLink} />
       </div>
