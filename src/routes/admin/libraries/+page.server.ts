@@ -7,9 +7,9 @@ import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config';
 import { db } from '$lib/server/db';
 import { library, librarySummary } from '$lib/server/db/schema';
 import {
-  ProcessBulkGASLibraryService,
-  type LibrarySaveCallback,
-} from '$lib/server/services/process-bulk-gas-library-service.js';
+  ProcessBulkGASLibraryWithSaveService,
+  type LibrarySaveWithSummaryCallback,
+} from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -120,7 +120,11 @@ export const actions: Actions = {
       };
 
       // ライブラリ保存コールバック関数（ページごとにDB保存）
-      const saveCallback: LibrarySaveCallback = async libraryData => {
+      const saveCallback: LibrarySaveWithSummaryCallback = async (
+        libraryData,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _generateSummary
+      ) => {
         try {
           const [inserted] = await db
             .insert(library)
@@ -160,7 +164,7 @@ export const actions: Actions = {
       };
 
       // GASタグによる一括スクレイピング実行（ページごとにDB保存 + AI要約生成）
-      const result = await ProcessBulkGASLibraryService.callWithPageRangeAndSaveWithSummary(
+      const result = await ProcessBulkGASLibraryWithSaveService.call(
         startPage,
         endPage,
         perPage,
