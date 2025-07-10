@@ -1,24 +1,71 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { ERROR_MESSAGES } from '../../../../../src/lib/constants/error-messages.js';
-import { db, testConnection } from '../../../../../src/lib/server/db/index.js';
-import {
-  BaseAiSummaryManager,
-  BaseGitHubOperations,
-  BaseRepositoryService,
-  BaseServiceErrorHandler,
-} from '../../../../../src/lib/server/services/base/index.js';
-import { CreateLibraryService } from '../../../../../src/lib/server/services/create-library-service.js';
 
 // モックを設定
-vi.mock('../../../../../src/lib/server/db/index.js');
-vi.mock('../../../../../src/lib/server/services/base/index.js');
+vi.mock('../../../../../src/lib/server/db/index.js', () => ({
+  db: vi.fn(),
+  testConnection: vi.fn(),
+}));
 
-const mockDb = vi.mocked(db);
+vi.mock('../../../../../src/lib/server/repositories/library-repository.js', () => ({
+  LibraryRepository: {
+    create: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../../src/lib/server/services/fetch-github-repo-data-service.js', () => ({
+  FetchGitHubRepoDataService: {
+    call: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../../src/lib/server/services/validate-library-uniqueness-service.js', () => ({
+  ValidateLibraryUniquenessService: {
+    call: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../../src/lib/server/services/generate-ai-summary-service.js', () => ({
+  GenerateAiSummaryService: {
+    call: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../../src/lib/server/utils/github-api-utils.js', () => ({
+  GitHubApiUtils: {
+    parseGitHubUrl: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../../src/lib/server/utils/service-error-util.js', () => ({
+  ServiceErrorUtil: {
+    assertCondition: vi.fn(),
+  },
+}));
+
+vi.mock('nanoid', () => ({
+  nanoid: vi.fn(),
+}));
+
+// Imports after mocks
+import { nanoid } from 'nanoid';
+import { testConnection } from '../../../../../src/lib/server/db/index.js';
+import { LibraryRepository } from '../../../../../src/lib/server/repositories/library-repository.js';
+import { CreateLibraryService } from '../../../../../src/lib/server/services/create-library-service.js';
+import { FetchGitHubRepoDataService } from '../../../../../src/lib/server/services/fetch-github-repo-data-service.js';
+import { GenerateAiSummaryService } from '../../../../../src/lib/server/services/generate-ai-summary-service.js';
+import { ValidateLibraryUniquenessService } from '../../../../../src/lib/server/services/validate-library-uniqueness-service.js';
+import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
+import { ServiceErrorUtil } from '../../../../../src/lib/server/utils/service-error-util.js';
+
 const mockTestConnection = vi.mocked(testConnection);
-const mockBaseRepositoryService = vi.mocked(BaseRepositoryService);
-const mockBaseGitHubOperations = vi.mocked(BaseGitHubOperations);
-const mockBaseAiSummaryManager = vi.mocked(BaseAiSummaryManager);
-const mockBaseServiceErrorHandler = vi.mocked(BaseServiceErrorHandler);
+const mockLibraryRepository = vi.mocked(LibraryRepository);
+const mockFetchGitHubRepoDataService = vi.mocked(FetchGitHubRepoDataService);
+const mockValidateLibraryUniquenessService = vi.mocked(ValidateLibraryUniquenessService);
+const mockGenerateAiSummaryService = vi.mocked(GenerateAiSummaryService);
+const mockGitHubApiUtils = vi.mocked(GitHubApiUtils);
+const mockServiceErrorUtil = vi.mocked(ServiceErrorUtil);
+const mockNanoid = vi.mocked(nanoid);
 
 describe('CreateLibraryService', () => {
   const mockParams = {
@@ -42,40 +89,40 @@ describe('CreateLibraryService', () => {
     lastCommitAt: new Date('2024-01-01T00:00:00Z'),
   };
 
+  const mockCreatedLibrary = {
+    id: 'mock-library-id',
+    name: 'Test Library',
+    scriptId: 'TEST_SCRIPT_ID',
+    repositoryUrl: 'https://github.com/owner/repo',
+    authorUrl: 'https://github.com/owner',
+    authorName: 'owner',
+    description: 'Test description',
+    starCount: 100,
+    copyCount: 0,
+    licenseType: 'MIT',
+    licenseUrl: 'https://example.com/license',
+    lastCommitAt: new Date('2024-01-01T00:00:00Z'),
+    status: 'pending',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
 
     // デフォルトのモック設定
     mockTestConnection.mockResolvedValue(true);
-    mockBaseGitHubOperations.normalizeGitHubUrl.mockReturnValue('https://github.com/owner/repo');
-    mockBaseGitHubOperations.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
-    mockBaseGitHubOperations.fetchFullRepoData.mockResolvedValue(mockRepoData);
-    mockBaseRepositoryService.ensureMultipleUnique.mockResolvedValue(undefined);
-    mockBaseAiSummaryManager.generateForNewLibrary.mockResolvedValue(undefined);
-    mockBaseServiceErrorHandler.assertCondition.mockImplementation((condition, message) => {
+    mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'owner', repo: 'repo' });
+    mockFetchGitHubRepoDataService.call.mockResolvedValue(mockRepoData);
+    mockValidateLibraryUniquenessService.call.mockResolvedValue(undefined);
+    mockGenerateAiSummaryService.call.mockResolvedValue(undefined);
+    mockLibraryRepository.create.mockResolvedValue(mockCreatedLibrary);
+    mockNanoid.mockReturnValue('mock-library-id');
+    mockServiceErrorUtil.assertCondition.mockImplementation((condition, message) => {
       if (!condition) {
         throw new Error(message);
       }
     });
-
-    // データベースモックの設定
-    const mockSelect = vi.fn();
-    const mockFrom = vi.fn();
-    const mockWhere = vi.fn();
-    const mockLimit = vi.fn();
-    const mockInsert = vi.fn();
-    const mockValues = vi.fn();
-
-    mockSelect.mockReturnValue({ from: mockFrom });
-    mockFrom.mockReturnValue({ where: mockWhere });
-    mockWhere.mockReturnValue({ limit: mockLimit });
-    mockLimit.mockResolvedValue([]); // 重複なしの場合
-
-    mockInsert.mockReturnValue({ values: mockValues });
-    mockValues.mockResolvedValue(undefined);
-
-    mockDb.select = mockSelect;
-    mockDb.insert = mockInsert;
   });
 
   afterEach(() => {
@@ -88,55 +135,75 @@ describe('CreateLibraryService', () => {
 
     // 基本的なライブラリ作成が正常に実行されたことを確認
     expect(mockTestConnection).toHaveBeenCalledOnce();
-    expect(mockBaseGitHubOperations.normalizeGitHubUrl).toHaveBeenCalledWith('owner/repo');
-    expect(mockBaseGitHubOperations.parseGitHubUrl).toHaveBeenCalledWith(
+    expect(mockGitHubApiUtils.parseGitHubUrl).toHaveBeenCalledWith('https://github.com/owner/repo');
+    expect(mockFetchGitHubRepoDataService.call).toHaveBeenCalledWith('owner', 'repo');
+    expect(mockValidateLibraryUniquenessService.call).toHaveBeenCalledWith(
+      'TEST_SCRIPT_ID',
       'https://github.com/owner/repo'
     );
-    expect(mockBaseGitHubOperations.fetchFullRepoData).toHaveBeenCalledWith('owner', 'repo');
-    expect(mockBaseRepositoryService.ensureMultipleUnique).toHaveBeenCalledWith(expect.any(Array));
 
     // AI要約生成が呼び出されたことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).toHaveBeenCalledWith(
-      expect.any(String),
-      'https://github.com/owner/repo'
-    );
+    expect(mockGenerateAiSummaryService.call).toHaveBeenCalledWith({
+      libraryId: 'mock-library-id',
+      githubUrl: 'https://github.com/owner/repo',
+      skipOnError: true,
+      logContext: '新規ライブラリのAI要約を生成',
+    });
 
     // 結果の検証
-    expect(result).toEqual(expect.any(String));
+    expect(result).toBe('mock-library-id');
   });
 
   test('AI要約生成でエラーが発生してもライブラリ作成は続行される', async () => {
-    // AI要約生成でエラーを発生させる
-    mockBaseAiSummaryManager.generateForNewLibrary.mockRejectedValue(new Error('AI要約生成エラー'));
+    // AI要約生成でエラーを発生させる（但し、skipOnError: trueのため例外は投げられない）
+    mockGenerateAiSummaryService.call.mockImplementation(async params => {
+      if (params.skipOnError) {
+        // skipOnError: trueの場合は例外を投げない
+        console.warn('AI要約生成エラー（スキップ）');
+        return;
+      }
+      throw new Error('AI要約生成エラー');
+    });
 
     // ライブラリ作成を実行
     const result = await CreateLibraryService.call(mockParams);
 
     // ライブラリ作成は成功することを確認
-    expect(result).toEqual(expect.any(String));
+    expect(result).toBe('mock-library-id');
 
     // AI要約生成が試行されたことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).toHaveBeenCalledWith(
-      expect.any(String),
-      'https://github.com/owner/repo'
-    );
+    expect(mockGenerateAiSummaryService.call).toHaveBeenCalledWith({
+      libraryId: 'mock-library-id',
+      githubUrl: 'https://github.com/owner/repo',
+      skipOnError: true,
+      logContext: '新規ライブラリのAI要約を生成',
+    });
   });
 
   test('AI要約保存でエラーが発生してもライブラリ作成は続行される', async () => {
-    // AI要約生成でエラーを発生させる（保存時のエラーをシミュレート）
-    mockBaseAiSummaryManager.generateForNewLibrary.mockRejectedValue(new Error('AI要約保存エラー'));
+    // AI要約生成でエラーを発生させる（保存時のエラーをシミュレート、但し、skipOnError: trueのため例外は投げられない）
+    mockGenerateAiSummaryService.call.mockImplementation(async params => {
+      if (params.skipOnError) {
+        // skipOnError: trueの場合は例外を投げない
+        console.warn('AI要約保存エラー（スキップ）');
+        return;
+      }
+      throw new Error('AI要約保存エラー');
+    });
 
     // ライブラリ作成を実行
     const result = await CreateLibraryService.call(mockParams);
 
     // ライブラリ作成は成功することを確認
-    expect(result).toEqual(expect.any(String));
+    expect(result).toBe('mock-library-id');
 
     // AI要約生成が試行されたことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).toHaveBeenCalledWith(
-      expect.any(String),
-      'https://github.com/owner/repo'
-    );
+    expect(mockGenerateAiSummaryService.call).toHaveBeenCalledWith({
+      libraryId: 'mock-library-id',
+      githubUrl: 'https://github.com/owner/repo',
+      skipOnError: true,
+      logContext: '新規ライブラリのAI要約を生成',
+    });
   });
 
   test('データベース接続に失敗した場合はエラーをスローする', async () => {
@@ -147,12 +214,12 @@ describe('CreateLibraryService', () => {
     );
 
     // AI要約生成は呼び出されないことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).not.toHaveBeenCalled();
+    expect(mockGenerateAiSummaryService.call).not.toHaveBeenCalled();
   });
 
   test('重複するscriptIdが存在する場合はエラーをスローする', async () => {
     // 重複チェックでエラーを発生させる
-    mockBaseRepositoryService.ensureMultipleUnique.mockRejectedValue(
+    mockValidateLibraryUniquenessService.call.mockRejectedValue(
       new Error(ERROR_MESSAGES.SCRIPT_ID_ALREADY_REGISTERED)
     );
 
@@ -161,12 +228,12 @@ describe('CreateLibraryService', () => {
     );
 
     // AI要約生成は呼び出されないことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).not.toHaveBeenCalled();
+    expect(mockGenerateAiSummaryService.call).not.toHaveBeenCalled();
   });
 
   test('最終コミット日時の取得に失敗した場合はエラーをスローする', async () => {
-    // fetchFullRepoDataでエラーを発生させる
-    mockBaseGitHubOperations.fetchFullRepoData.mockRejectedValue(
+    // fetchGitHubRepoDataServiceでエラーを発生させる
+    mockFetchGitHubRepoDataService.call.mockRejectedValue(
       new Error('Failed to fetch last commit date.')
     );
 
@@ -175,6 +242,6 @@ describe('CreateLibraryService', () => {
     );
 
     // AI要約生成は呼び出されないことを確認
-    expect(mockBaseAiSummaryManager.generateForNewLibrary).not.toHaveBeenCalled();
+    expect(mockGenerateAiSummaryService.call).not.toHaveBeenCalled();
   });
 });

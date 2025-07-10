@@ -3,13 +3,13 @@ import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
 import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper.js';
 
 /**
- * GAS Library Scraper Service
+ * GASライブラリスクレイピングサービス
  * 単一のGitHubリポジトリからライブラリ情報をスクレイピングし、データベース形式に変換する
  *
  * 使用例:
- * const result = await GASLibraryScraper.call('https://github.com/owner/repo');
+ * const result = await ScrapeGASLibraryService.call('https://github.com/owner/repo');
  */
-export class GASLibraryScraper {
+export class ScrapeGASLibraryService {
   /**
    * 単一のGitHubリポジトリからライブラリ情報をスクレイピング
    *

@@ -291,11 +291,7 @@
             await update();
             bulkAddInProgress = false;
             if (result.type === 'success') {
-              startPage = PAGINATION.MIN_PAGE;
-              endPage = PAGINATION.MIN_PAGE;
-              perPage = PAGINATION.PER_PAGE_OPTIONS[3]; // 100件/ページ
-              sortOption = DEFAULT_GITHUB_SEARCH_SORT;
-              selectedTags = resetSelectedTags();
+              // 一括新規追加成功時は値をリセットしない（フォームの値を維持）
               showBulkAddForm = false;
               // ページリロードでライブラリ一覧を更新
               window.location.reload();

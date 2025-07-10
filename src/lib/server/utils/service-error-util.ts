@@ -1,5 +1,5 @@
 /**
- * サービス共通エラーハンドラー
+ * サービス共通エラーハンドリングユーティリティ
  * 全サービスで統一されたエラーハンドリングを提供
  */
 export interface ServiceError {
@@ -14,7 +14,7 @@ export interface ServiceSuccess<T = void> {
 
 export type ServiceResult<T = void> = ServiceSuccess<T> | ServiceError;
 
-export class BaseServiceErrorHandler {
+export class ServiceErrorUtil {
   /**
    * サービスエラーの統一ハンドリング
    * @param error エラーオブジェクト
@@ -62,6 +62,47 @@ export class BaseServiceErrorHandler {
       const error = new Error(errorMessage);
       console.error(`${context}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * 成功レスポンスを作成
+   * @param data レスポンスデータ
+   * @returns 成功レスポンス
+   */
+  static success<T>(data?: T): ServiceSuccess<T> {
+    return {
+      success: true,
+      data,
+    };
+  }
+
+  /**
+   * エラーレスポンスを作成
+   * @param message エラーメッセージ
+   * @returns エラーレスポンス
+   */
+  static error(message: string): ServiceError {
+    return {
+      success: false,
+      error: message,
+    };
+  }
+
+  /**
+   * 複数の条件をチェックして最初のエラーを返す
+   * @param checks チェック配列
+   * @throws Error いずれかの条件が false の場合
+   */
+  static assertMultipleConditions(
+    checks: Array<{
+      condition: boolean;
+      errorMessage: string;
+      context: string;
+    }>
+  ): void {
+    for (const check of checks) {
+      this.assertCondition(check.condition, check.errorMessage, check.context);
     }
   }
 }

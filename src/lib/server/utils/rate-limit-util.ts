@@ -1,8 +1,8 @@
 /**
- * レート制限管理の共通クラス
+ * レート制限管理ユーティリティ
  * API呼び出しのレート制限を統一管理
  */
-export class BaseRateLimitManager {
+export class RateLimitUtil {
   /**
    * 指定時間待機
    * @param ms 待機時間（ミリ秒）
