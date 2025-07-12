@@ -126,7 +126,7 @@ npm run test
 
 **自動管理**:
 
-- テストDB: `apps_script_hub_test_db`（本番DBと分離）
+- テストDB: `gas_library_hub_test_db`（本番DBと分離）
 - データクリア: `scripts/clear-test-data.js`（テスト前自動実行）
 - スキーマ作成: `scripts/setup-test-db.js`
 

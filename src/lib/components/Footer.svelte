@@ -2,7 +2,7 @@
   import { copyright, terms, privacy, about_us } from '$lib/paraglide/messages.js';
 
   // フッターコンポーネント
-  // Apps Script Hubのメインフッターで、コピーライトとリンクを表示
+  // GAS Library Hubのメインフッターで、コピーライトとリンクを表示
   // variant: 'default' | 'admin'を指定して表示形式を切り替え
 
   interface Props {

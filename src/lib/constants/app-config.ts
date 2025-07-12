@@ -4,7 +4,7 @@
 
 // ドメイン関連
 export const APP_CONFIG = {
-  SITE_NAME: 'Apps Script Hub',
+  SITE_NAME: 'GAS Library Hub',
   DOMAIN: 'appscripthub.com',
   BASE_URL: 'https://appscripthub.com',
   LOGO_PATH: '/logo.png',

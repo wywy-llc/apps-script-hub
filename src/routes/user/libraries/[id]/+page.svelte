@@ -128,7 +128,7 @@
   <meta property="og:description" content={getSeoDescription()} />
   <meta property="og:type" content="article" />
   <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
-  <meta property="og:site_name" content="Apps Script Hub" />
+  <meta property="og:site_name" content="GAS Library Hub" />
   <meta property="og:image" content={getLogoUrl()} />
   <meta property="article:author" content={library.authorName} />
   <meta property="article:section" content="Google Apps Script" />

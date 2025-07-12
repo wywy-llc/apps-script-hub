@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/apps_script_hub_test_db
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gas_library_hub_test_db
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_TEST_DB: apps_script_hub_test_db
+      POSTGRES_TEST_DB: gas_library_hub_test_db
       GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       AUTH_SECRET: test-secret-for-ci
 
@@ -24,7 +24,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
-          POSTGRES_DB: apps_script_hub_test_db
+          POSTGRES_DB: gas_library_hub_test_db
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
