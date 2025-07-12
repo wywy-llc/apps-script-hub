@@ -103,6 +103,53 @@ describe('ScrapeGASLibraryService', () => {
         '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF'
       );
     });
+
+    test('ファイルパス形式の.gsファイルが正しく検知される', async () => {
+      const readmeWithFilePaths = `
+        # Project Structure
+        
+        \`\`\`
+        src/
+        ├── main.gs
+        ├── utils.gs
+        └── config.gs
+        \`\`\`
+        
+        Main logic is in /src/main.gs
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithFilePaths);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptId).toBe('test-owner/test-repo');
+    });
+
+    test('コード例内の.gsファイル名は誤検知されない', async () => {
+      const readmeWithCodeExamples = `
+        # GAS Library
+        
+        スクリプトID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
+        
+        Example usage:
+        \`\`\`javascript
+        // Don't confuse with example.gs in code
+        const result = processFile("example.gs");
+        \`\`\`
+        
+        This processes .gs files but doesn't contain them.
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithCodeExamples);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('library');
+      expect(result.data?.scriptId).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+    });
   });
 
   describe('WebアプリURL抽出機能', () => {

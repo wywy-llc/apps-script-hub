@@ -46,16 +46,22 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
 /**
  * Google Apps Script Web App検知パターン
  * READMEファイル内に.gsファイルの記載がある場合、Web Appとして検知する
+ * より具体的なコンテキスト（ファイルパス、リンク、ファイルリスト等）を考慮した精密なパターン
+ * コードブロック内やクォート内の記載は除外
  */
 export const DEFAULT_WEB_APP_PATTERNS: RegExp[] = [
-  // .gsファイルの直接記載
-  /\b\w+\.gs\b/gi,
-  // .gsファイルへのリンク形式
-  /\[.*?\]\(.*?\.gs\)/gi,
-  // Google Apps Scriptファイル形式の記載
-  /google\s*apps?\s*script.*?\.gs/gi,
-  // Main.gs等の典型的なファイル名
-  /(?:main|code|app|script|index)\.gs/gi,
+  // Markdownリンク形式（最も確実）
+  /\[.*?\]\([^)]*\.gs\)/gi,
+  // ファイルリスト形式（行頭やリスト記号の後）
+  /(?:^|\n|[-*+]\s+|[\d]+\.\s+)(?:[a-zA-Z0-9_-]+\.gs)\b/gim,
+  // ディレクトリ構造やファイル一覧での記載
+  /(?:├|└|│)\s*[a-zA-Z0-9_-]+\.gs\b/gi,
+  // ファイルパス形式（スラッシュで始まる）
+  /\/[a-zA-Z0-9_/-]+\.gs\b/gi,
+  // 典型的なGASファイル名（行頭または空白後、クォートなし）
+  /(?:^|\s)(?:main|code|app|script|index|appsscript)\.gs\b/gim,
+  // Google Apps Scriptと.gsの組み合わせ
+  /google\s*apps?\s*script.*?[a-zA-Z0-9_-]+\.gs/gi,
 ];
 
 /**
