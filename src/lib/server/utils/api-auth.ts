@@ -33,12 +33,15 @@ function tryValidateAuthSecret(request: Request): boolean {
   }
 
   // 1. Authorization Bearer トークンをチェック
-  const authHeader = request.headers.get('Authorization');
+  const authHeader = request.headers.get('authorization'); // ヘッダー名は大文字小文字を区別しない
   if (authHeader) {
-    const token = authHeader.replace('Bearer ', '');
-    if (token === AUTH_SECRET) {
-      console.log('AUTH_SECRET認証成功: Authorization Bearer');
-      return true;
+    const match = authHeader.match(/^Bearer\s+(.*)$/i); // 'Bearer '接頭辞を大文字小文字非依存で処理
+    if (match) {
+      const token = match[1];
+      if (token === AUTH_SECRET) {
+        console.log('AUTH_SECRET認証成功: Authorization Bearer');
+        return true;
+      }
     }
   }
 
