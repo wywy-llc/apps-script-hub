@@ -22,8 +22,9 @@ export class ScrapeGASLibraryService {
   private static extractWebAppInfo(
     readmeContent: string
   ): { scriptId: string; scriptType: 'web_app' } | null {
-    // GAS実行URLのパターンを検索
-    const webAppUrlPattern = /https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)\/exec/g;
+    // GAS実行URLのパターンを検索（標準形式と/a/macros/形式の両方に対応）
+    const webAppUrlPattern =
+      /https:\/\/script\.google\.com\/(?:a\/)?macros\/(?:[^/]+\/)?s\/([A-Za-z0-9_-]+)\/exec/g;
     const matches = readmeContent.matchAll(webAppUrlPattern);
 
     for (const match of matches) {
@@ -86,27 +87,28 @@ export class ScrapeGASLibraryService {
 
       let scriptType: 'library' | 'web_app' = 'library';
 
-      // ライブラリ形式のスクリプトIDが見つからない場合、WebアプリURLをチェック
-      if (!scriptId && readmeContent) {
+      // WebアプリURLを最初にチェック（優先度高）
+      if (readmeContent) {
         const webAppInfo = this.extractWebAppInfo(readmeContent);
         if (webAppInfo) {
           scriptId = webAppInfo.scriptId;
           scriptType = webAppInfo.scriptType;
-        } else {
-          // .gsファイルの記載があるかチェック（Web Appとして検知）
+        } else if (!scriptId) {
+          // ライブラリ形式のスクリプトIDが見つからず、WebアプリURLもない場合、.gsファイルをチェック
           const webAppType = this.detectWebAppFromGsFiles(readmeContent);
           if (webAppType) {
             // .gsファイルが見つかったがスクリプトIDが無い場合は、web_appタイプとして処理を継続
             scriptType = 'web_app';
-            // スクリプトIDが無い場合はダミーIDを設定（後で手動登録が必要）
-            scriptId = 'NO_SCRIPT_ID_DETECTED';
+            // スクリプトIDが無い場合はowner/repo形式をscriptIdとして使用（重複回避）
+            scriptId = `${owner}/${repo}`;
+          }
+        } else {
+          // ライブラリIDがある場合でも、.gsファイルの記載があればweb_appタイプに変更
+          const webAppType = this.detectWebAppFromGsFiles(readmeContent);
+          if (webAppType) {
+            scriptType = 'web_app';
           }
         }
-      }
-
-      // .gsファイルの記載があれば、ライブラリでもweb_appタイプに変更
-      if (scriptId && readmeContent && this.detectWebAppFromGsFiles(readmeContent)) {
-        scriptType = 'web_app';
       }
 
       if (!scriptId) {

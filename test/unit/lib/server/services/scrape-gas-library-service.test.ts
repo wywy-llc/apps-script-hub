@@ -63,7 +63,7 @@ describe('ScrapeGASLibraryService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.scriptType).toBe('web_app');
-      expect(result.data?.scriptId).toBe('NO_SCRIPT_ID_DETECTED');
+      expect(result.data?.scriptId).toBe('test-owner/test-repo');
     });
 
     test('.gsファイルとスクリプトIDが両方ある場合、web_appとして保存される', async () => {
@@ -105,6 +105,44 @@ describe('ScrapeGASLibraryService', () => {
     });
   });
 
+  describe('WebアプリURL抽出機能', () => {
+    test('/a/macros/形式のWebアプリURLが正しく抽出される', async () => {
+      const readmeWithWebAppUrl = `
+        # 客製化選項選擇登記萬用系統
+        
+        歡迎參觀我的網站 [Gas Station](https://script.google.com/a/macros/gms.hlgs.hlc.edu.tw/s/AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt/exec "GAS Station")
+        
+        Also check [Code.gs](Code.gs) for additional functions.
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithWebAppUrl);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptId).toBe(
+        'AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt'
+      );
+    });
+
+    test('標準形式のWebアプリURLが正しく抽出される', async () => {
+      const readmeWithStandardUrl = `
+        # Test Web App
+        
+        Visit: https://script.google.com/macros/s/AKfycbxTEST123456789abcdef/exec
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithStandardUrl);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptId).toBe('AKfycbxTEST123456789abcdef');
+    });
+  });
+
   describe('GitHub画像URL誤検知対策', () => {
     test('GitHub画像URLファイル名は誤検知されない', async () => {
       const readmeWithGitHubImages = `
@@ -125,7 +163,7 @@ describe('ScrapeGASLibraryService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.scriptType).toBe('web_app');
-      expect(result.data?.scriptId).toBe('NO_SCRIPT_ID_DETECTED');
+      expect(result.data?.scriptId).toBe('test-owner/test-repo');
 
       // GitHub画像URLのファイル名ではないことを確認
       expect(result.data?.scriptId).not.toBe('103873116-2dd87e00-5084-11eb-8ab6-d4c1b7be8ec6');

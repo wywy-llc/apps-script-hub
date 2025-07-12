@@ -50,8 +50,9 @@ export function extractGasScriptId(url: string): string | null {
     return null;
   }
 
-  // GAS実行URLのパターン: https://script.google.com/macros/s/{scriptId}/exec
-  const pattern = /^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)\/exec$/;
+  // GAS実行URLのパターン: 標準形式と/a/macros/形式の両方に対応
+  const pattern =
+    /^https:\/\/script\.google\.com\/(?:a\/)?macros\/(?:[^/]+\/)?s\/([A-Za-z0-9_-]+)\/exec$/;
   const match = url.match(pattern);
 
   return match ? match[1] : null;
