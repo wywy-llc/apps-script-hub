@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ request }) => {
       } catch (error) {
         return {
           success: false,
-          error: error instanceof Error ? error.message : '保存に失敗しました',
+          error: ErrorUtils.getMessage(error, '保存に失敗しました'),
         };
       }
     };
@@ -220,7 +220,7 @@ export const POST: RequestHandler = async ({ request }) => {
     return json(
       {
         success: false,
-        message: 'サーバーエラーが発生しました',
+        message: `サーバーエラーが発生しました: ${ErrorUtils.getMessage(error, '不明なエラー')}`,
         summary: {
           total: 0,
           successCount: 0,
@@ -228,7 +228,7 @@ export const POST: RequestHandler = async ({ request }) => {
           duplicateCount: 0,
           tag: 'unknown',
         },
-        errors: [error instanceof Error ? error.message : '不明なエラー'],
+        errors: [ErrorUtils.getMessage(error, '不明なエラー')],
       } as BulkRegisterResponse,
       { status: errorStatus }
     );

@@ -155,8 +155,12 @@ export const actions: Actions = {
 
       const errorStatus = ErrorUtils.getHttpStatus(error);
 
+      const errorMessage = ErrorUtils.getMessage(
+        error,
+        'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。'
+      );
       return fail(errorStatus, {
-        error: 'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+        error: `AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。 詳細: ${errorMessage}`,
       });
     }
   },

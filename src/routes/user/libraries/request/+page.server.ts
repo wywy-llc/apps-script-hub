@@ -91,7 +91,13 @@ export const actions: Actions = {
 
       const errorStatus = ErrorUtils.getHttpStatus(error);
 
-      return fail(errorStatus, { error: 'GASライブラリ追加申請中にエラーが発生しました。' });
+      const errorMessage = ErrorUtils.getMessage(
+        error,
+        'GASライブラリ追加申請中にエラーが発生しました。'
+      );
+      return fail(errorStatus, {
+        error: `GASライブラリ追加申請中にエラーが発生しました。${errorMessage}`,
+      });
     }
   },
 };

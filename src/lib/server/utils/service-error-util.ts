@@ -1,3 +1,5 @@
+import { ErrorUtils } from './error-utils.js';
+
 /**
  * サービス共通エラーハンドリングユーティリティ
  * 全サービスで統一されたエラーハンドリングを提供
@@ -25,7 +27,7 @@ export class ServiceErrorUtil {
     console.error(`${context}:`, error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : `${context}に失敗しました`,
+      error: ErrorUtils.getMessage(error, `${context}に失敗しました`),
     };
   }
 

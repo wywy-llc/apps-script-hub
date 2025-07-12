@@ -1,6 +1,7 @@
 import { type GitHubSearchSortOption } from '$lib/constants/github-search.js';
 import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type {
   BulkScrapeResult,
   ScrapeResult,
@@ -231,7 +232,7 @@ export class ProcessBulkGASLibraryWithSaveService {
             } catch (error) {
               allResults.push({
                 success: false,
-                error: `${repo.name}: ${error instanceof Error ? error.message : '処理に失敗しました'}`,
+                error: `${repo.name}: ${ErrorUtils.getMessage(error, '処理に失敗しました')}`,
               });
             }
           }
@@ -250,7 +251,7 @@ export class ProcessBulkGASLibraryWithSaveService {
           }
           allResults.push({
             success: false,
-            error: `ページ ${currentPage}: ${pageError instanceof Error ? pageError.message : '処理に失敗しました'}`,
+            error: `ページ ${currentPage}: ${ErrorUtils.getMessage(pageError, '処理に失敗しました')}`,
           });
         }
       }
@@ -279,7 +280,7 @@ export class ProcessBulkGASLibraryWithSaveService {
         results: [
           {
             success: false,
-            error: error instanceof Error ? error.message : '一括処理に失敗しました',
+            error: ErrorUtils.getMessage(error, '一括処理に失敗しました'),
           },
         ],
         total: totalProcessedCount,

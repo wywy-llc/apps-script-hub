@@ -185,7 +185,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
           successCount: 0,
           errorCount: 1,
           duplicateCount: 0,
-          errors: [error instanceof Error ? error.message : '不明なエラー'],
+          errors: [ErrorUtils.getMessage(error, '不明なエラー')],
         });
 
         totalErrors++;
@@ -220,7 +220,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     return json(
       {
         success: false,
-        message: 'サーバーエラーが発生しました',
+        message: `サーバーエラーが発生しました: ${ErrorUtils.getMessage(error, '不明なエラー')}`,
         overallResults: {
           totalTags: 0,
           successTags: 0,

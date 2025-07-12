@@ -198,8 +198,12 @@ export const actions: Actions = {
 
       const errorStatus = ErrorUtils.getHttpStatus(error);
 
+      const errorMessage = ErrorUtils.getMessage(
+        error,
+        'ライブラリの更新中にエラーが発生しました。'
+      );
       return fail(errorStatus, {
-        error: 'ライブラリの更新中にエラーが発生しました。',
+        error: `ライブラリの更新中にエラーが発生しました。 詳細: ${errorMessage}`,
       });
     }
   },

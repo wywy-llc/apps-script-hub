@@ -206,8 +206,12 @@ export const actions: Actions = {
 
       const errorStatus = ErrorUtils.getHttpStatus(error);
 
+      const errorMessage = ErrorUtils.getMessage(
+        error,
+        '自動検索・一括追加処理中にエラーが発生しました。'
+      );
       return fail(errorStatus, {
-        error: '自動検索・一括追加処理中にエラーが発生しました。',
+        error: `自動検索・一括追加処理中にエラーが発生しました。 詳細: ${errorMessage}`,
       });
     }
   },
@@ -255,8 +259,12 @@ export const actions: Actions = {
 
       const errorStatus = ErrorUtils.getHttpStatus(error);
 
+      const errorMessage = ErrorUtils.getMessage(
+        error,
+        'ライブラリの削除処理中にエラーが発生しました。'
+      );
       return fail(errorStatus, {
-        error: 'ライブラリの削除処理中にエラーが発生しました。',
+        error: `ライブラリの削除処理中にエラーが発生しました。 詳細: ${errorMessage}`,
       });
     }
   },
