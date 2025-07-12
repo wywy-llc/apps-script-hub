@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
-import { ErrorUtils } from '$lib/server/utils/error-utils.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -196,15 +196,11 @@ export const actions: Actions = {
     } catch (error) {
       console.error('ライブラリ更新エラー:', error);
 
-      const errorStatus = ErrorUtils.getHttpStatus(error);
-
-      const errorMessage = ErrorUtils.getMessage(
+      return ActionErrorHandler.handleActionError(
         error,
-        'ライブラリの更新中にエラーが発生しました。'
+        'ライブラリの更新',
+        'ライブラリ更新エラー:'
       );
-      return fail(errorStatus, {
-        error: `ライブラリの更新中にエラーが発生しました。 詳細: ${errorMessage}`,
-      });
     }
   },
 };

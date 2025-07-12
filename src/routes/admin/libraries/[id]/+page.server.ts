@@ -2,7 +2,7 @@ import { LIBRARY_STATUS, type LibraryStatus } from '$lib/constants/library-statu
 import { db } from '$lib/server/db/index.js';
 import { library, librarySummary } from '$lib/server/db/schema.js';
 import { UpdateLibraryFromGithubService } from '$lib/server/services/update-library-from-github-service.js';
-import { ErrorUtils } from '$lib/server/utils/error-utils.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import { error, fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types.js';
@@ -153,15 +153,11 @@ export const actions: Actions = {
         error instanceof Error ? error.stack : 'スタックトレース不明'
       );
 
-      const errorStatus = ErrorUtils.getHttpStatus(error);
-
-      const errorMessage = ErrorUtils.getMessage(
+      return ActionErrorHandler.handleActionErrorWithCustomMessage(
         error,
-        'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。'
+        'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+        'AI要約生成エラー:'
       );
-      return fail(errorStatus, {
-        error: `AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。 詳細: ${errorMessage}`,
-      });
     }
   },
 };

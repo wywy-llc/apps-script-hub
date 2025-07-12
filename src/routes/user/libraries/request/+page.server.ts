@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
-import { ErrorUtils } from '$lib/server/utils/error-utils.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
@@ -87,17 +87,11 @@ export const actions: Actions = {
 
       return { success: true, id: libraryId };
     } catch (error) {
-      console.error('GASライブラリ追加申請エラー:', error);
-
-      const errorStatus = ErrorUtils.getHttpStatus(error);
-
-      const errorMessage = ErrorUtils.getMessage(
+      return ActionErrorHandler.handleActionErrorWithCustomMessage(
         error,
-        'GASライブラリ追加申請中にエラーが発生しました。'
+        'GASライブラリ追加申請中にエラーが発生しました。',
+        'GASライブラリ追加申請エラー:'
       );
-      return fail(errorStatus, {
-        error: `GASライブラリ追加申請中にエラーが発生しました。${errorMessage}`,
-      });
     }
   },
 };
