@@ -166,10 +166,10 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         tagResults.push({
           tag,
           success: result.success,
-          total: result.results.total,
-          successCount: result.results.successCount,
-          errorCount: result.results.errorCount,
-          duplicateCount: result.results.duplicateCount,
+          total: result.summary.total,
+          successCount: result.summary.successCount,
+          errorCount: result.summary.errorCount,
+          duplicateCount: result.summary.duplicateCount,
           errors: result.errors,
         });
 
@@ -177,13 +177,13 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
           successTags++;
         }
 
-        totalLibraries += result.results.total;
-        totalSuccess += result.results.successCount;
-        totalErrors += result.results.errorCount;
-        totalDuplicates += result.results.duplicateCount;
+        totalLibraries += result.summary.total;
+        totalSuccess += result.summary.successCount;
+        totalErrors += result.summary.errorCount;
+        totalDuplicates += result.summary.duplicateCount;
 
         console.log(
-          `✅ ${tag}完了: 成功=${result.results.successCount}件, エラー=${result.results.errorCount}件`
+          `✅ ${tag}完了: 成功=${result.summary.successCount}件, エラー=${result.summary.errorCount}件`
         );
 
         // タグ間の待機時間（レート制限対策）

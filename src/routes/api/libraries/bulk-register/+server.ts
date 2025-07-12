@@ -64,7 +64,7 @@ interface BulkRegisterRequest {
 interface BulkRegisterResponse {
   success: boolean;
   message: string;
-  results: {
+  summary: {
     total: number;
     successCount: number;
     errorCount: number;
@@ -118,7 +118,7 @@ export const POST: RequestHandler = async ({ request }) => {
         {
           success: false,
           message: 'tagまたはselectedTagsパラメータが必須です',
-          results: {
+          summary: {
             total: 0,
             successCount: 0,
             errorCount: 1,
@@ -211,7 +211,7 @@ export const POST: RequestHandler = async ({ request }) => {
       message: result.success
         ? `一括登録完了: ${result.successCount}件成功、${result.errorCount}件エラー、${result.duplicateCount}件重複`
         : `一括登録に失敗: ${result.errorCount}件エラー`,
-      results: {
+      summary: {
         total: result.total,
         successCount: result.successCount,
         errorCount: result.errorCount,
@@ -233,7 +233,7 @@ export const POST: RequestHandler = async ({ request }) => {
       {
         success: false,
         message: 'サーバーエラーが発生しました',
-        results: {
+        summary: {
           total: 0,
           successCount: 0,
           errorCount: 1,

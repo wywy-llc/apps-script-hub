@@ -42,7 +42,7 @@ test.describe('Admin Screen - Library Bulk Register API', () => {
         body: JSON.stringify({
           success: false,
           message: '一括登録に失敗: 1件エラー',
-          results: {
+          summary: {
             total: 1,
             successCount: 0,
             errorCount: 1,

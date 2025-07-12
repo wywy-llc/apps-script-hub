@@ -168,25 +168,25 @@ export const actions: Actions = {
 
       // 結果メッセージの生成
       const messages = [
-        `自動検索・処理完了: ${result.results.total}件のリポジトリ中 ${result.results.successCount}件を登録しました。`,
+        `自動検索・処理完了: ${result.summary.total}件のリポジトリ中 ${result.summary.successCount}件を登録しました。`,
       ];
 
-      if (result.results.errorCount > 0) {
-        messages.push(`エラー: ${result.results.errorCount}件`);
+      if (result.summary.errorCount > 0) {
+        messages.push(`エラー: ${result.summary.errorCount}件`);
       }
 
-      if (result.results.duplicateCount > 0) {
-        messages.push(`重複スキップ: ${result.results.duplicateCount}件`);
+      if (result.summary.duplicateCount > 0) {
+        messages.push(`重複スキップ: ${result.summary.duplicateCount}件`);
       }
 
       return {
         success: true,
         message: messages.join(' '),
         details: {
-          total: result.results.total,
-          inserted: result.results.successCount,
-          errors: result.results.errorCount,
-          duplicates: result.results.duplicateCount,
+          total: result.summary.total,
+          inserted: result.summary.successCount,
+          errors: result.summary.errorCount,
+          duplicates: result.summary.duplicateCount,
           apiResponse: result,
         },
       };
