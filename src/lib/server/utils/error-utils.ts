@@ -13,8 +13,13 @@ export class ErrorUtils {
     if (isHttpError(error)) {
       return error.status;
     }
-    if (error && typeof error === 'object' && 'status' in error) {
-      return error.status as number;
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      typeof error.status === 'number'
+    ) {
+      return error.status;
     }
     return 500;
   }
