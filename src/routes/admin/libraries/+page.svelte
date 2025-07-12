@@ -1,5 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import StatusUpdateButtons from '$lib/components/admin/StatusUpdateButtons.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import { APP_CONFIG, PAGINATION } from '$lib/constants/app-config.js';
@@ -26,7 +28,17 @@
   let { data, form }: Props = $props();
 
   let libraries = $state(data.libraries);
-  let currentPage = $state(1);
+  let currentPage = $state(data.currentPage);
+
+  // dataが更新された時にcurrentPageも同期
+  $effect(() => {
+    currentPage = data.currentPage;
+
+    // 現在のページが総ページ数を超えている場合は1ページ目にリダイレクト
+    if (totalPages > 0 && currentPage > totalPages) {
+      updatePageUrl(1);
+    }
+  });
   let totalItems = $derived(libraries.length);
   let itemsPerPage = 10;
   let totalPages = $derived(Math.ceil(totalItems / itemsPerPage));
@@ -197,27 +209,40 @@
     }
   }
 
-  function goToPage(page: number) {
-    if (page >= 1 && page <= totalPages) {
-      currentPage = page;
+  // URLを更新してページ遷移する関数
+  function updatePageUrl(newPage: number) {
+    const url = new URL($page.url);
+    if (newPage === 1) {
+      url.searchParams.delete('page');
+    } else {
+      url.searchParams.set('page', newPage.toString());
+    }
+    goto(url.toString(), { replaceState: false });
+  }
+
+  function goToPage(pageNumber: number) {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      updatePageUrl(pageNumber);
     }
   }
 
   function goToPreviousPage() {
     if (currentPage > 1) {
-      currentPage = currentPage - 1;
+      updatePageUrl(currentPage - 1);
     }
   }
 
   function goToNextPage() {
     if (currentPage < totalPages) {
-      currentPage = currentPage + 1;
+      updatePageUrl(currentPage + 1);
     }
   }
 </script>
 
 <svelte:head>
-  <title>管理画面 - ライブラリ一覧 - {APP_CONFIG.SITE_NAME}</title>
+  <title
+    >管理画面 - ライブラリ一覧{currentPage > 1 ? ` (${currentPage}ページ目)` : ''} - {APP_CONFIG.SITE_NAME}</title
+  >
   <meta
     name="description"
     content="{APP_CONFIG.SITE_NAME}管理者画面 - ライブラリの承認・削除を管理"

@@ -12,7 +12,11 @@ import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async () => {
+export const load = (async ({ url }) => {
+  // URLからページ番号を取得（デフォルトは1）
+  const pageParam = url.searchParams.get('page');
+  const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10)) || 1 : 1;
+
   // ライブラリ一覧をデータベースから取得（申請者情報も含む）
   const libraries = await db
     .select({
@@ -38,6 +42,7 @@ export const load = (async () => {
 
   return {
     libraries,
+    currentPage,
   };
 }) satisfies PageServerLoad;
 
