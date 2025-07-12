@@ -1,5 +1,8 @@
 import type { GitHubSearchSortOption } from '$lib/constants/github-search.js';
-import { DEFAULT_SCRIPT_ID_PATTERNS } from '$lib/constants/scraper-config.js';
+import {
+  DEFAULT_SCRIPT_ID_PATTERNS,
+  DEFAULT_WEB_APP_PATTERNS,
+} from '$lib/constants/scraper-config.js';
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
@@ -171,6 +174,7 @@ export const POST: RequestHandler = async ({ request }) => {
         delayBetweenRequests: 1000, // 1秒間隔
       },
       scriptIdPatterns: DEFAULT_SCRIPT_ID_PATTERNS,
+      webAppPatterns: DEFAULT_WEB_APP_PATTERNS,
       gasTags: tags, // 指定されたタグを使用
       verbose: true,
     };

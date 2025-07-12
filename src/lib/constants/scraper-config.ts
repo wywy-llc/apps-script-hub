@@ -34,10 +34,28 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
   // キャプチャグループに先頭の「1」も含める
   /(?:library_id|clasp|apps.?script)[^a-zA-Z0-9_-]*['"`]?(1[A-Za-z0-9_-]{24,69})['"`]?/gi,
 
-  // 5. 1で始まる文字列（厳格化：特定のJSONフィールドを除外）
-  // email_id, session_id, api_key等の一般的なIDフィールドを除外
+  // 5. 1で始まる文字列（厳格化：特定のコンテキストを除外）
+  // - HTTP/HTTPS URL内の文字列を除外（GitHub画像URL等の誤検知対策）
+  // - *.png, *.jpg等の画像ファイル拡張子を除外
+  // - email_id, session_id等のJSONフィールドを除外
+  // - UUID形式（ハイフン区切り）を除外
   // キャプチャグループに先頭の「1」も含める
-  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])\b(1[A-Za-z0-9_-]{24,69})\b(?!["']\s*[,}])/g,
+  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])(?<!https?:\/\/[^\s)]+\/)\b(1[A-Za-z0-9_-]{24,69})(?!\.[a-z]{2,4})(?!-[a-f0-9]{8}-[a-f0-9]{4})\b(?!["']\s*[,}])/g,
+];
+
+/**
+ * Google Apps Script Web App検知パターン
+ * READMEファイル内に.gsファイルの記載がある場合、Web Appとして検知する
+ */
+export const DEFAULT_WEB_APP_PATTERNS: RegExp[] = [
+  // .gsファイルの直接記載
+  /\b\w+\.gs\b/gi,
+  // .gsファイルへのリンク形式
+  /\[.*?\]\(.*?\.gs\)/gi,
+  // Google Apps Scriptファイル形式の記載
+  /google\s*apps?\s*script.*?\.gs/gi,
+  // Main.gs等の典型的なファイル名
+  /(?:main|code|app|script|index)\.gs/gi,
 ];
 
 /**
@@ -70,6 +88,7 @@ export const DEFAULT_SCRAPER_CONFIG: ScraperConfig = {
     delayBetweenRequests: 1200, // ms
   },
   scriptIdPatterns: DEFAULT_SCRIPT_ID_PATTERNS,
+  webAppPatterns: DEFAULT_WEB_APP_PATTERNS,
   gasTags: DEFAULT_GAS_TAGS.slice(0, 5), // 上位5つのタグを使用
   verbose: true,
 };

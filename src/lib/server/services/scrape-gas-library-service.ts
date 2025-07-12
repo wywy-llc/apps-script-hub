@@ -1,3 +1,4 @@
+import { DEFAULT_WEB_APP_PATTERNS } from '$lib/constants/scraper-config.js';
 import { extractGasScriptId, isValidGasWebAppUrl } from '$lib/helpers/url.js';
 import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import { GASScriptIdExtractor } from '$lib/server/utils/gas-script-id-extractor.js';
@@ -35,6 +36,21 @@ export class ScrapeGASLibraryService {
       }
     }
 
+    return null;
+  }
+
+  /**
+   * READMEに.gsファイルの記載があるかチェックし、Web Appとして検知する
+   *
+   * @param readmeContent - README文字列
+   * @returns .gsファイルが見つかればweb_app、そうでなければnull
+   */
+  private static detectWebAppFromGsFiles(readmeContent: string): 'web_app' | null {
+    for (const pattern of DEFAULT_WEB_APP_PATTERNS) {
+      if (pattern.test(readmeContent)) {
+        return 'web_app';
+      }
+    }
     return null;
   }
   /**
@@ -76,13 +92,28 @@ export class ScrapeGASLibraryService {
         if (webAppInfo) {
           scriptId = webAppInfo.scriptId;
           scriptType = webAppInfo.scriptType;
+        } else {
+          // .gsファイルの記載があるかチェック（Web Appとして検知）
+          const webAppType = this.detectWebAppFromGsFiles(readmeContent);
+          if (webAppType) {
+            // .gsファイルが見つかったがスクリプトIDが無い場合は、web_appタイプとして処理を継続
+            scriptType = 'web_app';
+            // スクリプトIDが無い場合はダミーIDを設定（後で手動登録が必要）
+            scriptId = 'NO_SCRIPT_ID_DETECTED';
+          }
         }
+      }
+
+      // .gsファイルの記載があれば、ライブラリでもweb_appタイプに変更
+      if (scriptId && readmeContent && this.detectWebAppFromGsFiles(readmeContent)) {
+        scriptType = 'web_app';
       }
 
       if (!scriptId) {
         return {
           success: false,
-          error: 'READMEからGASスクリプトIDまたはWebアプリURLが見つかりませんでした',
+          error:
+            'READMEからGASスクリプトIDまたはWebアプリURL、.gsファイルの記載が見つかりませんでした',
         };
       }
 

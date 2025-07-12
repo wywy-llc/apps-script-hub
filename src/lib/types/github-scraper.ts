@@ -9,6 +9,7 @@ export interface ScraperConfig {
     delayBetweenRequests: number;
   };
   scriptIdPatterns: RegExp[];
+  webAppPatterns: RegExp[];
   gasTags: string[];
   verbose: boolean;
 }
