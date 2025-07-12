@@ -6,6 +6,7 @@ import {
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
 import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
@@ -165,8 +166,14 @@ export const actions: Actions = {
         // API レスポンスのエラーステータスを確認
         const errorStatus = response.status || 500;
 
+        // エラーメッセージを構築（メインメッセージ + 詳細エラー）
+        let errorMessage = result.message || 'API実行に失敗しました。';
+        if (result.errors && result.errors.length > 0) {
+          errorMessage += ` 詳細: ${result.errors.join(', ')}`;
+        }
+
         return fail(errorStatus, {
-          error: result.message || 'API実行に失敗しました。',
+          error: errorMessage,
         });
       }
 
@@ -197,9 +204,7 @@ export const actions: Actions = {
     } catch (error) {
       console.error('自動検索・一括追加エラー:', error);
 
-      // error.statusが存在する場合はそちらを使用、なければ500
-      const errorStatus =
-        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+      const errorStatus = ErrorUtils.getHttpStatus(error);
 
       return fail(errorStatus, {
         error: '自動検索・一括追加処理中にエラーが発生しました。',
@@ -248,9 +253,7 @@ export const actions: Actions = {
     } catch (error) {
       console.error('ライブラリ削除エラー:', error);
 
-      // error.statusが存在する場合はそちらを使用、なければ500
-      const errorStatus =
-        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+      const errorStatus = ErrorUtils.getHttpStatus(error);
 
       return fail(errorStatus, {
         error: 'ライブラリの削除処理中にエラーが発生しました。',

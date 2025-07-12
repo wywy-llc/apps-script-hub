@@ -1,5 +1,6 @@
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
@@ -88,9 +89,7 @@ export const actions: Actions = {
     } catch (error) {
       console.error('GASライブラリ追加申請エラー:', error);
 
-      // error.statusが存在する場合はそちらを使用、なければ500
-      const errorStatus =
-        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+      const errorStatus = ErrorUtils.getHttpStatus(error);
 
       return fail(errorStatus, { error: 'GASライブラリ追加申請中にエラーが発生しました。' });
     }
