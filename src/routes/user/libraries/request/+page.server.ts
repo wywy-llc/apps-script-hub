@@ -87,7 +87,12 @@ export const actions: Actions = {
       return { success: true, id: libraryId };
     } catch (error) {
       console.error('GASライブラリ追加申請エラー:', error);
-      return fail(500, { error: 'GASライブラリ追加申請中にエラーが発生しました。' });
+
+      // error.statusが存在する場合はそちらを使用、なければ500
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
+      return fail(errorStatus, { error: 'GASライブラリ追加申請中にエラーが発生しました。' });
     }
   },
 };

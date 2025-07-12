@@ -214,6 +214,10 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   } catch (error) {
     console.error('全タグ一括登録APIエラー:', error);
 
+    // error.statusが存在する場合はそちらを使用、なければ500
+    const errorStatus =
+      error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
     return json(
       {
         success: false,
@@ -229,7 +233,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         },
         tagResults: [],
       } as BatchRegisterResponse,
-      { status: 500 }
+      { status: errorStatus }
     );
   }
 };

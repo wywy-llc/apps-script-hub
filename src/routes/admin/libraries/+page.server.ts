@@ -162,7 +162,10 @@ export const actions: Actions = {
       const result: BulkRegisterResponse = await response.json();
 
       if (!result.success) {
-        return fail(500, {
+        // API レスポンスのエラーステータスを確認
+        const errorStatus = response.status || 500;
+
+        return fail(errorStatus, {
           error: result.message || 'API実行に失敗しました。',
         });
       }
@@ -193,7 +196,12 @@ export const actions: Actions = {
       };
     } catch (error) {
       console.error('自動検索・一括追加エラー:', error);
-      return fail(500, {
+
+      // error.statusが存在する場合はそちらを使用、なければ500
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
+      return fail(errorStatus, {
         error: '自動検索・一括追加処理中にエラーが発生しました。',
       });
     }
@@ -239,7 +247,12 @@ export const actions: Actions = {
       };
     } catch (error) {
       console.error('ライブラリ削除エラー:', error);
-      return fail(500, {
+
+      // error.statusが存在する場合はそちらを使用、なければ500
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
+      return fail(errorStatus, {
         error: 'ライブラリの削除処理中にエラーが発生しました。',
       });
     }

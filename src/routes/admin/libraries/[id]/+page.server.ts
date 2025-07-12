@@ -151,7 +151,12 @@ export const actions: Actions = {
         'エラースタックトレース:',
         error instanceof Error ? error.stack : 'スタックトレース不明'
       );
-      return fail(500, {
+
+      // error.statusが存在する場合はそちらを使用、なければ500
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
+      return fail(errorStatus, {
         error: 'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
       });
     }

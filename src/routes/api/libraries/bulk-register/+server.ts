@@ -5,8 +5,8 @@ import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
 import { ProcessBulkGASLibraryWithSaveService } from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
 import { validateApiAuth } from '$lib/server/utils/api-auth.js';
-import type { BulkRegisterResponse } from '$lib/types/index.js';
 import type { ScrapedLibraryData } from '$lib/types/github-scraper.js';
+import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
@@ -214,6 +214,10 @@ export const POST: RequestHandler = async ({ request }) => {
   } catch (error) {
     console.error('一括ライブラリ登録APIエラー:', error);
 
+    // error.statusが存在する場合はそちらを使用、なければ500
+    const errorStatus =
+      error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
     return json(
       {
         success: false,
@@ -227,7 +231,7 @@ export const POST: RequestHandler = async ({ request }) => {
         },
         errors: [error instanceof Error ? error.message : '不明なエラー'],
       } as BulkRegisterResponse,
-      { status: 500 }
+      { status: errorStatus }
     );
   }
 };

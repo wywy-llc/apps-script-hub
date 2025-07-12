@@ -194,7 +194,12 @@ export const actions: Actions = {
       };
     } catch (error) {
       console.error('ライブラリ更新エラー:', error);
-      return fail(500, {
+
+      // error.statusが存在する場合はそちらを使用、なければ500
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error ? (error.status as number) : 500;
+
+      return fail(errorStatus, {
         error: 'ライブラリの更新中にエラーが発生しました。',
       });
     }
