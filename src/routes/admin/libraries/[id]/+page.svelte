@@ -1,11 +1,11 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import Footer from '$lib/components/Footer.svelte';
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
+  import { APP_CONFIG } from '$lib/constants/app-config.js';
   import type { LibraryStatus } from '$lib/constants/library-status.js';
   import * as m from '$lib/paraglide/messages.js';
-  import Footer from '$lib/components/Footer.svelte';
   import type { ActionData, PageData } from './$types';
-  import { APP_CONFIG } from '$lib/constants/app-config.js';
 
   // 管理者画面 - ライブラリ詳細ページ
   // ライブラリの詳細情報表示、スクレイピング実行、編集・公開機能
@@ -53,19 +53,24 @@
     }
   });
 
-  function handleScraping() {
+  async function handleScraping() {
     if (isScrapingInProgress) return;
 
     isScrapingInProgress = true;
     scrapingMessage = 'GitHubリポジトリから情報を取得中...';
 
-    // GitHub API から情報を再取得
-    fetch(`/admin/libraries/${library.id}/scraping`, {
-      method: 'POST',
-    })
-      .then(async response => {
-        if (response.ok) {
-          scrapingMessage = 'スクレイピングが完了しました。';
+    try {
+      // フォームアクションを使用してスクレイピングを実行
+      const formData = new FormData();
+      const response = await fetch(`?/runScraping`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.type === 'success') {
+          scrapingMessage = result.data?.message || 'スクレイピングが完了しました。';
 
           // AI要約生成の確認ダイアログ
           const shouldGenerateAiSummary = confirm(
@@ -82,32 +87,33 @@
             }, 1000);
           }
         } else {
-          try {
-            const errorData = await response.json();
-            scrapingMessage = errorData.message || 'スクレイピングに失敗しました。';
-          } catch (parseError) {
-            console.error('レスポンス解析エラー:', parseError);
-            scrapingMessage = `スクレイピングに失敗しました。(HTTP ${response.status})`;
-          }
+          scrapingMessage = result.data?.error || 'スクレイピングに失敗しました。';
         }
-      })
-      .catch(error => {
-        console.error('スクレイピングエラー:', error);
-        console.error(
-          'エラースタックトレース:',
-          error instanceof Error ? error.stack : 'スタックトレース不明'
-        );
-        scrapingMessage = 'ネットワークエラーまたはサーバーエラーが発生しました。';
-      })
-      .finally(() => {
-        isScrapingInProgress = false;
-        // 3秒後にメッセージを消去（AI要約生成が実行されない場合）
-        if (!isAiSummaryInProgress) {
-          setTimeout(() => {
-            scrapingMessage = '';
-          }, 3000);
+      } else {
+        try {
+          const errorData = await response.json();
+          scrapingMessage = errorData.error || 'スクレイピングに失敗しました。';
+        } catch (parseError) {
+          console.error('レスポンス解析エラー:', parseError);
+          scrapingMessage = `スクレイピングに失敗しました。(HTTP ${response.status})`;
         }
-      });
+      }
+    } catch (error) {
+      console.error('スクレイピングエラー:', error);
+      console.error(
+        'エラースタックトレース:',
+        error instanceof Error ? error.stack : 'スタックトレース不明'
+      );
+      scrapingMessage = 'ネットワークエラーまたはサーバーエラーが発生しました。';
+    } finally {
+      isScrapingInProgress = false;
+      // 3秒後にメッセージを消去（AI要約生成が実行されない場合）
+      if (!isAiSummaryInProgress) {
+        setTimeout(() => {
+          scrapingMessage = '';
+        }, 3000);
+      }
+    }
   }
 
   /**
