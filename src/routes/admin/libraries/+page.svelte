@@ -26,9 +26,13 @@
   let { data, form }: Props = $props();
 
   let libraries = $state(data.libraries);
-  let currentPage = 1;
+  let currentPage = $state(1);
   let totalItems = $derived(libraries.length);
   let itemsPerPage = 10;
+  let totalPages = $derived(Math.ceil(totalItems / itemsPerPage));
+  let paginatedLibraries = $derived(
+    libraries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  );
   let statusUpdateInProgress: Record<string, boolean> = {};
   let showBulkAddForm = $state(false);
   let bulkAddInProgress = $state(false);
@@ -190,6 +194,24 @@
       setTimeout(() => {
         bulkUpdateMessage = '';
       }, 5000);
+    }
+  }
+
+  function goToPage(page: number) {
+    if (page >= 1 && page <= totalPages) {
+      currentPage = page;
+    }
+  }
+
+  function goToPreviousPage() {
+    if (currentPage > 1) {
+      currentPage = currentPage - 1;
+    }
+  }
+
+  function goToNextPage() {
+    if (currentPage < totalPages) {
+      currentPage = currentPage + 1;
     }
   }
 </script>
@@ -565,7 +587,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          {#each libraries as library (library.id)}
+          {#each paginatedLibraries as library (library.id)}
             <tr>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
@@ -657,12 +679,16 @@
     >
       <div class="flex flex-1 justify-between sm:hidden">
         <button
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          onclick={goToPreviousPage}
+          disabled={currentPage === 1}
+          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           前へ
         </button>
         <button
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          onclick={goToNextPage}
+          disabled={currentPage === totalPages}
+          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           次へ
         </button>
@@ -685,7 +711,9 @@
             aria-label="Pagination"
           >
             <button
-              class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
+              onclick={goToPreviousPage}
+              disabled={currentPage === 1}
+              class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span class="sr-only">前へ</span>
               <svg
@@ -702,19 +730,31 @@
                 />
               </svg>
             </button>
+
+            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page}
+              {#if totalPages <= 7 || page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2}
+                <button
+                  onclick={() => goToPage(page)}
+                  aria-current={page === currentPage ? 'page' : undefined}
+                  class={page === currentPage
+                    ? 'relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600'
+                    : 'relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50'}
+                >
+                  {page}
+                </button>
+              {:else if page === currentPage - 3 || page === currentPage + 3}
+                <span
+                  class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                >
+                  ...
+                </span>
+              {/if}
+            {/each}
+
             <button
-              aria-current="page"
-              class="relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600"
-            >
-              1
-            </button>
-            <button
-              class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              2
-            </button>
-            <button
-              class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
+              onclick={goToNextPage}
+              disabled={currentPage === totalPages}
+              class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span class="sr-only">次へ</span>
               <svg
