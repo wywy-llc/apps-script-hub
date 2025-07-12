@@ -30,8 +30,8 @@
 
   // SEO用のmeta情報を動的に生成
   $: pageTitle = searchQuery
-    ? `${search_results_for({ query: searchQuery, count: totalResults })} - Apps Script Hub`
-    : `${all_libraries_count({ count: totalResults })} - Apps Script Hub`;
+    ? `${search_results_for({ query: searchQuery, count: totalResults })} - GAS Library Hub`
+    : `${all_libraries_count({ count: totalResults })} - GAS Library Hub`;
 
   $: pageDescription = searchQuery
     ? `"${searchQuery}"の検索結果を表示中。${totalResults}件のGoogle Apps Scriptライブラリが見つかりました。`
@@ -53,7 +53,7 @@
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={pageDescription} />
   <meta property="og:image" content={getLogoUrl()} />
-  <meta property="og:site_name" content="Apps Script Hub" />
+  <meta property="og:site_name" content="GAS Library Hub" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />

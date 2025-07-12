@@ -15,7 +15,7 @@ export const POSTGRES_CONFIG = {
   port: parseInt(process.env.POSTGRES_PORT || '5433', 10),
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db',
+  database: process.env.POSTGRES_TEST_DB || 'gas_library_hub_test_db',
 };
 
 /**

@@ -5,7 +5,7 @@
   import * as m from '$lib/paraglide/messages.js';
 
   // プライバシーポリシーページ
-  // Apps Script Hubのプライバシーポリシーを表示
+  // GAS Library Hubのプライバシーポリシーを表示
 </script>
 
 <svelte:head>

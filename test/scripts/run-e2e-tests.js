@@ -23,10 +23,10 @@ function runCommand(command, args = [], options = {}) {
         // テスト環境変数を設定
         POSTGRES_USER: process.env.POSTGRES_USER || 'postgres',
         POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD || 'password',
-        POSTGRES_DB: process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db',
+        POSTGRES_DB: process.env.POSTGRES_TEST_DB || 'gas_library_hub_test_db',
         DATABASE_URL:
           process.env.DATABASE_TEST_URL ||
-          `postgresql://${process.env.POSTGRES_USER || 'postgres'}:${process.env.POSTGRES_PASSWORD || 'password'}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || '5433'}/${process.env.POSTGRES_TEST_DB || 'apps_script_hub_test_db'}`,
+          `postgresql://${process.env.POSTGRES_USER || 'postgres'}:${process.env.POSTGRES_PASSWORD || 'password'}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || '5433'}/${process.env.POSTGRES_TEST_DB || 'gas_library_hub_test_db'}`,
         NODE_ENV: 'test',
         GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
       },

@@ -34,7 +34,7 @@ function generateJsonLd(
 
   // SEO用のtitleとdescriptionを動的に取得
   const getSeoTitle = () => {
-    if (!librarySummary) return `${library.name} - Apps Script Hub`;
+    if (!librarySummary) return `${library.name} - GAS Library Hub`;
 
     if (currentLocale === 'ja' && librarySummary.seoTitleJa) {
       return librarySummary.seoTitleJa;
@@ -42,7 +42,7 @@ function generateJsonLd(
       return librarySummary.seoTitleEn;
     }
 
-    return `${library.name} - Apps Script Hub`;
+    return `${library.name} - GAS Library Hub`;
   };
 
   const getSeoDescription = () => {
@@ -132,8 +132,8 @@ describe('JSON-LD構造化データ', () => {
     mainBenefits: [],
     usageExampleJa: 'テスト使用例',
     usageExampleEn: 'Test usage example',
-    seoTitleJa: 'テストライブラリ - Apps Script Hub',
-    seoTitleEn: 'Test Library - Apps Script Hub',
+    seoTitleJa: 'テストライブラリ - GAS Library Hub',
+    seoTitleEn: 'Test Library - GAS Library Hub',
     seoDescriptionJa: 'テストライブラリの説明',
     seoDescriptionEn: 'Test library description',
     createdAt: new Date('2023-01-01'),
@@ -146,7 +146,7 @@ describe('JSON-LD構造化データ', () => {
     // 基本構造の確認
     expect(jsonLdContent['@context']).toBe('https://schema.org');
     expect(jsonLdContent['@type']).toBe('SoftwareSourceCode');
-    expect(jsonLdContent.name).toBe('テストライブラリ - Apps Script Hub');
+    expect(jsonLdContent.name).toBe('テストライブラリ - GAS Library Hub');
     expect(jsonLdContent.description).toBe('テストライブラリの説明');
 
     // SoftwareSourceCode特有のプロパティ確認
@@ -178,7 +178,7 @@ describe('JSON-LD構造化データ', () => {
     const jsonLdContent = generateJsonLd(mockLibrary, mockLibrarySummary, 'en');
 
     // 英語コンテンツの確認
-    expect(jsonLdContent.name).toBe('Test Library - Apps Script Hub');
+    expect(jsonLdContent.name).toBe('Test Library - GAS Library Hub');
     expect(jsonLdContent.description).toBe('Test library description');
 
     // SoftwareSourceCode特有のプロパティ確認
@@ -206,7 +206,7 @@ describe('JSON-LD構造化データ', () => {
     const jsonLdContent = generateJsonLd(mockLibrary, null, 'ja');
 
     // フォールバック値の確認
-    expect(jsonLdContent.name).toBe('Test Library - Apps Script Hub');
+    expect(jsonLdContent.name).toBe('Test Library - GAS Library Hub');
     expect(jsonLdContent.description).toBe('Test library description');
     expect(jsonLdContent.keywords).toBe('JavaScript, Google Apps Script');
 
