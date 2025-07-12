@@ -69,8 +69,9 @@
 
       if (response.ok) {
         const result = await response.json();
-        if (result.type === 'success') {
-          scrapingMessage = result.data?.message || 'スクレイピングが完了しました。';
+        if (result.type === 'success' || result.success) {
+          scrapingMessage =
+            result.data?.message || result.message || 'スクレイピングが完了しました。';
 
           // AI要約生成の確認ダイアログ
           const shouldGenerateAiSummary = confirm(
@@ -87,7 +88,7 @@
             }, 1000);
           }
         } else {
-          scrapingMessage = result.data?.error || 'スクレイピングに失敗しました。';
+          scrapingMessage = result.data?.error || result.error || 'スクレイピングに失敗しました。';
         }
       } else {
         try {

@@ -61,9 +61,20 @@ test.describe('Admin Screen - Library Bulk Register API', () => {
     await expect(submitButton).toBeVisible();
     await submitButton.click();
 
-    // エラーメッセージが表示されることを確認（実際のAPI結果に基づく）
-    // モックAPIがエラーレスポンスを返すので、UIにエラーが表示されるかレスポンス完了を確認
-    await page.waitForTimeout(2000);
+    // 一括登録APIレスポンス待機を設定
+    const bulkApiPromise = page.waitForResponse(
+      response =>
+        response.url().includes('?/bulkAddByTags') && response.request().method() === 'POST',
+      { timeout: 10000 }
+    );
+
+    // APIレスポンス完了を確認
+    try {
+      await bulkApiPromise;
+    } catch {
+      // APIレスポンス待機がタイムアウトした場合、UI状態で判断
+      console.log('API response timeout, checking UI state instead');
+    }
 
     // ページが正常に表示されていることを確認（エラーメッセージの表示は環境により異なる）
     await expect(page.locator('h1')).toContainText('ライブラリ管理');
@@ -128,11 +139,24 @@ test.describe('Admin Screen - Library Bulk Register API', () => {
     const submitButton = page
       .locator('button[type="submit"]')
       .filter({ hasText: '自動検索・一括追加実行' });
+
+    // APIレスポンス待機を設定
+    const bulkApiPromise = page.waitForResponse(
+      response =>
+        response.url().includes('?/bulkAddByTags') && response.request().method() === 'POST',
+      { timeout: 10000 }
+    );
+
     await submitButton.click();
 
     // エラーメッセージが表示されることを確認
     // モックAPIが認証エラーを返すので、UIにエラーが表示されるかレスポンス完了を確認
-    await page.waitForTimeout(2000);
+    try {
+      await bulkApiPromise;
+    } catch {
+      // APIレスポンス待機がタイムアウトした場合、UI状態で判断
+      console.log('API response timeout, checking UI state instead');
+    }
 
     // ページが正常に表示されていることを確認（エラーメッセージの表示は環境により異なる）
     await expect(page.locator('h1')).toContainText('ライブラリ管理');

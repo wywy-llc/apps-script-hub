@@ -133,9 +133,9 @@ test.describe('Admin Screen - Library AI Summary Generation', () => {
     await expect(page.locator('button:has-text("Execute Scraping")')).toBeVisible();
     await page.click('button:has-text("Execute Scraping")');
 
-    // スクレイピング処理完了の確認
-    // （モックなので高速で完了するはず）
-    await page.waitForTimeout(2000);
+    // スクレイピング処理完了を待機（UI状態の変化で判断）
+    // モック環境では処理が高速なので、ボタンの有効化状態やページ更新で判断
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
 
     // ページが正常に表示されていることを確認
     // スクレイピング後もスクリプトIDは変更されない（モック環境では実際のスクレイピングは行われない）
@@ -197,8 +197,9 @@ test.describe('Admin Screen - Library AI Summary Generation', () => {
     // 再度スクレイピングを実行してlibrary_summary未存在時のAI要約生成を確認
     await page.click('button:has-text("Execute Scraping")');
 
-    // 処理完了を待機
-    await page.waitForTimeout(3000);
+    // 処理完了を待機（UI状態の変化で判断）
+    // モック環境では処理が高速なので、ネットワークアイドル状態で判断
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
 
     // ライブラリが正常に表示されていることを確認
     // スクレイピング後もスクリプトIDは変更されない（モック環境では実際のスクレイピングは行われない）
