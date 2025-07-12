@@ -6,6 +6,7 @@ import {
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
 import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
+import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -116,7 +117,7 @@ export const actions: Actions = {
         endPage,
         perPage,
         sortOption,
-        selectedTags,
+        tags: selectedTags,
         generateSummary: true,
       };
 
@@ -158,7 +159,7 @@ export const actions: Actions = {
         throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      const result: BulkRegisterResponse = await response.json();
 
       if (!result.success) {
         return fail(500, {

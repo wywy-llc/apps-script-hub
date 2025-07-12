@@ -1,9 +1,11 @@
 import type { GitHubSearchSortOption } from '$lib/constants/github-search.js';
+import { DEFAULT_SCRIPT_ID_PATTERNS } from '$lib/constants/scraper-config.js';
 import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
 import { ProcessBulkGASLibraryWithSaveService } from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
 import { validateApiAuth } from '$lib/server/utils/api-auth.js';
+import type { BulkRegisterResponse } from '$lib/types/index.js';
 import type { ScrapedLibraryData } from '$lib/types/github-scraper.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
@@ -19,7 +21,7 @@ import { eq } from 'drizzle-orm';
  * Content-Type: application/json
  *
  * {
- *   "tag": "google-apps-script",
+ *   "tags": ["google-apps-script"],
  *   "maxPages": 3,
  *   "perPage": 10,
  *   "generateSummary": true
@@ -36,18 +38,18 @@ import { eq } from 'drizzle-orm';
  * crontab設定例:
  *
  * # 毎日午前2時に google-apps-script タグで一括登録
- * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tag":"google-apps-script","maxPages":3,"perPage":10,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
+ * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tags":["google-apps-script"],"maxPages":3,"perPage":10,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
  *
  * # 毎日午前3時に google-sheets タグで一括登録
- * 0 3 * * * /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tag":"google-sheets","maxPages":2,"perPage":10,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
+ * 0 3 * * * /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tags":["google-sheets"],"maxPages":2,"perPage":10,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
  *
  * # 毎週日曜日午前4時に library タグで一括登録（週1回）
- * 0 4 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tag":"library","maxPages":5,"perPage":15,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
+ * 0 4 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/libraries/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d '{"tags":["library"],"maxPages":5,"perPage":15,"generateSummary":true}' >> /var/log/gas-library-cron.log 2>&1
  */
 
 interface BulkRegisterRequest {
-  // 共通パラメータ
-  tag?: string;
+  // 必須パラメータ
+  tags: string[];
   generateSummary?: boolean;
 
   // cron用パラメータ（シンプル）
@@ -58,20 +60,6 @@ interface BulkRegisterRequest {
   startPage?: number;
   endPage?: number;
   sortOption?: GitHubSearchSortOption;
-  selectedTags?: string[];
-}
-
-interface BulkRegisterResponse {
-  success: boolean;
-  message: string;
-  summary: {
-    total: number;
-    successCount: number;
-    errorCount: number;
-    duplicateCount: number;
-    tag: string;
-  };
-  errors?: string[];
 }
 
 /**
@@ -89,35 +77,12 @@ export const POST: RequestHandler = async ({ request }) => {
     const body: BulkRegisterRequest = await request.json();
     console.log('📋 リクエストパラメータ:', JSON.stringify(body, null, 2));
 
-    // パラメータの正規化と検証
-    let tags: string[];
-    let startPage: number;
-    let endPage: number;
-    let perPage: number;
-    let sortOption: GitHubSearchSortOption;
-    let generateSummary: boolean;
-
-    if (body.selectedTags && body.selectedTags.length > 0) {
-      // 管理画面からの実行の場合
-      tags = body.selectedTags;
-      startPage = body.startPage || 1;
-      endPage = body.endPage || 3;
-      perPage = body.perPage || 10;
-      sortOption = body.sortOption || 'UPDATED_DESC';
-      generateSummary = body.generateSummary !== false;
-    } else if (body.tag) {
-      // cron実行の場合
-      tags = [body.tag];
-      startPage = 1;
-      endPage = body.maxPages || 3;
-      perPage = body.perPage || 10;
-      sortOption = 'UPDATED_DESC';
-      generateSummary = body.generateSummary !== false;
-    } else {
+    // パラメータ検証
+    if (!body.tags || !Array.isArray(body.tags) || body.tags.length === 0) {
       return json(
         {
           success: false,
-          message: 'tagまたはselectedTagsパラメータが必須です',
+          message: 'tagsパラメータ（文字列配列）が必須です',
           summary: {
             total: 0,
             successCount: 0,
@@ -128,6 +93,31 @@ export const POST: RequestHandler = async ({ request }) => {
         } as BulkRegisterResponse,
         { status: 400 }
       );
+    }
+
+    // パラメータの正規化と検証
+    const tags = body.tags;
+    let startPage: number;
+    let endPage: number;
+    let perPage: number;
+    let sortOption: GitHubSearchSortOption;
+    let generateSummary: boolean;
+
+    // その他のパラメータ設定
+    if (body.startPage !== undefined && body.endPage !== undefined) {
+      // 管理画面からの実行の場合
+      startPage = body.startPage;
+      endPage = body.endPage;
+      perPage = body.perPage || 10;
+      sortOption = body.sortOption || 'UPDATED_DESC';
+      generateSummary = body.generateSummary !== false;
+    } else {
+      // cron実行の場合
+      startPage = 1;
+      endPage = body.maxPages || 3;
+      perPage = body.perPage || 10;
+      sortOption = 'UPDATED_DESC';
+      generateSummary = body.generateSummary !== false;
     }
 
     const primaryTag = tags[0];
@@ -178,12 +168,7 @@ export const POST: RequestHandler = async ({ request }) => {
         maxRequestsPerHour: 60,
         delayBetweenRequests: 1000, // 1秒間隔
       },
-      scriptIdPatterns: [
-        /スクリプトID[：:\s]*([A-Za-z0-9_-]{20,})/gi,
-        /Script[\s]*ID[：:\s]*([A-Za-z0-9_-]{20,})/gi,
-        /script[\s]*id[：:\s]*['"`]([A-Za-z0-9_-]{20,})['"`]/gi,
-        /https:\/\/script\.google\.com\/macros\/d\/([A-Za-z0-9_-]{20,})/gi,
-      ],
+      scriptIdPatterns: DEFAULT_SCRIPT_ID_PATTERNS,
       gasTags: tags, // 指定されたタグを使用
       verbose: true,
     };

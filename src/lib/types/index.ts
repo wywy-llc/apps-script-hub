@@ -55,6 +55,20 @@ export interface LibrarySearchResult {
 // ロケール関連
 export type { Locale } from './locale';
 
+// API レスポンス型
+export interface BulkRegisterResponse {
+  success: boolean;
+  message: string;
+  summary: {
+    total: number;
+    successCount: number;
+    errorCount: number;
+    duplicateCount: number;
+    tag: string;
+  };
+  errors?: string[];
+}
+
 /**
  * 使用例:
  *

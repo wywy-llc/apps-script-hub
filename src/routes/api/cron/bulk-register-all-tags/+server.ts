@@ -1,3 +1,4 @@
+import { DEFAULT_GAS_TAGS } from '$lib/constants/scraper-config.js';
 import { validateCronAuth } from '$lib/server/utils/api-auth.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
@@ -86,23 +87,6 @@ interface BatchRegisterResponse {
 }
 
 /**
- * Google Apps Scriptでよく使われるタグリスト
- * 優先度順に並べられている
- */
-const DEFAULT_GAS_TAGS = [
-  'google-apps-script',
-  'google-sheets',
-  'apps-script',
-  'library',
-  'gas',
-  'google-workspace',
-  'gmail',
-  'google-drive',
-  'developer-tools',
-  'javascript',
-];
-
-/**
  * 全タグ一括登録エンドポイント
  */
 export const POST: RequestHandler = async ({ request, fetch }) => {
@@ -150,7 +134,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
             Authorization: request.headers.get('Authorization') || '',
           },
           body: JSON.stringify({
-            tag,
+            tags: [tag],
             maxPages,
             perPage,
             generateSummary,
@@ -187,7 +171,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         );
 
         // タグ間の待機時間（レート制限対策）
-        if (tags.indexOf(tag) < tags.length - 1) {
+        if (index < tags.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 2000)); // 2秒待機
         }
       } catch (error) {
