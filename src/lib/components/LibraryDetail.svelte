@@ -3,7 +3,7 @@
   import LibrarySummarySection from '$lib/components/LibrarySummarySection.svelte';
   import { LIBRARY_STATUS_BADGE_CLASS, type LibraryStatus } from '$lib/constants/library-status.js';
   import { formatDate, getStatusText } from '$lib/helpers/format.js';
-  import { truncateUrl, isValidGasWebAppUrl } from '$lib/helpers/url.js';
+  import { isValidGasWebAppUrl, truncateUrl } from '$lib/helpers/url.js';
   import * as m from '$lib/paraglide/messages.js';
   import { toastStore } from '$lib/stores/toast-store.js';
   import type { LibrarySummaryRecord } from '$lib/types/library-summary.js';
@@ -478,37 +478,44 @@
           <!-- Webアプリカード -->
           <div class="rounded-lg border p-4">
             <h3 class="mb-3 font-semibold text-gray-800">Webアプリ</h3>
-            <label for="web-app-url" class="text-sm font-medium text-gray-600"
-              >{m.web_app_execution_url()}</label
-            >
-            <div class="mt-1 flex items-center">
-              <input
-                id="web-app-url"
-                type="text"
-                readonly
-                value={sampleAppUrl}
-                class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
-              />
-              <button
-                onclick={() => copyToClipboard('web-app-url')}
-                aria-label={`${m.web_app_execution_url()}をコピー`}
-                class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
+
+            {#if isValidGasWebAppUrl(sampleAppUrl)}
+              <label for="web-app-url" class="text-sm font-medium text-gray-600"
+                >{m.web_app_execution_url()}</label
               >
-                <svg
-                  class="h-5 w-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div class="mt-1 flex items-center">
+                <input
+                  id="web-app-url"
+                  type="text"
+                  readonly
+                  value={sampleAppUrl}
+                  class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
+                />
+                <button
+                  onclick={() => copyToClipboard('web-app-url')}
+                  aria-label={`${m.web_app_execution_url()}をコピー`}
+                  class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-              </button>
-            </div>
+                  <svg
+                    class="h-5 w-5 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            {:else}
+              <p class="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-gray-500">
+                {m.invalid_web_app_url_notice()}
+              </p>
+            {/if}
 
             <!-- 実行リンク -->
             <div class="mt-3">
@@ -629,19 +636,17 @@
                   {truncateUrl(gasProjectUrl)}
                 </a>
               </dd>
-            {:else if library.scriptType === 'web_app'}
+            {:else if library.scriptType === 'web_app' && isValidGasWebAppUrl(sampleAppUrl)}
               <dt class="font-semibold text-gray-800">{m.web_app_execution_url()}</dt>
               <dd class="mb-3">
                 <a
-                  href={getWebAppUrl()}
+                  href={sampleAppUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-blue-600 hover:underline"
-                  title={getWebAppUrl()}
+                  title={sampleAppUrl}
                 >
-                  {isValidGasWebAppUrl(sampleAppUrl)
-                    ? truncateUrl(sampleAppUrl)
-                    : m.open_github_repository()}
+                  {truncateUrl(sampleAppUrl)}
                 </a>
               </dd>
             {/if}

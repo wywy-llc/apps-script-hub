@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { truncateUrl } from '../../../../src/lib/helpers/url';
+import {
+  truncateUrl,
+  extractGasScriptId,
+  isValidGasWebAppUrl,
+} from '../../../../src/lib/helpers/url';
 
 describe('truncateUrl', () => {
   describe('正常なケース', () => {
@@ -156,6 +160,90 @@ describe('truncateUrl', () => {
       const result = truncateUrl(url, 30);
       expect(result).toBe('https://example.com/search?...');
       expect(result.length).toBe(30);
+    });
+  });
+});
+
+describe('extractGasScriptId', () => {
+  describe('有効なGAS WebアプリURL', () => {
+    it('「1」で始まるライブラリ形式のスクリプトIDを抽出する', () => {
+      const url =
+        'https://script.google.com/macros/s/1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg/exec';
+      const result = extractGasScriptId(url);
+      expect(result).toBe('1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg');
+    });
+
+    it('「AKfyc」で始まるWebアプリIDを抽出する', () => {
+      const url =
+        'https://script.google.com/macros/s/AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt/exec';
+      const result = extractGasScriptId(url);
+      expect(result).toBe(
+        'AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt'
+      );
+    });
+  });
+
+  describe('無効なGAS WebアプリURL', () => {
+    it('「your-script-deployment-id」のような無効なIDはnullを返す', () => {
+      const url = 'https://script.google.com/macros/s/your-script-deployment-id/exec';
+      const result = extractGasScriptId(url);
+      expect(result).toBe(null);
+    });
+
+    it('「2」で始まるIDはnullを返す', () => {
+      const url =
+        'https://script.google.com/macros/s/2mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg/exec';
+      const result = extractGasScriptId(url);
+      expect(result).toBe(null);
+    });
+
+    it('「AK」で始まるが「AKfyc」でないIDはnullを返す', () => {
+      const url = 'https://script.google.com/macros/s/AKtest123/exec';
+      const result = extractGasScriptId(url);
+      expect(result).toBe(null);
+    });
+
+    it('GAS以外のURLはnullを返す', () => {
+      const url = 'https://example.com/test';
+      const result = extractGasScriptId(url);
+      expect(result).toBe(null);
+    });
+
+    it('文字列以外の入力はnullを返す', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(extractGasScriptId(null as any)).toBe(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(extractGasScriptId(undefined as any)).toBe(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(extractGasScriptId(123 as any)).toBe(null);
+    });
+  });
+});
+
+describe('isValidGasWebAppUrl', () => {
+  describe('有効なWebアプリURL', () => {
+    it('「1」で始まるライブラリ形式のURLは有効', () => {
+      const url =
+        'https://script.google.com/macros/s/1mbq56Ik4-I_4rnVlr9lTxJoXHStkjHYDyMHjmDWiRiJR3MDl-ThHwnbg/exec';
+      expect(isValidGasWebAppUrl(url)).toBe(true);
+    });
+
+    it('「AKfyc」で始まるWebアプリURLは有効', () => {
+      const url =
+        'https://script.google.com/macros/s/AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt/exec';
+      expect(isValidGasWebAppUrl(url)).toBe(true);
+    });
+  });
+
+  describe('無効なWebアプリURL', () => {
+    it('「your-script-deployment-id」は無効', () => {
+      const url = 'https://script.google.com/macros/s/your-script-deployment-id/exec';
+      expect(isValidGasWebAppUrl(url)).toBe(false);
+    });
+
+    it('GAS以外のURLは無効', () => {
+      const url = 'https://example.com/test';
+      expect(isValidGasWebAppUrl(url)).toBe(false);
     });
   });
 });

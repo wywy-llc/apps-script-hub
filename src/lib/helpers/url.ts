@@ -51,8 +51,10 @@ export function extractGasScriptId(url: string): string | null {
   }
 
   // GAS実行URLのパターン: 標準形式と/a/macros/形式の両方に対応
+  // WebアプリのスクリプトIDは「1」で始まるライブラリIDまたは「AK」で始まるWebアプリIDが有効
+  // 「your-script-deployment-id」のような無効なIDは除外
   const pattern =
-    /^https:\/\/script\.google\.com\/(?:a\/)?macros\/(?:[^/]+\/)?s\/([A-Za-z0-9_-]+)\/exec$/;
+    /^https:\/\/script\.google\.com\/(?:a\/)?macros\/(?:[^/]+\/)?s\/(1[A-Za-z0-9_-]{24,69}|AKfyc[A-Za-z0-9_-]{1,})\/exec$/;
   const match = url.match(pattern);
 
   return match ? match[1] : null;

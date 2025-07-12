@@ -25,6 +25,7 @@
   "open_web_app": "Webアプリを開く",
   "web_app_execution_url": "WebアプリURL",
   "open_github_repository": "GitHubリポジトリを開く",
+  "invalid_web_app_url_notice": "GitHubのREADMEで利用方法をご確認ください。",
   "cta_title": "あなたのライブラリを公開しませんか？",
   "cta_description": "あなたが作成した便利なGASライブラリやツールをGAS Library Hubに登録して、GASコミュニティに貢献しましょう。",
   "view_contribution_guide": "ライブラリ登録方法を見る",
