@@ -49,23 +49,27 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
 
 /**
  * Google Apps Script Web App検知パターン
- * READMEファイル内に.gsファイルの記載がある場合、Web Appとして検知する
+ * READMEファイル内に.gsまたは.jsファイルの記載がある場合、Web Appとして検知する
  * より具体的なコンテキスト（ファイルパス、リンク、ファイルリスト等）を考慮した精密なパターン
  * コードブロック内やクォート内の記載は除外
  */
 export const DEFAULT_WEB_APP_PATTERNS: RegExp[] = [
-  // Markdownリンク形式（最も確実）
-  /\[.*?\]\([^)]*\.gs\)/gi,
-  // ファイルリスト形式（行頭やリスト記号の後）
-  /(?:^|\n|[-*+]\s+|[\d]+\.\s+)(?:[a-zA-Z0-9_-]+\.gs)\b/gim,
+  // Markdownリンク形式（最も確実）- .gsと.js両方対応
+  /\[.*?\]\([^)]*\.(?:gs|js)\)/gi,
+  // ファイルリスト形式（行頭やリスト記号の後）- .gsと.js両方対応
+  /(?:^|\n|[-*+]\s+|[\d]+\.\s+)(?:[a-zA-Z0-9_-]+\.(?:gs|js))\b/gim,
   // ディレクトリ構造やファイル一覧での記載
-  /(?:├|└|│)\s*[a-zA-Z0-9_-]+\.gs\b/gi,
+  /(?:├|└|│)\s*[a-zA-Z0-9_-]+\.(?:gs|js)\b/gi,
   // ファイルパス形式（スラッシュで始まる）
-  /\/[a-zA-Z0-9_/-]+\.gs\b/gi,
+  /\/[a-zA-Z0-9_/-]+\.(?:gs|js)\b/gi,
   // 典型的なGASファイル名（行頭または空白後、クォートなし）
-  /(?:^|\s)(?:main|code|app|script|index|appsscript)\.gs\b/gim,
-  // Google Apps Scriptと.gsの組み合わせ
-  /google\s*apps?\s*script.*?[a-zA-Z0-9_-]+\.gs/gi,
+  /(?:^|\s)(?:main|code|app|script|index|appsscript)\.(?:gs|js)\b/gim,
+  // Google Apps Scriptと.gs/.jsの組み合わせ
+  /google\s*apps?\s*script.*?[a-zA-Z0-9_-]+\.(?:gs|js)/gi,
+  // GASでよく使われるファイル名パターン（.gsまたは.js）
+  /\b(?:code|main|app|script|index)[a-zA-Z0-9_-]*\.(?:gs|js)\b/gi,
+  // HTML関連ファイル（Webアプリの特徴）
+  /[a-zA-Z0-9_-]+\.html\b/gi,
 ];
 
 /**

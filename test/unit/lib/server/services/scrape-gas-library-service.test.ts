@@ -127,6 +127,27 @@ describe('ScrapeGASLibraryService', () => {
       expect(result.data?.scriptId).toBe('test-owner/test-repo');
     });
 
+    test('GAS .jsファイルもWebアプリとして正しく検知される', async () => {
+      const readmeWithJsFiles = `
+        # 客製化選項選擇登記萬用系統
+        
+        *   \`code.js\`:
+            *   核心後端邏輯檔案。
+        *   \`codeUser.js\`:
+            *   處理所有用戶帳號相關的操作。
+        *   \`index.html\`:
+            *   系統登入頁面。
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithJsFiles);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptId).toBe('test-owner/test-repo');
+    });
+
     test('コード例内の.gsファイル名は誤検知されない', async () => {
       const readmeWithCodeExamples = `
         # GAS Library
@@ -189,6 +210,35 @@ describe('ScrapeGASLibraryService', () => {
       expect(result.success).toBe(true);
       expect(result.data?.scriptType).toBe('library');
       expect(result.data?.scriptId).toBe('AKfycbxTEST123456789abcdef');
+    });
+
+    test('AKから始まるWebアプリURLで.jsファイルがある場合、web_appとして分類される', async () => {
+      const readmeWithComplexWebApp = `
+        # 客製化選項選擇登記萬用系統
+        
+        歡迎參觀我的網站 [Gas Station](https://script.google.com/a/macros/gms.hlgs.hlc.edu.tw/s/AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt/exec "GAS Station")
+        
+        ### Google Apps Script 檔案 (.gs)
+        
+        *   \`code.js\`:
+            *   核心後端邏輯檔案。
+        *   \`codeUser.js\`:
+            *   處理所有用戶帳號相關的操作。
+        *   \`index.html\`:
+            *   系統登入頁面。
+        *   \`main.html\`:
+            *   用戶登入後的主要操作介面。
+      `;
+
+      mockGitHubApiUtils.fetchReadme.mockResolvedValue(readmeWithComplexWebApp);
+
+      const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
+
+      expect(result.success).toBe(true);
+      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptId).toBe(
+        'AKfycbzS29sVfv6vUKcXY8zhHl8XZKU52VfvjxzqeEQACrAufS7JiWOexlIYgyfgtCusAVJt'
+      );
     });
   });
 
