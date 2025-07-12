@@ -1,15 +1,12 @@
-import { PAGINATION } from '$lib/constants/app-config';
+import { createAppUrl, PAGINATION } from '$lib/constants/app-config';
 import {
   GITHUB_SEARCH_SORT_OPTIONS,
   type GitHubSearchSortOption,
 } from '$lib/constants/github-search';
-import { DEFAULT_SCRAPER_CONFIG } from '$lib/constants/scraper-config';
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
-import {
-  ProcessBulkGASLibraryWithSaveService,
-  type LibrarySaveWithSummaryCallback,
-} from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
+import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
+import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -45,9 +42,9 @@ export const load = (async () => {
 export const actions: Actions = {
   /**
    * GASタグによる自動検索・一括新規追加アクション
-   * GitHubのGASタグを持つリポジトリを自動検索してライブラリ情報をスクレイピング・一括登録
+   * - `/api/libraries/bulk-register`
    */
-  bulkAddByTags: async ({ request }) => {
+  bulkAddByTags: async ({ request, fetch }) => {
     try {
       const formData = await request.formData();
       const startPageStr = formData.get('startPage') as string;
@@ -114,96 +111,84 @@ export const actions: Actions = {
         });
       }
 
-      // 重複チェック関数
-      const duplicateChecker = async (scriptId: string): Promise<boolean> => {
-        const existing = await db
-          .select({ id: library.id })
-          .from(library)
-          .where(eq(library.scriptId, scriptId))
-          .limit(1);
-        return existing.length > 0;
-      };
-
-      // ライブラリ保存コールバック関数（ページごとにDB保存）
-      const saveCallback: LibrarySaveWithSummaryCallback = async (
-        libraryData,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        _generateSummary
-      ) => {
-        try {
-          const [inserted] = await db
-            .insert(library)
-            .values({
-              id: crypto.randomUUID(),
-              name: libraryData.name,
-              scriptId: libraryData.scriptId,
-              repositoryUrl: libraryData.repositoryUrl,
-              authorUrl: libraryData.authorUrl,
-              authorName: libraryData.authorName,
-              description: libraryData.description,
-              licenseType: libraryData.licenseType || 'unknown',
-              licenseUrl: libraryData.licenseUrl || 'unknown',
-              starCount: libraryData.starCount || 0,
-              copyCount: 0,
-              lastCommitAt: libraryData.lastCommitAt,
-              status: 'pending',
-              requesterId: undefined,
-              requestNote: undefined,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            })
-            .returning({ id: library.id });
-
-          return { success: true, id: inserted.id };
-        } catch (error) {
-          console.error('データベース挿入エラー:', error);
-          return {
-            success: false,
-            error: error instanceof Error ? error.message : '不明なエラー',
-          };
-        }
-      };
-
-      // カスタムスクレイパー設定（選択されたタグのみ使用）
-      const customConfig = {
-        ...DEFAULT_SCRAPER_CONFIG,
-        gasTags: selectedTags,
-      };
-
-      // GASタグによる一括スクレイピング実行（ページごとにDB保存 + AI要約生成）
-      const result = await ProcessBulkGASLibraryWithSaveService.call(
+      const apiUrl = createAppUrl('/api/libraries/bulk-register');
+      const apiRequest = {
         startPage,
         endPage,
         perPage,
-        duplicateChecker,
-        saveCallback,
         sortOption,
-        true, // generateSummary
-        customConfig
-      );
+        tags: selectedTags,
+        generateSummary: true,
+      };
+
+      console.log(`管理画面から一括登録API呼び出し: ${apiUrl}`, apiRequest);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: generateAuthHeader(),
+        },
+        body: JSON.stringify(apiRequest),
+      });
+
+      console.log(`API呼び出し結果: status=${response.status}, ok=${response.ok}`);
+
+      if (!response.ok) {
+        let errorData;
+        let responseText = '';
+
+        try {
+          responseText = await response.text();
+          errorData = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('APIレスポンスのパースに失敗:', parseError);
+          console.error('レスポンステキスト:', responseText);
+          errorData = { message: `API呼び出しエラー: ${response.status} ${response.statusText}` };
+        }
+
+        const errorMessage =
+          errorData.message || `API呼び出しエラー: ${response.status} ${response.statusText}`;
+        console.error('API呼び出しエラー詳細:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          responseText: responseText.substring(0, 500), // 最初の500文字のみログ
+        });
+
+        throw new Error(errorMessage);
+      }
+
+      const result: BulkRegisterResponse = await response.json();
+
+      if (!result.success) {
+        return fail(500, {
+          error: result.message || 'API実行に失敗しました。',
+        });
+      }
 
       // 結果メッセージの生成
       const messages = [
-        `自動検索・処理完了: ${result.total}件のリポジトリ中 ${result.successCount}件を登録しました。`,
+        `自動検索・処理完了: ${result.summary.total}件のリポジトリ中 ${result.summary.successCount}件を登録しました。`,
       ];
 
-      if (result.errorCount > 0) {
-        messages.push(`エラー: ${result.errorCount}件`);
+      if (result.summary.errorCount > 0) {
+        messages.push(`エラー: ${result.summary.errorCount}件`);
       }
 
-      if (result.duplicateCount > 0) {
-        messages.push(`重複スキップ: ${result.duplicateCount}件`);
+      if (result.summary.duplicateCount > 0) {
+        messages.push(`重複スキップ: ${result.summary.duplicateCount}件`);
       }
 
       return {
         success: true,
         message: messages.join(' '),
         details: {
-          total: result.total,
-          inserted: result.successCount,
-          errors: result.errorCount,
-          duplicates: result.duplicateCount,
-          results: result.results,
+          total: result.summary.total,
+          inserted: result.summary.successCount,
+          errors: result.summary.errorCount,
+          duplicates: result.summary.duplicateCount,
+          apiResponse: result,
         },
       };
     } catch (error) {
