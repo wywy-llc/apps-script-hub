@@ -138,9 +138,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     let successTags = 0;
 
     // 各タグを順次処理
-    for (const tag of tags) {
+    for (const [index, tag] of tags.entries()) {
       try {
-        console.log(`📋 処理中: ${tag} (${tags.indexOf(tag) + 1}/${tags.length})`);
+        console.log(`📋 処理中: ${tag} (${index + 1}/${tags.length})`);
 
         // 個別タグ用APIを呼び出し
         const response = await fetch('/api/libraries/bulk-register', {
