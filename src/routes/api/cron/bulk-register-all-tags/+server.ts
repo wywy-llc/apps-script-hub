@@ -1,3 +1,4 @@
+import { validateCronAuth } from '$lib/server/utils/cron-auth.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 /**
@@ -21,13 +22,14 @@ import { json, type RequestHandler } from '@sveltejs/kit';
  * crontab設定例:
  *
  * # 毎日午前2時に全タグで一括登録（推奨）
- * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -d "{\"maxPages\":2,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-all-tags-cron.log 2>&1
+ * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"maxPages\":2,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-all-tags-cron.log 2>&1
  *
  * # 毎週日曜日午前1時に全タグで大規模一括登録（週1回）
- * 0 1 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -d "{\"maxPages\":5,\"perPage\":20,\"generateSummary\":true}" >> /var/log/gas-library-all-tags-weekly.log 2>&1
+ * 0 1 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"maxPages\":5,\"perPage\":20,\"generateSummary\":true}" >> /var/log/gas-library-all-tags-weekly.log 2>&1
  *
  * # 平日のみ午前3時に軽量実行（業務日対応）
- * 0 3 * * 1-5 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -d "{\"maxPages\":1,\"perPage\":5,\"generateSummary\":false}" >> /var/log/gas-library-weekday-cron.log 2>&1
+ * 0 3 * * 1-5 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register-all-tags -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"maxPages\":1,\"perPage\":5,\"generateSummary\":false}" >> /var/log/gas-library-weekday-cron.log 2>&1
+ *
  *
  * 処理対象タグ（順次実行）:
  * 1. google-apps-script  - 最重要タグ
@@ -105,6 +107,9 @@ const DEFAULT_GAS_TAGS = [
  */
 export const POST: RequestHandler = async ({ request, fetch }) => {
   try {
+    // 認証チェック
+    validateCronAuth(request);
+
     const body: BatchRegisterRequest = await request.json();
 
     const maxPages = body.maxPages || 2;

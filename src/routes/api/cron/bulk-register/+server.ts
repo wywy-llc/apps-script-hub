@@ -2,6 +2,7 @@ import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
 import { ProcessBulkGASLibraryWithSaveService } from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
+import { validateCronAuth } from '$lib/server/utils/cron-auth.js';
 import type { ScrapedLibraryData } from '$lib/types/github-scraper.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
@@ -30,13 +31,14 @@ import { eq } from 'drizzle-orm';
  * crontab設定例:
  *
  * # 毎日午前2時に google-apps-script タグで一括登録
- * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -d "{\"tag\":\"google-apps-script\",\"maxPages\":10,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
+ * 0 2 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"tag\":\"google-apps-script\",\"maxPages\":3,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
  *
  * # 毎日午前3時に google-sheets タグで一括登録
- * 0 3 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -d "{\"tag\":\"google-sheets\",\"maxPages\":2,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
+ * 0 3 * * * /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"tag\":\"google-sheets\",\"maxPages\":2,\"perPage\":10,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
  *
  * # 毎週日曜日午前4時に library タグで一括登録（週1回）
- * 0 4 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -d "{\"tag\":\"library\",\"maxPages\":5,\"perPage\":15,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
+ * 0 4 * * 0 /usr/bin/curl -X POST http://localhost:5173/api/cron/bulk-register -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_SECRET" -d "{\"tag\":\"library\",\"maxPages\":5,\"perPage\":15,\"generateSummary\":true}" >> /var/log/gas-library-cron.log 2>&1
+ *
  *
  * crontab時刻フォーマット:
  * 分(0-59) 時(0-23) 日(1-31) 月(1-12) 曜日(0-7, 0と7は日曜日)
@@ -73,6 +75,9 @@ interface BulkRegisterResponse {
  */
 export const POST: RequestHandler = async ({ request }) => {
   try {
+    // 認証チェック
+    validateCronAuth(request);
+
     const body: BulkRegisterRequest = await request.json();
 
     // パラメータのバリデーション
