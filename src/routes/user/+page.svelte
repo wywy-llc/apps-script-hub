@@ -82,7 +82,7 @@
     </div>
 
     <footer class="mt-16 text-center">
-      <Button variant="outline" size="lg" href="/user/search">
+      <Button variant="outline" size="lg" href="/user/search?scriptType=library">
         {view_all_libraries()}
       </Button>
     </footer>

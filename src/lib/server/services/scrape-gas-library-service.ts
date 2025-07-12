@@ -54,6 +54,7 @@ export class ScrapeGASLibraryService {
     }
     return null;
   }
+
   /**
    * 単一のGitHubリポジトリからライブラリ情報をスクレイピング
    *
@@ -80,53 +81,39 @@ export class ScrapeGASLibraryService {
         GitHubApiUtils.fetchLastCommitDate(owner, repo),
       ]);
 
-      // READMEからスクリプトIDを抽出（ライブラリ形式を優先）
-      let scriptId = readmeContent
-        ? GASScriptIdExtractor.extractScriptId(readmeContent)
-        : undefined;
-
+      let scriptId: string | undefined;
       let scriptType: 'library' | 'web_app' = 'library';
 
       if (readmeContent) {
         // WebアプリURLをチェック
         const webAppInfo = this.extractWebAppInfo(readmeContent);
-        if (webAppInfo) {
-          // WebアプリURLから抽出されたスクリプトIDを優先使用
-          const webAppScriptId = webAppInfo.scriptId;
 
-          // 1から始まる場合はライブラリとして分類
-          if (webAppScriptId.startsWith('1')) {
-            scriptId = webAppScriptId;
-            scriptType = 'library';
-          } else if (webAppScriptId.startsWith('AK')) {
-            // AKから始まる場合は、Webアプリの条件をチェック
-            const hasWebAppConditions = this.detectWebAppFromGsFiles(readmeContent);
-            if (hasWebAppConditions) {
-              scriptId = webAppScriptId;
-              scriptType = 'web_app';
-            } else {
-              // Webアプリ条件がない場合はライブラリとして扱う
-              scriptId = webAppScriptId;
-              scriptType = 'library';
-            }
-          } else {
-            // その他の場合はWebアプリとして分類
-            scriptId = webAppScriptId;
-            scriptType = 'web_app';
-          }
-        } else if (scriptId) {
+        // READMEからスクリプトIDを抽出（ライブラリ形式のみ：1から始まるID）
+        const extractedScriptId = GASScriptIdExtractor.extractScriptId(readmeContent);
+        const libraryScriptId = extractedScriptId?.startsWith('1') ? extractedScriptId : undefined;
+
+        const webAppFromGsFiles = this.detectWebAppFromGsFiles(readmeContent);
+
+        if (webAppInfo && libraryScriptId) {
+          // WebアプリURLと通常のライブラリスクリプトIDの両方がある場合はライブラリとして分類
+          scriptId = libraryScriptId;
+          scriptType = 'library';
+        } else if (webAppInfo) {
+          // WebアプリURLのみがある場合はweb_appとして分類
+          scriptId = webAppInfo.scriptId;
+          scriptType = 'web_app';
+        } else if (libraryScriptId) {
           // WebアプリURLがなく、通常のスクリプトIDがある場合
-          if (scriptId.startsWith('1')) {
+          scriptId = libraryScriptId;
+          if (libraryScriptId.startsWith('1')) {
             scriptType = 'library';
           } else {
             // 1以外から始まる場合はWebアプリ条件をチェック
-            const hasWebAppConditions = this.detectWebAppFromGsFiles(readmeContent);
-            scriptType = hasWebAppConditions ? 'web_app' : 'library';
+            scriptType = webAppFromGsFiles ? 'web_app' : 'library';
           }
         } else {
           // スクリプトIDもWebアプリURLもない場合、.gsファイルをチェック
-          const webAppType = this.detectWebAppFromGsFiles(readmeContent);
-          if (webAppType) {
+          if (webAppFromGsFiles) {
             scriptType = 'web_app';
             // スクリプトIDが無い場合はowner/repo形式をscriptIdとして使用（重複回避）
             scriptId = `${owner}/${repo}`;

@@ -196,7 +196,7 @@ describe('ScrapeGASLibraryService', () => {
       );
     });
 
-    test('AKから始まるWebアプリURLで.gsファイルがない場合、libraryとして分類される', async () => {
+    test('AKから始まるWebアプリURLで.gsファイルがない場合、web_appとして分類される', async () => {
       const readmeWithStandardUrl = `
         # Test Web App
         
@@ -208,7 +208,7 @@ describe('ScrapeGASLibraryService', () => {
       const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
 
       expect(result.success).toBe(true);
-      expect(result.data?.scriptType).toBe('library');
+      expect(result.data?.scriptType).toBe('web_app');
       expect(result.data?.scriptId).toBe('AKfycbxTEST123456789abcdef');
     });
 
