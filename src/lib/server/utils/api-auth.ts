@@ -34,12 +34,12 @@ function tryValidateAuthSecret(request: Request): boolean {
 
   // 1. Authorization Bearer トークンをチェック
   const authHeader = request.headers.get('authorization');
-  
+
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.*)$/i);
     if (match) {
       const token = match[1];
-      
+
       if (token === AUTH_SECRET) {
         return true;
       }
@@ -49,7 +49,7 @@ function tryValidateAuthSecret(request: Request): boolean {
   // 2. クエリパラメータをチェック
   const url = new URL(request.url);
   const authParam = url.searchParams.get('auth');
-  
+
   if (authParam === AUTH_SECRET) {
     return true;
   }
