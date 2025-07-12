@@ -49,6 +49,8 @@
   "login_with_google": "Login with Google",
   "search_by_tag_tooltip": "Search by \"{tag}\"",
   "search_by_tag_aria": "Search by \"{tag}\" tag",
+  "script_type_library": "Library",
+  "script_type_web_app": "Web App",
   "library_detail_title": "Library Details",
   "scraping_in_progress": "Scraping in progress...",
   "execute_scraping": "Execute Scraping",
