@@ -17,9 +17,9 @@ test.describe('Admin Screen - Library Bulk Register API', () => {
     await page.locator('select[name="perPage"]').selectOption('10');
     await page.locator('select[name="sortOption"]').selectOption('UPDATED_DESC');
 
-    // タグを選択（テスト用に少数のタグのみ）
+    // タグを選択（テスト用に少数のタグのみ - DEFAULT_SCRAPER_CONFIG.gasTagsに含まれるタグを使用）
     await page.locator('input[name="selectedTags"][value="google-apps-script"]').check();
-    await page.locator('input[name="selectedTags"][value="apps-script"]').check();
+    await page.locator('input[name="selectedTags"][value="google-sheets"]').check();
 
     // APIレスポンスをモック（軽量テスト用）
     await page.route('**/api/libraries/bulk-register', async route => {
@@ -32,7 +32,7 @@ test.describe('Admin Screen - Library Bulk Register API', () => {
         endPage: 1,
         perPage: 10,
         sortOption: 'UPDATED_DESC',
-        selectedTags: expect.arrayContaining(['google-apps-script', 'apps-script']),
+        tags: expect.arrayContaining(['google-apps-script', 'google-sheets']),
         generateSummary: true,
       });
 

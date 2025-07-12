@@ -36,19 +36,24 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
 
 /**
  * Google Apps Scriptでよく使われるタグリスト
- * 優先度順に並べられている
+ * 実際のGitHubリポジトリ調査に基づく優先度順
+ *
+ * 調査日: 2025-07-12
+ * 調査元: https://github.com/topics/google-apps-script
  */
 export const DEFAULT_GAS_TAGS = [
   'google-apps-script',
+
   'google-sheets',
+  'gmail',
+  'google-workspace',
+  'google-drive',
+  'google-docs',
   'apps-script',
+  'javascript',
+  'typescript',
   'library',
   'gas',
-  'google-workspace',
-  'gmail',
-  'google-drive',
-  'developer-tools',
-  'javascript',
 ] as const;
 
 /**
