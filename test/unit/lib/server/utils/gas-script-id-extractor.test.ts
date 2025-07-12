@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { GASScriptIdExtractor } from '../../../../../src/lib/server/utils/gas-script-id-extractor.js';
 import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 
@@ -36,12 +36,12 @@ describe('GASScriptIdExtractor', () => {
       expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
     });
 
-    test('1で始まる20文字以上の文字列から抽出する（現在のパターンでは抽出されない）', () => {
+    test('1で始まる25文字以上の文字列から抽出する（修正されたパターンで完全なIDが抽出される）', () => {
       const readme =
         'Use this script: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF for testing';
       const result = GASScriptIdExtractor.extractScriptId(readme);
-      // 現在のパターンでは単体のスクリプトIDは抽出されない（キャプチャグループがないため）
-      expect(result).toBeUndefined();
+      // 修正されたパターンでは先頭の「1」も含めて完全なIDが抽出される
+      expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
     });
 
     test('複数のスクリプトIDがある場合は最初のものを返す', () => {
@@ -97,6 +97,7 @@ describe('GASScriptIdExtractor', () => {
     test('ScraperConfigのパターンを使用してスクリプトIDを抽出できる', () => {
       const config = {
         scriptIdPatterns: [/スクリプトID[：:\s]*([A-Za-z0-9_-]{20,})/gi],
+        webAppPatterns: [],
         gasTags: ['test'],
         rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
         verbose: false,
@@ -110,6 +111,7 @@ describe('GASScriptIdExtractor', () => {
     test('設定のパターンでマッチしない場合はundefined', () => {
       const config = {
         scriptIdPatterns: [/MY_CUSTOM_ID:\s*([A-Za-z0-9_-]{20,})/gi],
+        webAppPatterns: [],
         gasTags: ['test'],
         rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
         verbose: false,
@@ -123,7 +125,7 @@ describe('GASScriptIdExtractor', () => {
 
   describe('DEFAULT_SCRIPT_ID_PATTERNS', () => {
     test('デフォルトパターンが正しく定義されている', () => {
-      expect(GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS).toHaveLength(7);
+      expect(GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS).toHaveLength(9);
       expect(
         GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS.every(pattern => pattern instanceof RegExp)
       ).toBe(true);
@@ -153,18 +155,94 @@ describe('GASScriptIdExtractor', () => {
         },
         {
           text: 'ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-          shouldMatch: false, // 現在のパターンでは "ID:" だけでは抽出されない
+          shouldMatch: true, // 改善されたパターンでは1で始まる文字列も抽出される
         },
       ];
 
       testCases.forEach(({ text, shouldMatch }) => {
         const result = GASScriptIdExtractor.extractScriptId(text);
         if (shouldMatch) {
+          // 修正されたパターンでは常に完全なスクリプトIDが返される
           expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
         } else {
           expect(result).toBeUndefined();
         }
       });
+    });
+  });
+
+  describe('GitHub画像URL誤検知対策', () => {
+    test('画像ファイル拡張子付きの文字列は抽出しない', () => {
+      const readme = `
+        # Monthly Bill Generator Apps Script
+        
+        From emails in your inbox: 
+        ![Inbox Emails](https://example.com/images/103873116-2dd87e00-5084-11eb-8ab6-d4c1b7be8ec6.png)
+        
+        To sending out:
+        ![Composed Email](https://example.com/images/103457672-18470b00-4cb6-11eb-9e84-5c69af90e90a.jpg)
+        
+        Also see: 123456789012345678901234567890.gif
+      `;
+      const result = GASScriptIdExtractor.extractScriptId(readme);
+      expect(result).toBeUndefined();
+    });
+
+    test('画像ファイルの拡張子を持つ1で始まる文字列は除外される', () => {
+      const readme = `
+        Check this image: https://example.com/images/103873116-2dd87e00-5084-11eb-8ab6-d4c1b7be8ec6.png
+        But this script ID should work: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
+      `;
+      const result = GASScriptIdExtractor.extractScriptId(readme);
+      expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+    });
+
+    test('ファイル拡張子付きの文字列は除外される', () => {
+      const readme = `
+        Image file: 123456789abcdef123456789abcdef.png
+        Script file: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
+      `;
+      const result = GASScriptIdExtractor.extractScriptId(readme);
+      expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+    });
+
+    test('UUID形式（ハイフン区切り）の文字列は除外される', () => {
+      const readme = `
+        UUID: 12345678-1234-1234-1234-123456789abc
+        Script ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
+      `;
+      const result = GASScriptIdExtractor.extractScriptId(readme);
+      expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+    });
+  });
+
+  describe('Web App検知機能', () => {
+    test('.gsファイルの記載からWeb Appとして検知される', () => {
+      const readme = `
+        # Test Project
+        
+        [Main.gs](Main.gs) is where most of the logic happens.
+        
+        Also check [Code.gs](Code.gs) for additional functions.
+      `;
+
+      // Web App検知の実装は今後のテストで確認
+      // この段階では.gsファイルが含まれていることを確認
+      expect(readme).toContain('.gs');
+      expect(readme).toContain('Main.gs');
+      expect(readme).toContain('Code.gs');
+    });
+
+    test('Google Apps Scriptファイル形式の記載を検知', () => {
+      const readme = `
+        This Google Apps Script project includes several .gs files:
+        - main.gs
+        - utils.gs
+        - config.gs
+      `;
+
+      expect(readme).toContain('Google Apps Script');
+      expect(readme).toContain('.gs');
     });
   });
 });

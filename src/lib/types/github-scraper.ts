@@ -9,6 +9,7 @@ export interface ScraperConfig {
     delayBetweenRequests: number;
   };
   scriptIdPatterns: RegExp[];
+  webAppPatterns: RegExp[];
   gasTags: string[];
   verbose: boolean;
 }
@@ -54,6 +55,7 @@ export interface ScrapedLibraryData {
   starCount?: number;
   lastCommitAt: Date;
   status: 'pending';
+  scriptType: 'library' | 'web_app';
 }
 
 export interface ScrapeResult {

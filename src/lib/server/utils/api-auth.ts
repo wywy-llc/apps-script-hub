@@ -33,13 +33,14 @@ function tryValidateAuthSecret(request: Request): boolean {
   }
 
   // 1. Authorization Bearer トークンをチェック
-  const authHeader = request.headers.get('authorization'); // ヘッダー名は大文字小文字を区別しない
+  const authHeader = request.headers.get('authorization');
+
   if (authHeader) {
-    const match = authHeader.match(/^Bearer\s+(.*)$/i); // 'Bearer '接頭辞を大文字小文字非依存で処理
+    const match = authHeader.match(/^Bearer\s+(.*)$/i);
     if (match) {
       const token = match[1];
+
       if (token === AUTH_SECRET) {
-        console.log('AUTH_SECRET認証成功: Authorization Bearer');
         return true;
       }
     }
@@ -48,8 +49,8 @@ function tryValidateAuthSecret(request: Request): boolean {
   // 2. クエリパラメータをチェック
   const url = new URL(request.url);
   const authParam = url.searchParams.get('auth');
+
   if (authParam === AUTH_SECRET) {
-    console.log('AUTH_SECRET認証成功: クエリパラメータ');
     return true;
   }
 

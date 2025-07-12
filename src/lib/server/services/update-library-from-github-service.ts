@@ -7,6 +7,7 @@ import { ServiceErrorUtil } from '$lib/server/utils/service-error-util.js';
 import { eq } from 'drizzle-orm';
 import { FetchGitHubRepoDataService } from './fetch-github-repo-data-service.js';
 import { GenerateAiSummaryService } from './generate-ai-summary-service.js';
+import { ScrapeGASLibraryService } from './scrape-gas-library-service.js';
 
 /**
  * GitHub リポジトリ情報を再取得するサービス
@@ -34,11 +35,43 @@ export class UpdateLibraryFromGithubService {
     );
     const { owner, repo } = parsedUrl!;
 
-    // GitHub から情報を取得
+    // GitHub から基本情報を取得
     const { repoInfo, licenseInfo, lastCommitAt } = await FetchGitHubRepoDataService.call(
       owner,
       repo
     );
+
+    // スクレイピングでGAS固有の情報を取得
+    let scriptId = libraryData!.scriptId;
+    let scriptType = libraryData!.scriptType;
+
+    try {
+      console.log(
+        `ライブラリ更新: スクレイピングを実行してスクリプトID情報を更新 - ${libraryData!.repositoryUrl}`
+      );
+      const scrapeResult = await ScrapeGASLibraryService.call(libraryData!.repositoryUrl);
+
+      if (scrapeResult.success && scrapeResult.data) {
+        const newScriptId = scrapeResult.data.scriptId;
+        const newScriptType = scrapeResult.data.scriptType;
+
+        // スクリプトIDが変更された場合はログ出力
+        if (newScriptId !== libraryData!.scriptId) {
+          console.log(`スクリプトID更新: ${libraryData!.scriptId} → ${newScriptId}`);
+          scriptId = newScriptId;
+        }
+
+        // スクリプトタイプが変更された場合はログ出力
+        if (newScriptType !== libraryData!.scriptType) {
+          console.log(`スクリプトタイプ更新: ${libraryData!.scriptType} → ${newScriptType}`);
+          scriptType = newScriptType;
+        }
+      } else {
+        console.warn(`スクレイピング失敗: ${scrapeResult.error} - 既存の値を保持します`);
+      }
+    } catch (error) {
+      console.warn(`スクレイピングエラー: ${error} - 既存の値を保持します`);
+    }
 
     // 新しいlastCommitAtと既存データを比較
     const hasCommitChanges = libraryData!.lastCommitAt.getTime() !== lastCommitAt.getTime();
@@ -49,7 +82,7 @@ export class UpdateLibraryFromGithubService {
     // AI要約生成判定: lastCommitAtに変化がある または library_summaryが存在しない場合（スキップオプションが無効の場合）
     const shouldGenerateSummary = !options.skipAiSummary && (hasCommitChanges || !summaryExists);
 
-    // ライブラリを更新
+    // ライブラリを更新（スクリプトIDとタイプも含む）
     await db
       .update(library)
       .set({
@@ -62,6 +95,8 @@ export class UpdateLibraryFromGithubService {
         licenseType: licenseInfo.type,
         licenseUrl: licenseInfo.url,
         lastCommitAt: lastCommitAt,
+        scriptId: scriptId,
+        scriptType: scriptType,
         updatedAt: new Date(),
       })
       .where(eq(library.id, libraryId));

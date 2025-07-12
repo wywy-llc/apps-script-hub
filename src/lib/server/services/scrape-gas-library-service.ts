@@ -1,6 +1,8 @@
+import { DEFAULT_WEB_APP_PATTERNS } from '$lib/constants/scraper-config.js';
+import { extractGasScriptId, isValidGasWebAppUrl } from '$lib/helpers/url.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import { GASScriptIdExtractor } from '$lib/server/utils/gas-script-id-extractor.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
-import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper.js';
 
 /**
@@ -11,6 +13,48 @@ import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper
  * const result = await ScrapeGASLibraryService.call('https://github.com/owner/repo');
  */
 export class ScrapeGASLibraryService {
+  /**
+   * READMEからGAS WebアプリのURLを検出する
+   *
+   * @param readmeContent - README文字列
+   * @returns 検出されたscriptIdとscriptType、または null
+   */
+  private static extractWebAppInfo(
+    readmeContent: string
+  ): { scriptId: string; scriptType: 'web_app' } | null {
+    // GAS実行URLのパターンを検索（標準形式と/a/macros/形式の両方に対応）
+    const webAppUrlPattern =
+      /https:\/\/script\.google\.com\/(?:a\/)?macros\/(?:[^/]+\/)?s\/([A-Za-z0-9_-]+)\/exec/g;
+    const matches = readmeContent.matchAll(webAppUrlPattern);
+
+    for (const match of matches) {
+      const url = match[0];
+      if (isValidGasWebAppUrl(url)) {
+        const scriptId = extractGasScriptId(url);
+        if (scriptId) {
+          return { scriptId, scriptType: 'web_app' };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * READMEに.gsファイルの記載があるかチェックし、Web Appとして検知する
+   *
+   * @param readmeContent - README文字列
+   * @returns .gsファイルが見つかればweb_app、そうでなければnull
+   */
+  private static detectWebAppFromGsFiles(readmeContent: string): 'web_app' | null {
+    for (const pattern of DEFAULT_WEB_APP_PATTERNS) {
+      if (pattern.test(readmeContent)) {
+        return 'web_app';
+      }
+    }
+    return null;
+  }
+
   /**
    * 単一のGitHubリポジトリからライブラリ情報をスクレイピング
    *
@@ -37,15 +81,51 @@ export class ScrapeGASLibraryService {
         GitHubApiUtils.fetchLastCommitDate(owner, repo),
       ]);
 
-      // READMEからスクリプトIDを抽出
-      const scriptId = readmeContent
-        ? GASScriptIdExtractor.extractScriptId(readmeContent)
-        : undefined;
+      let scriptId: string | undefined;
+      let scriptType: 'library' | 'web_app' = 'library';
+
+      if (readmeContent) {
+        // WebアプリURLをチェック
+        const webAppInfo = this.extractWebAppInfo(readmeContent);
+
+        // READMEからスクリプトIDを抽出（ライブラリ形式のみ：1から始まるID）
+        const extractedScriptId = GASScriptIdExtractor.extractScriptId(readmeContent);
+        const libraryScriptId = extractedScriptId?.startsWith('1') ? extractedScriptId : undefined;
+
+        const webAppFromGsFiles = this.detectWebAppFromGsFiles(readmeContent);
+
+        if (webAppInfo && libraryScriptId) {
+          // WebアプリURLと通常のライブラリスクリプトIDの両方がある場合はライブラリとして分類
+          scriptId = libraryScriptId;
+          scriptType = 'library';
+        } else if (webAppInfo) {
+          // WebアプリURLのみがある場合はweb_appとして分類
+          scriptId = webAppInfo.scriptId;
+          scriptType = 'web_app';
+        } else if (libraryScriptId) {
+          // WebアプリURLがなく、通常のスクリプトIDがある場合
+          scriptId = libraryScriptId;
+          if (libraryScriptId.startsWith('1')) {
+            scriptType = 'library';
+          } else {
+            // 1以外から始まる場合はWebアプリ条件をチェック
+            scriptType = webAppFromGsFiles ? 'web_app' : 'library';
+          }
+        } else {
+          // スクリプトIDもWebアプリURLもない場合、.gsファイルをチェック
+          if (webAppFromGsFiles) {
+            scriptType = 'web_app';
+            // スクリプトIDが無い場合はowner/repo形式をscriptIdとして使用（重複回避）
+            scriptId = `${owner}/${repo}`;
+          }
+        }
+      }
 
       if (!scriptId) {
         return {
           success: false,
-          error: 'READMEからGASスクリプトIDが見つかりませんでした',
+          error:
+            'READMEからGASスクリプトIDまたはWebアプリURL、.gsファイルの記載が見つかりませんでした',
         };
       }
 
@@ -69,6 +149,7 @@ export class ScrapeGASLibraryService {
         starCount: repoInfo.stargazers_count,
         lastCommitAt: lastCommitAt,
         status: 'pending',
+        scriptType,
       };
 
       return {

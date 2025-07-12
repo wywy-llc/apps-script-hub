@@ -30,6 +30,7 @@ export const load: PageServerLoad = async ({ params }) => {
       licenseUrl: library.licenseUrl,
       lastCommitAt: library.lastCommitAt,
       status: library.status,
+      scriptType: library.scriptType,
       createdAt: library.createdAt,
       updatedAt: library.updatedAt,
     })
@@ -157,6 +158,55 @@ export const actions: Actions = {
         error,
         'AI要約の生成中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
         'AI要約生成エラー:'
+      );
+    }
+  },
+
+  /**
+   * スクレイピングを実行してライブラリ情報を更新する
+   */
+  runScraping: async ({ params }) => {
+    const libraryId = params.id;
+
+    if (!libraryId) {
+      return fail(400, { error: 'ライブラリIDが不正です。' });
+    }
+
+    try {
+      // ライブラリの存在確認
+      const existingLibrary = await db
+        .select({
+          id: library.id,
+          name: library.name,
+        })
+        .from(library)
+        .where(eq(library.id, libraryId))
+        .limit(1);
+
+      if (existingLibrary.length === 0) {
+        return fail(404, { error: 'ライブラリが見つかりません。' });
+      }
+
+      const libraryData = existingLibrary[0];
+
+      // スクレイピングを実行してライブラリ情報を更新
+      await UpdateLibraryFromGithubService.call(libraryId, { skipAiSummary: true });
+
+      return {
+        success: true,
+        message: `ライブラリ「${libraryData.name}」の情報を更新しました。スクリプトIDやその他の情報が最新の状態に更新されています。`,
+      };
+    } catch (error) {
+      console.error('スクレイピング実行エラー:', error);
+      console.error(
+        'エラースタックトレース:',
+        error instanceof Error ? error.stack : 'スタックトレース不明'
+      );
+
+      return ActionErrorHandler.handleActionErrorWithCustomMessage(
+        error,
+        'スクレイピングの実行中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+        'スクレイピング実行エラー:'
       );
     }
   },
