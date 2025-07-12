@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db/index.js';
 import { library, librarySummary } from '$lib/server/db/schema.js';
-import { eq, like, or, sql } from 'drizzle-orm';
+import { desc, eq, like, or, sql } from 'drizzle-orm';
 export const load = async ({ url }: { url: URL }) => {
   const searchQuery = url.searchParams.get('q') || '';
   const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -56,7 +56,7 @@ export const load = async ({ url }: { url: URL }) => {
         .from(library)
         .leftJoin(librarySummary, eq(library.id, librarySummary.libraryId))
         .where(eq(library.status, 'published'))
-        .orderBy(library.updatedAt)
+        .orderBy(desc(library.starCount))
         .limit(itemsPerPage)
         .offset(offset),
       db
@@ -157,7 +157,7 @@ export const load = async ({ url }: { url: URL }) => {
       .from(library)
       .leftJoin(librarySummary, eq(library.id, librarySummary.libraryId))
       .where(sql`${eq(library.status, 'published')} AND (${searchCondition})`)
-      .orderBy(library.updatedAt)
+      .orderBy(desc(library.starCount))
       .limit(itemsPerPage)
       .offset(offset),
     db
