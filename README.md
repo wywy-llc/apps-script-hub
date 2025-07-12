@@ -1,6 +1,6 @@
 # GAS Library Hub
 
-https://wywy-llc.github.io/gas-library-hub/
+<https://wywy-llc.github.io/gas-library-hub/>
 
 [![Website](https://img.shields.io/badge/Website-Live-brightgreen)](https://appscripthub.com)
 [![Built with SvelteKit](https://img.shields.io/badge/Built%20with-SvelteKit-ff3e00)](https://kit.svelte.dev/)
