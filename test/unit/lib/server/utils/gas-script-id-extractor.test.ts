@@ -125,7 +125,7 @@ describe('GASScriptIdExtractor', () => {
 
   describe('DEFAULT_SCRIPT_ID_PATTERNS', () => {
     test('デフォルトパターンが正しく定義されている', () => {
-      expect(GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS).toHaveLength(7);
+      expect(GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS).toHaveLength(9);
       expect(
         GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS.every(pattern => pattern instanceof RegExp)
       ).toBe(true);

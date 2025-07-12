@@ -87,26 +87,49 @@ export class ScrapeGASLibraryService {
 
       let scriptType: 'library' | 'web_app' = 'library';
 
-      // WebアプリURLを最初にチェック（優先度高）
       if (readmeContent) {
+        // WebアプリURLをチェック
         const webAppInfo = this.extractWebAppInfo(readmeContent);
         if (webAppInfo) {
-          scriptId = webAppInfo.scriptId;
-          scriptType = webAppInfo.scriptType;
-        } else if (!scriptId) {
-          // ライブラリ形式のスクリプトIDが見つからず、WebアプリURLもない場合、.gsファイルをチェック
+          // WebアプリURLから抽出されたスクリプトIDを優先使用
+          const webAppScriptId = webAppInfo.scriptId;
+
+          // 1から始まる場合はライブラリとして分類
+          if (webAppScriptId.startsWith('1')) {
+            scriptId = webAppScriptId;
+            scriptType = 'library';
+          } else if (webAppScriptId.startsWith('AK')) {
+            // AKから始まる場合は、Webアプリの条件をチェック
+            const hasWebAppConditions = this.detectWebAppFromGsFiles(readmeContent);
+            if (hasWebAppConditions) {
+              scriptId = webAppScriptId;
+              scriptType = 'web_app';
+            } else {
+              // Webアプリ条件がない場合はライブラリとして扱う
+              scriptId = webAppScriptId;
+              scriptType = 'library';
+            }
+          } else {
+            // その他の場合はWebアプリとして分類
+            scriptId = webAppScriptId;
+            scriptType = 'web_app';
+          }
+        } else if (scriptId) {
+          // WebアプリURLがなく、通常のスクリプトIDがある場合
+          if (scriptId.startsWith('1')) {
+            scriptType = 'library';
+          } else {
+            // 1以外から始まる場合はWebアプリ条件をチェック
+            const hasWebAppConditions = this.detectWebAppFromGsFiles(readmeContent);
+            scriptType = hasWebAppConditions ? 'web_app' : 'library';
+          }
+        } else {
+          // スクリプトIDもWebアプリURLもない場合、.gsファイルをチェック
           const webAppType = this.detectWebAppFromGsFiles(readmeContent);
           if (webAppType) {
-            // .gsファイルが見つかったがスクリプトIDが無い場合は、web_appタイプとして処理を継続
             scriptType = 'web_app';
             // スクリプトIDが無い場合はowner/repo形式をscriptIdとして使用（重複回避）
             scriptId = `${owner}/${repo}`;
-          }
-        } else {
-          // ライブラリIDがある場合でも、.gsファイルの記載があればweb_appタイプに変更
-          const webAppType = this.detectWebAppFromGsFiles(readmeContent);
-          if (webAppType) {
-            scriptType = 'web_app';
           }
         }
       }

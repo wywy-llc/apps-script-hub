@@ -66,7 +66,7 @@ describe('ScrapeGASLibraryService', () => {
       expect(result.data?.scriptId).toBe('test-owner/test-repo');
     });
 
-    test('.gsファイルとスクリプトIDが両方ある場合、web_appとして保存される', async () => {
+    test('.gsファイルとスクリプトIDが両方ある場合、ライブラリIDがあるためlibraryとして保存される', async () => {
       const readmeWithBoth = `
         # Test Project
         
@@ -80,7 +80,7 @@ describe('ScrapeGASLibraryService', () => {
       const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
 
       expect(result.success).toBe(true);
-      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptType).toBe('library');
       expect(result.data?.scriptId).toBe(
         '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF'
       );
@@ -148,12 +148,14 @@ describe('ScrapeGASLibraryService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.scriptType).toBe('library');
-      expect(result.data?.scriptId).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+      expect(result.data?.scriptId).toBe(
+        '1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF'
+      );
     });
   });
 
   describe('WebアプリURL抽出機能', () => {
-    test('/a/macros/形式のWebアプリURLが正しく抽出される', async () => {
+    test('AKから始まるWebアプリURLで.gsファイルがある場合、web_appとして分類される', async () => {
       const readmeWithWebAppUrl = `
         # 客製化選項選擇登記萬用系統
         
@@ -173,7 +175,7 @@ describe('ScrapeGASLibraryService', () => {
       );
     });
 
-    test('標準形式のWebアプリURLが正しく抽出される', async () => {
+    test('AKから始まるWebアプリURLで.gsファイルがない場合、libraryとして分類される', async () => {
       const readmeWithStandardUrl = `
         # Test Web App
         
@@ -185,7 +187,7 @@ describe('ScrapeGASLibraryService', () => {
       const result = await ScrapeGASLibraryService.call('https://github.com/test-owner/test-repo');
 
       expect(result.success).toBe(true);
-      expect(result.data?.scriptType).toBe('web_app');
+      expect(result.data?.scriptType).toBe('library');
       expect(result.data?.scriptId).toBe('AKfycbxTEST123456789abcdef');
     });
   });

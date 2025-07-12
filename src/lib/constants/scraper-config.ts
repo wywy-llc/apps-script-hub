@@ -26,6 +26,10 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
   /(?:スクリプト|script)\s*(?:id|ID)[：:\s=]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
   /(?:gas|GAS)\s*(?:id|ID)[：:\s=]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
 
+  // 2.1. ライブラリインストール手順でのスクリプトID（高精度）
+  /(?:library|ライブラリ).*?(?:script\s*id|スクリプトID)[：:\s]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
+  /(?:find\s*a\s*library|ライブラリ.*?検索).*?['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
+
   // 3. script.google.comドメインの一般URL（中精度）
   /script\.google\.com\/.*?\/([A-Za-z0-9_-]{25,70})/gi,
 
