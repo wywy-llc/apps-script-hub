@@ -542,237 +542,330 @@
     </div>
   {/if}
 
-  <!-- Library List Table -->
-  <div class="overflow-hidden rounded-lg bg-white shadow-md">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              ライブラリ名
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              作者
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              申請者
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              ステータス
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              最終更新日
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
-            >
-              アクション
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          {#each paginatedLibraries as library (library.id)}
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+  <!-- Library List - Card Layout -->
+  <div class="space-y-4">
+    {#each paginatedLibraries as library (library.id)}
+      <div class="overflow-hidden rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg">
+        <div class="p-6">
+          <!-- Header Section -->
+          <div class="flex items-start justify-between">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center space-x-3">
+                <h3 class="truncate text-lg font-semibold text-gray-900">
                   <a
                     href="/admin/libraries/{library.id}"
                     class="text-blue-600 hover:text-blue-900 hover:underline"
                   >
                     {library.name}
                   </a>
-                </div>
-                <div class="max-w-xs truncate text-sm text-gray-500">
-                  <a
-                    href={`https://script.google.com/u/1/home/projects/${library.scriptId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={library.scriptId}
-                    class="text-blue-600 hover:text-blue-900 hover:underline"
-                  >
-                    {library.scriptId}
-                  </a>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
+                </h3>
+                <!-- Script Type Badge -->
+                <span
+                  class={library.scriptType === 'library'
+                    ? 'inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'
+                    : 'inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'}
+                >
+                  {library.scriptType === 'library' ? 'ライブラリ' : 'Webアプリ'}
+                </span>
+                <!-- Status Badge -->
+                <span class={LIBRARY_STATUS_BADGE_CLASS[library.status]}>
+                  {LIBRARY_STATUS_TEXT[library.status]}
+                </span>
+              </div>
+
+              <!-- Description -->
+              {#if library.description}
+                <p class="mt-1 line-clamp-2 text-sm text-gray-600">
+                  {library.description}
+                </p>
+              {/if}
+            </div>
+
+            <!-- Actions -->
+            <div class="ml-4 flex items-center space-x-2">
+              <a
+                href="/admin/libraries/{library.id}/edit"
+                class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100"
+              >
+                編集
+              </a>
+              <StatusUpdateButtons
+                {library}
+                isStatusUpdateInProgress={statusUpdateInProgress[library.id] || false}
+                onStatusUpdate={status => handleStatusUpdate(library.id, status)}
+                compact={true}
+              />
+              <button
+                onclick={() => handleDelete(library.id)}
+                class="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
+              >
+                削除
+              </button>
+            </div>
+          </div>
+
+          <!-- Details Grid -->
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Script ID -->
+            <div class="flex items-center space-x-2">
+              <svg
+                class="h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                ></path>
+              </svg>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs text-gray-500">スクリプトID</p>
+                <a
+                  href={library.scriptType === 'library'
+                    ? `https://script.google.com/u/1/home/projects/${library.scriptId}`
+                    : `https://script.google.com/macros/s/${library.scriptId}/exec`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={library.scriptId}
+                  class="block truncate font-mono text-sm text-blue-600 hover:text-blue-900 hover:underline"
+                >
+                  {library.scriptId.length > 20
+                    ? library.scriptId.substring(0, 20) + '...'
+                    : library.scriptId}
+                </a>
+              </div>
+            </div>
+
+            <!-- Author -->
+            <div class="flex items-center space-x-2">
+              <svg
+                class="h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                ></path>
+              </svg>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs text-gray-500">作者</p>
                 <a
                   href={library.authorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-600 hover:text-blue-900 hover:underline"
+                  class="block truncate text-sm text-blue-600 hover:text-blue-900 hover:underline"
                 >
                   {library.authorName}
                 </a>
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
-                {#if library.requesterName}
-                  <div class="text-sm">
-                    <div class="font-medium text-gray-900">{library.requesterName}</div>
-                    <div class="text-gray-500">{library.requesterEmail}</div>
-                    {#if library.requestNote}
-                      <div class="mt-1 text-xs text-gray-400" title={library.requestNote}>
-                        {library.requestNote.length > 30
-                          ? library.requestNote.substring(0, 30) + '...'
-                          : library.requestNote}
-                      </div>
-                    {/if}
+              </div>
+            </div>
+
+            <!-- Stars -->
+            <div class="flex items-center space-x-2">
+              <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                ></path>
+              </svg>
+              <div>
+                <p class="text-xs text-gray-500">Stars</p>
+                <p class="text-sm font-medium text-gray-900">
+                  {library.starCount?.toLocaleString() || 0}
+                </p>
+              </div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="flex items-center space-x-2">
+              <svg
+                class="h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              <div>
+                <p class="text-xs text-gray-500">最終更新</p>
+                <p class="text-sm text-gray-900">
+                  {new Date(library.updatedAt).toLocaleDateString('ja-JP')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requester Info (if exists) -->
+          {#if library.requesterName}
+            <div class="mt-4 border-t border-gray-200 pt-4">
+              <div class="flex items-center space-x-2">
+                <svg
+                  class="h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <div class="flex-1">
+                  <p class="text-xs text-gray-500">申請者</p>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-gray-900">{library.requesterName}</span>
+                    <span class="text-sm text-gray-500">({library.requesterEmail})</span>
                   </div>
-                {:else}
-                  <span class="text-sm text-gray-400">管理者追加</span>
-                {/if}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class={LIBRARY_STATUS_BADGE_CLASS[library.status]}>
-                  {LIBRARY_STATUS_TEXT[library.status]}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
-                {new Date(library.updatedAt).toLocaleDateString('ja-JP')}
-              </td>
-              <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <a
-                    href="/admin/libraries/{library.id}/edit"
-                    class="inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
-                  >
-                    編集
-                  </a>
-                  <StatusUpdateButtons
-                    {library}
-                    isStatusUpdateInProgress={statusUpdateInProgress[library.id] || false}
-                    onStatusUpdate={status => handleStatusUpdate(library.id, status)}
-                    compact={true}
-                  />
-                  <button
-                    onclick={() => handleDelete(library.id)}
-                    class="ml-2 inline-flex cursor-pointer justify-center rounded-md border border-transparent bg-gray-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    削除
-                  </button>
+                  {#if library.requestNote}
+                    <p class="mt-1 text-xs text-gray-600" title={library.requestNote}>
+                      {library.requestNote.length > 100
+                        ? library.requestNote.substring(0, 100) + '...'
+                        : library.requestNote}
+                    </p>
+                  {/if}
                 </div>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div
-      class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6"
-    >
-      <div class="flex flex-1 justify-between sm:hidden">
-        <button
-          onclick={goToPreviousPage}
-          disabled={currentPage === 1}
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          前へ
-        </button>
-        <button
-          onclick={goToNextPage}
-          disabled={currentPage === totalPages}
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          次へ
-        </button>
+              </div>
+            </div>
+          {:else}
+            <div class="mt-4 border-t border-gray-200 pt-4">
+              <div class="flex items-center space-x-2">
+                <svg
+                  class="h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  ></path>
+                </svg>
+                <div>
+                  <p class="text-xs text-gray-500">追加者</p>
+                  <span class="text-sm text-gray-600">管理者追加</span>
+                </div>
+              </div>
+            </div>
+          {/if}
+        </div>
       </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            全
-            <span class="font-medium">{totalItems}</span>
-            件中
-            <span class="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
-            -
-            <span class="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span>
-            件を表示
-          </p>
-        </div>
-        <div>
-          <nav
-            class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm"
-            aria-label="Pagination"
+    {/each}
+  </div>
+
+  <!-- Pagination -->
+  <div
+    class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6"
+  >
+    <div class="flex flex-1 justify-between sm:hidden">
+      <button
+        onclick={goToPreviousPage}
+        disabled={currentPage === 1}
+        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        前へ
+      </button>
+      <button
+        onclick={goToNextPage}
+        disabled={currentPage === totalPages}
+        class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        次へ
+      </button>
+    </div>
+    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          全
+          <span class="font-medium">{totalItems}</span>
+          件中
+          <span class="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
+          -
+          <span class="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span>
+          件を表示
+        </p>
+      </div>
+      <div>
+        <nav
+          class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm"
+          aria-label="Pagination"
+        >
+          <button
+            onclick={goToPreviousPage}
+            disabled={currentPage === 1}
+            class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <button
-              onclick={goToPreviousPage}
-              disabled={currentPage === 1}
-              class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            <span class="sr-only">前へ</span>
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
             >
-              <span class="sr-only">前へ</span>
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+
+          {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
+            {#if totalPages <= 7 || page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2}
+              <button
+                onclick={() => goToPage(page)}
+                aria-current={page === currentPage ? 'page' : undefined}
+                class={page === currentPage
+                  ? 'relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600'
+                  : 'relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50'}
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
+                {page}
+              </button>
+            {:else if page === currentPage - 3 || page === currentPage + 3}
+              <span
+                class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+              >
+                ...
+              </span>
+            {/if}
+          {/each}
 
-            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
-              {#if totalPages <= 7 || page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2}
-                <button
-                  onclick={() => goToPage(page)}
-                  aria-current={page === currentPage ? 'page' : undefined}
-                  class={page === currentPage
-                    ? 'relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600'
-                    : 'relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50'}
-                >
-                  {page}
-                </button>
-              {:else if page === currentPage - 3 || page === currentPage + 3}
-                <span
-                  class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                >
-                  ...
-                </span>
-              {/if}
-            {/each}
-
-            <button
-              onclick={goToNextPage}
-              disabled={currentPage === totalPages}
-              class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          <button
+            onclick={goToNextPage}
+            disabled={currentPage === totalPages}
+            class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span class="sr-only">次へ</span>
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
             >
-              <span class="sr-only">次へ</span>
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-          </nav>
-        </div>
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </nav>
       </div>
     </div>
   </div>
