@@ -83,6 +83,36 @@ export class ActionErrorHandler {
   }
 
   /**
+   * バッチ処理API用の特化エラーハンドラー
+   * @param error エラーオブジェクト
+   * @param logPrefix ログ出力用のプレフィックス
+   * @returns バッチ処理レスポンス形式のエラー
+   */
+  static handleBatchRegisterError(error: unknown, logPrefix: string) {
+    console.error(logPrefix, error);
+    const errorStatus = ErrorUtils.getHttpStatus(error);
+    const errorMessage = ErrorUtils.getMessage(error, '不明なエラー');
+
+    return json(
+      {
+        success: false,
+        message: `サーバーエラーが発生しました: ${errorMessage}`,
+        overallResults: {
+          totalTags: 0,
+          successTags: 0,
+          failedTags: 1,
+          totalLibraries: 0,
+          totalSuccess: 0,
+          totalErrors: 1,
+          totalDuplicates: 0,
+        },
+        tagResults: [],
+      },
+      { status: errorStatus }
+    );
+  }
+
+  /**
    * カスタムメッセージでのエラーハンドリング
    * @param error エラーオブジェクト
    * @param customMessage カスタムエラーメッセージ

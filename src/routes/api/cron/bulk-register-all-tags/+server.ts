@@ -1,5 +1,6 @@
 import { DEFAULT_GAS_TAGS } from '$lib/constants/scraper-config.js';
 import { validateCronAuth } from '$lib/server/utils/api-auth.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
@@ -213,26 +214,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
     return json(response);
   } catch (error) {
-    console.error('全タグ一括登録APIエラー:', error);
-
-    const errorStatus = ErrorUtils.getHttpStatus(error);
-
-    return json(
-      {
-        success: false,
-        message: `サーバーエラーが発生しました: ${ErrorUtils.getMessage(error, '不明なエラー')}`,
-        overallResults: {
-          totalTags: 0,
-          successTags: 0,
-          failedTags: 1,
-          totalLibraries: 0,
-          totalSuccess: 0,
-          totalErrors: 1,
-          totalDuplicates: 0,
-        },
-        tagResults: [],
-      } as BatchRegisterResponse,
-      { status: errorStatus }
-    );
+    return ActionErrorHandler.handleBatchRegisterError(error, '全タグ一括登録APIエラー:');
   }
 };
