@@ -1,6 +1,6 @@
 ## Concept
 
-https://wywy-llc.github.io/apps-script-hub/
+https://wywy-llc.github.io/gas-library-hub/
 
 ## Developing
 
