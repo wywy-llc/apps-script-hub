@@ -1,6 +1,7 @@
 import { GITHUB_TOKEN } from '$env/static/private';
 import type { GitHubSearchSortOption } from '$lib/constants/github-search.js';
 import { GITHUB_SEARCH_SORT_OPTIONS } from '$lib/constants/github-search.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { GitHubApiClient } from '$lib/types/github-api-client.js';
 import type {
   GitHubReadmeResponse,
@@ -227,7 +228,7 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         repositories: [],
         totalFound: 0,
         processedCount: 0,
-        error: error instanceof Error ? error.message : 'GitHub検索に失敗しました',
+        error: ErrorUtils.getMessage(error, 'GitHub検索に失敗しました'),
       };
     }
   }
@@ -372,7 +373,7 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         repositories: [],
         totalFound: 0,
         processedCount: 0,
-        error: error instanceof Error ? error.message : 'GitHub検索に失敗しました',
+        error: ErrorUtils.getMessage(error, 'GitHub検索に失敗しました'),
       };
     }
   }
@@ -448,7 +449,7 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         repositories: [],
         totalFound: 0,
         processedCount: 0,
-        error: error instanceof Error ? error.message : 'フォールバック検索に失敗しました',
+        error: ErrorUtils.getMessage(error, 'フォールバック検索に失敗しました'),
       };
     }
   }

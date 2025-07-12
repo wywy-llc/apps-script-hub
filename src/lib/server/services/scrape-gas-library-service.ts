@@ -1,5 +1,6 @@
 import { GASScriptIdExtractor } from '$lib/server/utils/gas-script-id-extractor.js';
 import { GitHubApiUtils } from '$lib/server/utils/github-api-utils.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { ScrapedLibraryData, ScrapeResult } from '$lib/types/github-scraper.js';
 
 /**
@@ -78,7 +79,7 @@ export class ScrapeGASLibraryService {
       console.error('スクレイピングエラー:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'スクレイピングに失敗しました',
+        error: ErrorUtils.getMessage(error, 'スクレイピングに失敗しました'),
       };
     }
   }

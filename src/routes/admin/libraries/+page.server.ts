@@ -6,6 +6,7 @@ import {
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
 import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
@@ -162,8 +163,17 @@ export const actions: Actions = {
       const result: BulkRegisterResponse = await response.json();
 
       if (!result.success) {
-        return fail(500, {
-          error: result.message || 'API実行に失敗しました。',
+        // API レスポンスのエラーステータスを確認
+        const errorStatus = response.status || 500;
+
+        // エラーメッセージを構築（メインメッセージ + 詳細エラー）
+        let errorMessage = result.message || 'API実行に失敗しました。';
+        if (result.errors && result.errors.length > 0) {
+          errorMessage += ` 詳細: ${result.errors.join(', ')}`;
+        }
+
+        return fail(errorStatus, {
+          error: errorMessage,
         });
       }
 
@@ -192,10 +202,11 @@ export const actions: Actions = {
         },
       };
     } catch (error) {
-      console.error('自動検索・一括追加エラー:', error);
-      return fail(500, {
-        error: '自動検索・一括追加処理中にエラーが発生しました。',
-      });
+      return ActionErrorHandler.handleActionError(
+        error,
+        '自動検索・一括追加処理',
+        '自動検索・一括追加エラー:'
+      );
     }
   },
 
@@ -238,10 +249,11 @@ export const actions: Actions = {
         message: `ライブラリ「${existingLibrary[0].name}」を削除しました。`,
       };
     } catch (error) {
-      console.error('ライブラリ削除エラー:', error);
-      return fail(500, {
-        error: 'ライブラリの削除処理中にエラーが発生しました。',
-      });
+      return ActionErrorHandler.handleActionError(
+        error,
+        'ライブラリの削除処理',
+        'ライブラリ削除エラー:'
+      );
     }
   },
 };

@@ -5,8 +5,10 @@ import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
 import { ProcessBulkGASLibraryWithSaveService } from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
 import { validateApiAuth } from '$lib/server/utils/api-auth.js';
-import type { BulkRegisterResponse } from '$lib/types/index.js';
+import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
+import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { ScrapedLibraryData } from '$lib/types/github-scraper.js';
+import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
@@ -157,7 +159,7 @@ export const POST: RequestHandler = async ({ request }) => {
       } catch (error) {
         return {
           success: false,
-          error: error instanceof Error ? error.message : '保存に失敗しました',
+          error: ErrorUtils.getMessage(error, '保存に失敗しました'),
         };
       }
     };
@@ -212,22 +214,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(response);
   } catch (error) {
-    console.error('一括ライブラリ登録APIエラー:', error);
-
-    return json(
-      {
-        success: false,
-        message: 'サーバーエラーが発生しました',
-        summary: {
-          total: 0,
-          successCount: 0,
-          errorCount: 1,
-          duplicateCount: 0,
-          tag: 'unknown',
-        },
-        errors: [error instanceof Error ? error.message : '不明なエラー'],
-      } as BulkRegisterResponse,
-      { status: 500 }
-    );
+    return ActionErrorHandler.handleBulkRegisterError(error, '一括ライブラリ登録APIエラー:');
   }
 };
