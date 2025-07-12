@@ -138,13 +138,15 @@
     if (bulkUpdateInProgress) return;
 
     if (
-      !confirm('全ライブラリの情報を一括更新しますか？この処理には時間がかかる場合があります。')
+      !confirm(
+        `既存の${libraries.length}件のライブラリのGitHub情報（Star数等）を一括更新しますか？\n\nAI要約の更新は行われません。\nこの処理には時間がかかる場合があります。`
+      )
     ) {
       return;
     }
 
     bulkUpdateInProgress = true;
-    bulkUpdateMessage = '全ライブラリの一括更新を開始しています...';
+    bulkUpdateMessage = '既存ライブラリのGitHub情報を一括更新中...';
 
     try {
       let successCount = 0;
@@ -153,7 +155,7 @@
 
       for (let i = 0; i < libraries.length; i++) {
         const library = libraries[i];
-        bulkUpdateMessage = `${i + 1}/${totalLibraries} ライブラリを更新中: ${library.name}`;
+        bulkUpdateMessage = `${i + 1}/${totalLibraries} GitHub情報を更新中: ${library.name}`;
 
         try {
           const response = await fetch(`/admin/libraries/${library.id}/scraping`, {
@@ -174,15 +176,15 @@
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      bulkUpdateMessage = `一括更新が完了しました。成功: ${successCount}件、失敗: ${errorCount}件`;
+      bulkUpdateMessage = `GitHub情報の一括更新が完了しました。成功: ${successCount}件、失敗: ${errorCount}件`;
 
       setTimeout(() => {
         bulkUpdateMessage = '';
         window.location.reload();
       }, 3000);
     } catch (error) {
-      console.error('一括更新エラー:', error);
-      bulkUpdateMessage = '一括更新中にエラーが発生しました。';
+      console.error('GitHub情報一括更新エラー:', error);
+      bulkUpdateMessage = 'GitHub情報の一括更新中にエラーが発生しました。';
     } finally {
       bulkUpdateInProgress = false;
       setTimeout(() => {
@@ -213,6 +215,7 @@
       <button
         onclick={toggleBulkAddForm}
         class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+        title="GitHubタグ検索で新しいライブラリを一括追加"
       >
         一括新規追加
       </button>
@@ -220,6 +223,7 @@
         onclick={handleBulkUpdate}
         disabled={bulkUpdateInProgress}
         class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+        title="既存ライブラリのGitHub情報を一括更新（Star数等）"
       >
         {#if bulkUpdateInProgress}
           <svg
@@ -235,9 +239,9 @@
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          一括更新中...
+          既存更新中...
         {:else}
-          一括更新
+          既存一括更新
         {/if}
       </button>
     </div>
