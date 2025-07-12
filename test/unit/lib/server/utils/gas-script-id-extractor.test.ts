@@ -36,12 +36,12 @@ describe('GASScriptIdExtractor', () => {
       expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
     });
 
-    test('1で始まる25文字以上の文字列から抽出する（改善されたパターンで抽出される）', () => {
+    test('1で始まる25文字以上の文字列から抽出する（修正されたパターンで完全なIDが抽出される）', () => {
       const readme =
         'Use this script: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF for testing';
       const result = GASScriptIdExtractor.extractScriptId(readme);
-      // 改善されたパターンでは1で始まる文字列も抽出される（ただし部分一致）
-      expect(result).toBe('B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
+      // 修正されたパターンでは先頭の「1」も含めて完全なIDが抽出される
+      expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
     });
 
     test('複数のスクリプトIDがある場合は最初のものを返す', () => {
@@ -160,8 +160,8 @@ describe('GASScriptIdExtractor', () => {
       testCases.forEach(({ text, shouldMatch }) => {
         const result = GASScriptIdExtractor.extractScriptId(text);
         if (shouldMatch) {
-          // パターン5の場合は先頭の"1"が除外された形で返される可能性がある
-          expect(result).toMatch(/^1?B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF$/);
+          // 修正されたパターンでは常に完全なスクリプトIDが返される
+          expect(result).toBe('1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF');
         } else {
           expect(result).toBeUndefined();
         }

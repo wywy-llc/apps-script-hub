@@ -31,11 +31,13 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
 
   // 4. GAS特有のコンテキストでの文字列リテラル（中精度）
   // 'library_id'や'clasp'等のコンテキストの近くにある場合のみ
-  /(?:library_id|clasp|apps.?script)[^a-zA-Z0-9_-]*['"`]?1([A-Za-z0-9_-]{24,69})['"`]?/gi,
+  // キャプチャグループに先頭の「1」も含める
+  /(?:library_id|clasp|apps.?script)[^a-zA-Z0-9_-]*['"`]?(1[A-Za-z0-9_-]{24,69})['"`]?/gi,
 
   // 5. 1で始まる文字列（厳格化：特定のJSONフィールドを除外）
   // email_id, session_id, api_key等の一般的なIDフィールドを除外
-  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])\b1([A-Za-z0-9_-]{24,69})\b(?!["']\s*[,}])/g,
+  // キャプチャグループに先頭の「1」も含める
+  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])\b(1[A-Za-z0-9_-]{24,69})\b(?!["']\s*[,}])/g,
 ];
 
 /**
