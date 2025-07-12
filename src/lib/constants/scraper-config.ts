@@ -43,7 +43,6 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
  */
 export const DEFAULT_GAS_TAGS = [
   'google-apps-script',
-
   'google-sheets',
   'gmail',
   'google-workspace',
