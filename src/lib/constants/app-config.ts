@@ -2,11 +2,23 @@
  * アプリケーション全体で使用する定数
  */
 
+import { dev } from '$app/environment';
+
+// 環境に応じたベースURLを動的に決定
+const getBaseUrl = (): string => {
+  if (dev) {
+    // 開発環境ではlocalhostを使用
+    return 'http://localhost:5173';
+  }
+  // 本番環境では固定URL
+  return 'https://appscripthub.com';
+};
+
 // ドメイン関連
 export const APP_CONFIG = {
   SITE_NAME: 'GAS Library Hub',
   DOMAIN: 'appscripthub.com',
-  BASE_URL: 'https://appscripthub.com',
+  BASE_URL: getBaseUrl(),
   LOGO_PATH: '/logo.png',
 } as const;
 

@@ -25,6 +25,7 @@ export const load: PageServerLoad = async ({ params }) => {
       licenseUrl: library.licenseUrl,
       lastCommitAt: library.lastCommitAt,
       status: library.status,
+      scriptType: library.scriptType,
       requesterId: library.requesterId,
       requestNote: library.requestNote,
       createdAt: library.createdAt,

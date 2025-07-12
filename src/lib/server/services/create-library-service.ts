@@ -68,6 +68,7 @@ export class CreateLibraryService {
       licenseUrl: licenseInfo.url,
       lastCommitAt: lastCommitAt,
       status: 'pending',
+      scriptType: 'library',
       requesterId: undefined,
       requestNote: undefined,
     });

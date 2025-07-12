@@ -22,6 +22,7 @@ export const load = (async () => {
       authorName: library.authorName,
       authorUrl: library.authorUrl,
       status: library.status,
+      scriptType: library.scriptType,
       updatedAt: library.updatedAt,
       starCount: library.starCount,
       description: library.description,

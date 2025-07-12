@@ -54,6 +54,7 @@ export interface ScrapedLibraryData {
   starCount?: number;
   lastCommitAt: Date;
   status: 'pending';
+  scriptType: 'library' | 'web_app';
 }
 
 export interface ScrapeResult {

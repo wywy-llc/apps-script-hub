@@ -101,6 +101,7 @@ async function setupTestDatabase() {
         "license_url" text NOT NULL,
         "last_commit_at" timestamp with time zone NOT NULL,
         "status" text DEFAULT 'pending' NOT NULL CHECK ("status" IN ('pending', 'published')),
+        "script_type" text DEFAULT 'library' NOT NULL CHECK ("script_type" IN ('library', 'web_app')),
         "requester_id" text,
         "request_note" text,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,

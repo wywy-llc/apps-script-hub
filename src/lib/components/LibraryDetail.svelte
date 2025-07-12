@@ -22,6 +22,7 @@
     copyCount?: number;
     lastCommitAt: Date;
     status: LibraryStatus;
+    scriptType: 'library' | 'web_app';
     createdAt: Date;
     updatedAt: Date;
   }
@@ -69,9 +70,10 @@
     onCopyScriptId,
   }: Props = $props();
 
-  // ライブラリメソッドを生成
+  // scriptTypeに応じてURL生成
   const libraryUrl = `https://script.google.com/macros/library/d/${library.scriptId}/0`;
   const gasProjectUrl = `https://script.google.com/u/1/home/projects/${library.scriptId}/edit`;
+  const sampleAppUrl = `https://script.google.com/macros/s/${library.scriptId}/exec`;
 
   // クリップボードにコピー
   async function copyToClipboard(elementId: string) {
@@ -247,32 +249,48 @@
                     </a>
                   </dd>
                 </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">{m.gas_methods()}</dt>
-                  <dd class="mt-1 text-base text-blue-600 hover:underline">
-                    <a
-                      href={libraryUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={libraryUrl}
-                    >
-                      https://script.google.com/macros/library/d/{library.scriptId.slice(-8)}...
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">{m.gas_project()}</dt>
-                  <dd class="mt-1 text-base text-blue-600 hover:underline">
-                    <a
-                      href={gasProjectUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={gasProjectUrl}
-                    >
-                      https://script.google.com/projects/{library.scriptId.slice(-8)}...
-                    </a>
-                  </dd>
-                </div>
+                {#if library.scriptType === 'library'}
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">{m.gas_methods()}</dt>
+                    <dd class="mt-1 text-base text-blue-600 hover:underline">
+                      <a
+                        href={libraryUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={libraryUrl}
+                      >
+                        https://script.google.com/macros/library/d/{library.scriptId.slice(-8)}...
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">{m.gas_project()}</dt>
+                    <dd class="mt-1 text-base text-blue-600 hover:underline">
+                      <a
+                        href={gasProjectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={gasProjectUrl}
+                      >
+                        https://script.google.com/projects/{library.scriptId.slice(-8)}...
+                      </a>
+                    </dd>
+                  </div>
+                {:else if library.scriptType === 'web_app'}
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Webアプリ</dt>
+                    <dd class="mt-1 text-base text-blue-600 hover:underline">
+                      <a
+                        href={sampleAppUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={sampleAppUrl}
+                      >
+                        {sampleAppUrl}
+                      </a>
+                    </dd>
+                  </div>
+                {/if}
                 <div>
                   <dt class="text-sm font-medium text-gray-500">{m.github_author()}</dt>
                   <dd class="mt-1 text-base">
@@ -391,60 +409,96 @@
     <!-- サイドバー（右カラム） -->
     <aside class="mt-8 lg:col-span-3 lg:mt-0">
       <div class="sticky top-24 space-y-6">
-        <!-- インストールカード -->
-        <div class="rounded-lg border p-4">
-          <h3 class="mb-3 font-semibold text-gray-800">{m.installation()}</h3>
-          <label for="script-id" class="text-sm font-medium text-gray-600">{m.script_id()}</label>
-          <div class="mt-1 flex items-center">
-            <input
-              id="script-id"
-              type="text"
-              readonly
-              value={library.scriptId}
-              class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
-            />
-            <button
-              onclick={() => copyToClipboard('script-id')}
-              aria-label={m.copy_script_id_aria()}
-              class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
-            >
-              <svg
-                class="h-5 w-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        {#if library.scriptType === 'library'}
+          <!-- インストールカード -->
+          <div class="rounded-lg border p-4">
+            <h3 class="mb-3 font-semibold text-gray-800">{m.installation()}</h3>
+            <label for="script-id" class="text-sm font-medium text-gray-600">{m.script_id()}</label>
+            <div class="mt-1 flex items-center">
+              <input
+                id="script-id"
+                type="text"
+                readonly
+                value={library.scriptId}
+                class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
+              />
+              <button
+                onclick={() => copyToClipboard('script-id')}
+                aria-label={m.copy_script_id_aria()}
+                class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                ></path>
-              </svg>
-            </button>
-          </div>
-
-          <!-- ライセンス情報 -->
-          <div class="mt-4 border-t border-gray-200 pt-4">
-            <dt class="mb-1 text-sm font-medium text-gray-600">{m.license()}</dt>
-            <dd class="text-sm">
-              {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
-                <a
-                  href={library.licenseUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:text-blue-900 hover:underline"
+                <svg
+                  class="h-5 w-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {library.licenseType || m.license_info()}
-                </a>
-              {:else}
-                <span class="text-gray-700">
-                  {library.licenseType || m.unknown()}
-                </span>
-              {/if}
-            </dd>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- ライセンス情報 -->
+            <div class="mt-4 border-t border-gray-200 pt-4">
+              <dt class="mb-1 text-sm font-medium text-gray-600">{m.license()}</dt>
+              <dd class="text-sm">
+                {#if library.licenseUrl && library.licenseUrl !== 'unknown'}
+                  <a
+                    href={library.licenseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:text-blue-900 hover:underline"
+                  >
+                    {library.licenseType || m.license_info()}
+                  </a>
+                {:else}
+                  <span class="text-gray-700">
+                    {library.licenseType || m.unknown()}
+                  </span>
+                {/if}
+              </dd>
+            </div>
           </div>
-        </div>
+        {:else if library.scriptType === 'web_app'}
+          <!-- Webアプリカード -->
+          <div class="rounded-lg border p-4">
+            <h3 class="mb-3 font-semibold text-gray-800">Webアプリ</h3>
+            <label for="web-app-url" class="text-sm font-medium text-gray-600">実行URL</label>
+            <div class="mt-1 flex items-center">
+              <input
+                id="web-app-url"
+                type="text"
+                readonly
+                value={sampleAppUrl}
+                class="w-full rounded-l-md border bg-gray-50 p-2 text-xs"
+              />
+              <button
+                onclick={() => copyToClipboard('web-app-url')}
+                aria-label="WebアプリURLをコピー"
+                class="rounded-r-md border-t border-r border-b bg-gray-200 p-2 hover:bg-gray-300"
+              >
+                <svg
+                  class="h-5 w-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        {/if}
 
         <!-- Aboutカード -->
         <div class="rounded-lg border p-4">
@@ -483,32 +537,47 @@
               </a>
             </dd>
 
-            <dt class="font-semibold text-gray-800">{m.script_reference()}</dt>
-            <dd class="mb-3">
-              <a
-                href={libraryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:underline"
-                title={libraryUrl}
-              >
-                {truncateUrl(libraryUrl)}
-              </a>
-            </dd>
+            {#if library.scriptType === 'library'}
+              <dt class="font-semibold text-gray-800">{m.script_reference()}</dt>
+              <dd class="mb-3">
+                <a
+                  href={libraryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                  title={libraryUrl}
+                >
+                  {truncateUrl(libraryUrl)}
+                </a>
+              </dd>
 
-            <!-- GASプロジェクトを追加 -->
-            <dt class="font-semibold text-gray-800">{m.gas_project()}</dt>
-            <dd class="mb-3">
-              <a
-                href={gasProjectUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:underline"
-                title={gasProjectUrl}
-              >
-                {truncateUrl(gasProjectUrl)}
-              </a>
-            </dd>
+              <!-- GASプロジェクトを追加 -->
+              <dt class="font-semibold text-gray-800">{m.gas_project()}</dt>
+              <dd class="mb-3">
+                <a
+                  href={gasProjectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                  title={gasProjectUrl}
+                >
+                  {truncateUrl(gasProjectUrl)}
+                </a>
+              </dd>
+            {:else if library.scriptType === 'web_app'}
+              <dt class="font-semibold text-gray-800">Webアプリ</dt>
+              <dd class="mb-3">
+                <a
+                  href={sampleAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline"
+                  title={sampleAppUrl}
+                >
+                  {truncateUrl(sampleAppUrl)}
+                </a>
+              </dd>
+            {/if}
 
             <dt class="font-semibold text-gray-800">{m.github_repository()}</dt>
             <dd class="mb-3">
