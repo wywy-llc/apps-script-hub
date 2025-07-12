@@ -49,6 +49,8 @@
   "login_with_google": "Googleでログイン",
   "search_by_tag_tooltip": "「{tag}」で検索",
   "search_by_tag_aria": "「{tag}」タグで検索",
+  "script_type_library": "ライブラリ",
+  "script_type_web_app": "Webアプリ",
   "library_detail_title": "ライブラリ詳細",
   "scraping_in_progress": "スクレイピング中...",
   "execute_scraping": "スクレイピング実行",

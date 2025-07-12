@@ -3,6 +3,8 @@
     last_updated,
     search_by_tag_aria,
     search_by_tag_tooltip,
+    script_type_library,
+    script_type_web_app,
   } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   // cspell:ignore paraglide
@@ -40,11 +42,21 @@
   class="flex flex-col rounded-lg border border-gray-200 p-6 transition-all hover:border-gray-300 hover:shadow-lg"
 >
   <div class="flex-grow">
-    <h3 class="text-xl font-semibold text-blue-600 hover:underline">
-      <a href="/user/libraries/{library.id}">
-        {library.name}
-      </a>
-    </h3>
+    <div class="flex flex-wrap items-center gap-2">
+      <h3 class="text-xl font-semibold text-blue-600 hover:underline">
+        <a href="/user/libraries/{library.id}">
+          {library.name}
+        </a>
+      </h3>
+      <!-- Script Type Badge -->
+      <span
+        class={library.scriptType === 'library'
+          ? 'inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-blue-800'
+          : 'inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-green-800'}
+      >
+        {library.scriptType === 'library' ? script_type_library() : script_type_web_app()}
+      </span>
+    </div>
     <p class="mt-2 text-sm text-gray-600">
       {librarySummary
         ? currentLocale === 'ja'
