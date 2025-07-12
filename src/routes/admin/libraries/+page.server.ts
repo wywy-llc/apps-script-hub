@@ -131,9 +131,31 @@ export const actions: Actions = {
         body: JSON.stringify(apiRequest),
       });
 
+      console.log(`API呼び出し結果: status=${response.status}, ok=${response.ok}`);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'APIエラー' }));
-        throw new Error(errorData.message || `API呼び出しエラー: ${response.status}`);
+        let errorData;
+        let responseText = '';
+
+        try {
+          responseText = await response.text();
+          errorData = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('APIレスポンスのパースに失敗:', parseError);
+          console.error('レスポンステキスト:', responseText);
+          errorData = { message: `API呼び出しエラー: ${response.status} ${response.statusText}` };
+        }
+
+        const errorMessage =
+          errorData.message || `API呼び出しエラー: ${response.status} ${response.statusText}`;
+        console.error('API呼び出しエラー詳細:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          responseText: responseText.substring(0, 500), // 最初の500文字のみログ
+        });
+
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();

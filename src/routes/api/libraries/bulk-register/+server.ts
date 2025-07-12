@@ -80,10 +80,14 @@ interface BulkRegisterResponse {
  */
 export const POST: RequestHandler = async ({ request }) => {
   try {
+    console.log('🚀 一括登録API呼び出し開始');
+
     // AUTH_SECRET認証チェック
     await validateApiAuth(request);
+    console.log('✅ 認証成功');
 
     const body: BulkRegisterRequest = await request.json();
+    console.log('📋 リクエストパラメータ:', JSON.stringify(body, null, 2));
 
     // パラメータの正規化と検証
     let tags: string[];
@@ -113,7 +117,7 @@ export const POST: RequestHandler = async ({ request }) => {
       return json(
         {
           success: false,
-          message: 'tagまたはselectedTagsパラメータは必須です',
+          message: 'tagまたはselectedTagsパラメータが必須です',
           results: {
             total: 0,
             successCount: 0,
