@@ -731,7 +731,7 @@
               </svg>
             </button>
 
-            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page}
+            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
               {#if totalPages <= 7 || page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2}
                 <button
                   onclick={() => goToPage(page)}
