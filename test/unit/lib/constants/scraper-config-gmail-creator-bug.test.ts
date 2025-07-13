@@ -177,47 +177,48 @@ Thank you for checking out the **Bulk Gmail Account Creator**! For the latest up
     console.log('誤検知されたマッチ:', falsePositiveMatches);
   });
 
-  it('問題のある特定のパターンを個別にテスト', () => {
-    // 問題を起こしそうな文字列パターンを個別にテスト
-    const testCases = [
-      {
-        name: 'node index.js',
-        content: 'node index.js',
-      },
-      {
-        name: 'npm install',
-        content: 'npm install',
-      },
-      {
-        name: 'JavaScript ファイル名（index.js）',
-        content: 'Execute the script with: node index.js',
-      },
-      {
-        name: 'GitHubクローンコマンド',
-        content: 'git clone https://github.com/ferit7/Bulk-Gmail-Account-Creator.git',
-      },
-      {
-        name: 'ファイルパス形式',
-        content:
-          'See the [LICENSE](https://github.com/ferit7/Bulk-Gmail-Account-Creator/blob/main/LICENSE) file',
-      },
-      {
-        name: 'コードブロック内のjs',
-        content: `\`\`\`bash
+  // 問題を起こしそうな文字列パターンを個別にテスト
+  const individualTestCases = [
+    {
+      name: 'node index.js',
+      content: 'node index.js',
+    },
+    {
+      name: 'npm install',
+      content: 'npm install',
+    },
+    {
+      name: 'JavaScript ファイル名（index.js）',
+      content: 'Execute the script with: node index.js',
+    },
+    {
+      name: 'GitHubクローンコマンド',
+      content: 'git clone https://github.com/ferit7/Bulk-Gmail-Account-Creator.git',
+    },
+    {
+      name: 'ファイルパス形式',
+      content:
+        'See the [LICENSE](https://github.com/ferit7/Bulk-Gmail-Account-Creator/blob/main/LICENSE) file',
+    },
+    {
+      name: 'コードブロック内のjs',
+      content: `\`\`\`bash
    node index.js
    \`\`\``,
-      },
-      {
-        name: 'Puppeteer Documentation',
-        content: '[Puppeteer Documentation](https://pptr.dev/)',
-      },
-      {
-        name: 'Node.js Documentation',
-        content: '[Node.js Documentation](https://nodejs.org/en/docs/)',
-      },
-    ];
+    },
+    {
+      name: 'Puppeteer Documentation',
+      content: '[Puppeteer Documentation](https://pptr.dev/)',
+    },
+    {
+      name: 'Node.js Documentation',
+      content: '[Node.js Documentation](https://nodejs.org/en/docs/)',
+    },
+  ];
 
-    testCases.forEach(({ name, content }) => {
+  it.each(individualTestCases)(
+    '問題のある特定のパターンを個別にテスト: $name',
+    ({ name, content }) => {
       const foundMatches: Array<{ patternIndex: number; matches: string[] }> = [];
 
       DEFAULT_WEB_APP_PATTERNS.forEach((pattern, patternIndex) => {
@@ -248,8 +249,8 @@ Thank you for checking out the **Bulk Gmail Account Creator**! For the latest up
 
       // 現在は各ケースでの結果を記録のみ（後で修正方針を決めるため）
       expect(foundMatches).toBeDefined();
-    });
-  });
+    }
+  );
 
   it('正当なGAS WebAppコンテンツは正しく検出される', () => {
     // 実際のGAS WebAppプロジェクトのREADME例
