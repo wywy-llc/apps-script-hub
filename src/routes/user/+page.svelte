@@ -2,7 +2,7 @@
   import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { createFullUrl, getLogoUrl } from '$lib/constants/app-config.js';
+  import { createAppUrl, createFullUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import {
     featured_libraries,
     featured_web_apps,
@@ -26,7 +26,7 @@
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={createFullUrl('HOME')} />
+  <meta property="og:url" content={createAppUrl('/user')} />
   <meta property="og:title" content={meta_title_home()} />
   <meta property="og:description" content={meta_description_home()} />
   <meta property="og:image" content={getLogoUrl()} />
