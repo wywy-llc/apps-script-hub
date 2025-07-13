@@ -5,7 +5,7 @@ import {
 } from '../../../../src/lib/constants/scraper-config.js';
 import { GASScriptIdExtractor } from '../../../../src/lib/server/utils/gas-script-id-extractor.js';
 
-describe('ScriptSync README スクリプトID抽出バグの再現', () => {
+describe('スクリプトID抽出バグの再現テスト', () => {
   const scriptSyncReadme = `# ScriptSync
 
 <a name="top"></a>
@@ -208,5 +208,132 @@ The library ID is: **\`1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL
 
     // 除外パターンによってスクリプトIDが除外されていないことを確認
     expect(excludingPatterns.length).toBe(0);
+  });
+
+  // aws-sdk-google-appsライブラリのバグ再現テスト
+  test('aws-sdk-google-apps READMEでのスクリプトID抽出バグ再現', () => {
+    const awsSdkReadme = `# aws-sdk-google-apps
+
+[![mit license](https://badgen.net/badge/license/MIT/red)](https://github.com/dxdc/aws-sdk-google-apps/blob/master/LICENSE)
+[![Donate](https://badgen.net/badge/Donate/PayPal/91BE09)](https://paypal.me/ddcaspi)
+
+Native support for the entire AWS SDK for JavaScript in Google Apps Script.
+
+Working examples for Simple Email Service (SES), S3, Lambda, and EC2. This project can easily accommodate _all_ other AWS services, e.g.,
+
+\`\`\`
+npm run sdk --sdk=ses,s3,ec2,lambda,dynamodb && npm run build
+\`\`\`
+
+## Library deployment
+
+1. Add the existing Google Apps Script project [as a Library](https://developers.google.com/apps-script/guides/libraries#add_a_library_to_your_script_project)
+
+- Script ID \`1J6iN9mJE-NK6LGTlZcngsflJEx59tE3ZOW4-2cdHbgw0So2MmEcRZxKG\`
+- Choose an identifier, e.g., \`AWSLIB\`
+- Versions of the Google Apps Script project map to tags on this Git repository
+
+2. Initialize your AWS config settings and implement one of this library's [S3](dist/S3.js), [Lambda](dist/Lambda.js), [SES](dist/Ses.js), or [EC2](dist/EC2.js) functions. [Examples.js](dist/Examples.js) shows some working examples.
+
+\`\`\`js
+const AWS_CONFIG = {
+  accessKey: 'AK0ZXZD0KGNG4KG6REBP', // use your own AWS key
+  secretKey: 'EXrPgHC41HEW2YownLUnJLgh6bMsrmW1uva1ic24', // use your own AWS key
+  region: 'us-east-1',
+};
+
+// example function to retrieve S3 object
+async function getS3ObjectTest() {
+  AWSLIB.initConfig(AWS_CONFIG);
+  var result = await AWSLIB.getS3Object('myBucket', 'folder1/file.jpg');
+  if (result === false) {
+    return false;
+  }
+
+  var blob = Utilities.newBlob(result.Body, result.ContentType);
+  // Logger.log(blob.getDataAsString());
+  return blob;
+}
+\`\`\``;
+
+    const expectedScriptId = '1J6iN9mJE-NK6LGTlZcngsflJEx59tE3ZOW4-2cdHbgw0So2MmEcRZxKG';
+    const incorrectlyExtractedString = '1HEW2YownLUnJLgh6bMsrmW1uva1ic24';
+
+    // 現在の抽出結果をテスト
+    const extractedId = GASScriptIdExtractor.extractScriptId(
+      awsSdkReadme,
+      DEFAULT_SCRIPT_ID_PATTERNS
+    );
+
+    console.log('抽出されたスクリプトID:', extractedId);
+    console.log('期待されるスクリプトID:', expectedScriptId);
+    console.log('誤って抽出される可能性のある文字列:', incorrectlyExtractedString);
+
+    // バグが発生している場合、期待されるスクリプトIDが抽出されない
+    expect(extractedId).toBe(expectedScriptId);
+  });
+
+  test('aws-sdk-google-apps: 各パターンの動作確認', () => {
+    const awsSdkReadme = `# aws-sdk-google-apps
+
+- Script ID \`1J6iN9mJE-NK6LGTlZcngsflJEx59tE3ZOW4-2cdHbgw0So2MmEcRZxKG\`
+
+\`\`\`js
+const AWS_CONFIG = {
+  secretKey: 'EXrPgHC41HEW2YownLUnJLgh6bMsrmW1uva1ic24', // use your own AWS key
+};
+\`\`\``;
+
+    const expectedScriptId = '1J6iN9mJE-NK6LGTlZcngsflJEx59tE3ZOW4-2cdHbgw0So2MmEcRZxKG';
+    const incorrectlyExtractedString = '1HEW2YownLUnJLgh6bMsrmW1uva1ic24';
+
+    // 除外パターンのテスト
+    console.log('除外パターンのテスト:');
+    SCRIPT_ID_EXCLUSION_PATTERNS.forEach((pattern, index) => {
+      const matches = [...awsSdkReadme.matchAll(pattern)];
+      if (matches.length > 0) {
+        console.log(`除外パターン ${index + 1}: ${pattern}`);
+        matches.forEach(match => {
+          console.log(
+            `  マッチ: "${match[0]}" - 誤った文字列を含む: ${match[0].includes(incorrectlyExtractedString)}`
+          );
+        });
+      }
+    });
+
+    // 各パターンを個別にテスト
+    const foundMatches: { pattern: RegExp; matches: string[] }[] = [];
+
+    DEFAULT_SCRIPT_ID_PATTERNS.forEach((pattern, index) => {
+      const matches = [...awsSdkReadme.matchAll(pattern)];
+
+      if (matches.length > 0) {
+        const extractedIds = matches.map(match => match[1] || match[0]);
+        foundMatches.push({
+          pattern,
+          matches: extractedIds,
+        });
+
+        console.log(`パターン ${index + 1}: ${pattern}`);
+        console.log('マッチした内容:', extractedIds);
+      }
+    });
+
+    // 正しいスクリプトIDがマッチしているかを確認
+    const correctMatches = foundMatches.filter(fm => fm.matches.includes(expectedScriptId));
+
+    // 誤った文字列がマッチしているかを確認
+    const incorrectMatches = foundMatches.filter(fm =>
+      fm.matches.includes(incorrectlyExtractedString)
+    );
+
+    console.log('正しいスクリプトIDをマッチしたパターン数:', correctMatches.length);
+    console.log('誤った文字列をマッチしたパターン数:', incorrectMatches.length);
+
+    // 正しいスクリプトIDが少なくとも1つのパターンでマッチすることを期待
+    expect(correctMatches.length).toBeGreaterThan(0);
+
+    // 誤った文字列がマッチしないことを期待
+    expect(incorrectMatches.length).toBe(0);
   });
 });

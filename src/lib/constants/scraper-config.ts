@@ -25,8 +25,9 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
   /(?:library["']?s?\s*project\s*key|project\s*key|ライブラリ.*?プロジェクト.*?キー|ライブラリ.*?キー)[^:]*[:：]?\s*(?:is\s*)?(?:as\s*follows[.。]?)?\s*```?\s*(1[A-Za-z0-9_-]{24,69})\s*```?/gi,
 
   // 2. コードブロック内のライブラリID（高精度）
-  // Markdownコードブロック内の1で始まる長い文字列
-  /```[^`]*?(1[A-Za-z0-9_-]{24,69})[^`]*?```/gs,
+  // Markdownコードブロック内の1で始まる長い文字列（AWSキー等を除外）
+  // 単体の値、またはコメント付きで明示的にGAS IDとして言及される場合のみ
+  /```[^`]*?(1[A-Za-z0-9_-]{57,69})[^`]*?```/gs,
 
   // 3. Google Script URL形式（高精度）
   /https:\/\/script\.google\.com\/macros\/d\/([A-Za-z0-9_-]{25,70})\/edit/gi,
@@ -65,6 +66,12 @@ export const SCRIPT_ID_EXCLUSION_PATTERNS: RegExp[] = [
 
   // JSON形式のIDフィールドを除外（GAS以外の特定のIDフィールドのみ）
   /["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'][A-Za-z0-9_-]+["']/gi,
+
+  // AWSキーやシークレットキーを除外
+  /(?:access_?key|secret_?key|aws_?access|aws_?secret)[^:]*[:=]\s*['"`]?[A-Za-z0-9_-]{20,}['"`]?/gi,
+
+  // コードブロック内のAWSキー除外（特定の構造）
+  /['"`](?:AK[A-Z0-9]{18}|[A-Za-z0-9+/]{40})['"`,]/gi,
 
   // UUID形式（ハイフン区切り）を除外
   /1[a-f0-9]{7}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
