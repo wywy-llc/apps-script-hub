@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/bulk-register-all-tags",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/bulk-update-existing",
+      "schedule": "0 3 * * *"
     }
   ]
 }
