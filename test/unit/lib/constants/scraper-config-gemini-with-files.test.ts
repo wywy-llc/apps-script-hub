@@ -79,40 +79,10 @@ If you want to use the access token, please link the Google Cloud Platform Proje
 
 Also, you can see the official document of Gemini API at [https://ai.google.dev/api/rest](https://ai.google.dev/api/rest).`;
 
-    console.log('=== 実際のGeminiWithFilesのREADME抽出テスト ===');
     const expectedLibraryId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
-
     const result = GASScriptIdExtractor.extractScriptId(actualGeminiWithFilesReadme);
 
-    console.log(`期待されるライブラリID: ${expectedLibraryId}`);
-    console.log(`抽出されたライブラリID: ${result || '(undefined)'}`);
-
-    if (result === expectedLibraryId) {
-      console.log('✅ 正しく抽出されました');
-      expect(result).toBe(expectedLibraryId);
-    } else {
-      console.log('🐛 抽出に失敗しました');
-
-      // デバッグ情報: どのパターンがマッチしたかを確認
-      console.log('\n=== デバッグ情報: パターン別マッチ結果 ===');
-      GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS.forEach((pattern, index) => {
-        const matches: string[] = [];
-        const matchResults = actualGeminiWithFilesReadme.matchAll(pattern);
-
-        for (const match of matchResults) {
-          if (match[1] && match[1].length >= 20) {
-            matches.push(match[1]);
-          }
-        }
-
-        if (matches.length > 0) {
-          console.log(`パターン ${index}: ${pattern.source}`);
-          console.log(`  マッチ結果: ${matches.join(', ')}`);
-        }
-      });
-
-      expect(result).toBe(expectedLibraryId);
-    }
+    expect(result).toBe(expectedLibraryId);
   });
 
   it('コードブロック内のライブラリIDが最初に抽出されることを確認', () => {
@@ -130,9 +100,6 @@ Script ID: 1AnotherScriptId234567890123456789012345`;
     const result = GASScriptIdExtractor.extractScriptId(readmeWithCodeBlock);
     const expectedFirstId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
 
-    console.log('コードブロック内のIDが最初に抽出されるかテスト');
-    console.log(`抽出されたID: ${result || '(undefined)'}`);
-
     expect(result).toBe(expectedFirstId);
   });
 
@@ -145,9 +112,6 @@ Real script ID: 1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC`;
 
     const result = GASScriptIdExtractor.extractScriptId(readmeWithUuid);
     const expectedId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
-
-    console.log('UUID形式の誤検知防止テスト');
-    console.log(`抽出されたID: ${result || '(undefined)'}`);
 
     expect(result).toBe(expectedId);
   });
@@ -162,20 +126,11 @@ Script ID: 1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC`;
     const result = GASScriptIdExtractor.extractScriptId(readmeWithGitHubUrl);
     const expectedId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
 
-    console.log('GitHub URL内のID誤検知防止テスト');
-    console.log(`抽出されたID: ${result || '(undefined)'}`);
-
     expect(result).toBe(expectedId);
   });
 
   it('ライブラリID文字列の妥当性を確認', () => {
     const libraryId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
-
-    console.log('ライブラリIDの形式確認');
-    console.log(`ライブラリID: ${libraryId}`);
-    console.log(`文字数: ${libraryId.length}`);
-    console.log(`先頭文字: ${libraryId.charAt(0)}`);
-    console.log(`使用文字: ${[...new Set(libraryId.split(''))].sort().join('')}`);
 
     // 基本的な形式チェック
     expect(libraryId.startsWith('1')).toBe(true);

@@ -22,7 +22,7 @@ import type { ScraperConfig } from '$lib/types/github-scraper.js';
 export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
   // 1. ライブラリキー明示記載（最高精度）
   // 「The library's project key is as follows」や「ライブラリのプロジェクトキー」の後のID
-  /(?:library['']?s?\s*project\s*key|project\s*key|ライブラリ.*?プロジェクト.*?キー|ライブラリ.*?キー)[^:]*[:：]?\s*(?:is\s*)?(?:as\s*follows[.。]?)?\s*```?\s*(1[A-Za-z0-9_-]{24,69})\s*```?/gi,
+  /(?:library["']?s?\s*project\s*key|project\s*key|ライブラリ.*?プロジェクト.*?キー|ライブラリ.*?キー)[^:]*[:：]?\s*(?:is\s*)?(?:as\s*follows[.。]?)?\s*```?\s*(1[A-Za-z0-9_-]{24,69})\s*```?/gi,
 
   // 2. コードブロック内のライブラリID（高精度）
   // Markdownコードブロック内の1で始まる長い文字列
