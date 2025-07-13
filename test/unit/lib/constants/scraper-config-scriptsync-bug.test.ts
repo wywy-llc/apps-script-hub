@@ -29,7 +29,7 @@ ScriptSync is a library designed to make it easier for developers to quickly dep
 1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL
 \`\`\`
 
-<a name="Howtoinstall"></a>
+<a name="how-to-install"></a>
 
 # How to install
 
