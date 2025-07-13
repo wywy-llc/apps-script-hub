@@ -232,11 +232,6 @@ export class ProcessBulkGASLibraryWithSaveService {
           });
         }
       }
-
-      // バッチ間の待機（レート制限対策）
-      if (batches.indexOf(batch) < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, config.rateLimit.delayBetweenRequests));
-      }
     }
 
     return { results, duplicateCount };

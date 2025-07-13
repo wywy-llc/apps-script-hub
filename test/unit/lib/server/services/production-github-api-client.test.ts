@@ -200,7 +200,7 @@ describe('ProductionGitHubApiClient', () => {
     const mockConfig = {
       gasTags: ['google-apps-script'],
       verbose: false,
-      rateLimit: { delayBetweenRequests: 200 },
+      rateLimit: {},
       github: { sortBy: 'stars' as const },
     };
 
@@ -277,7 +277,7 @@ describe('ProductionGitHubApiClient', () => {
     const mockConfig = {
       gasTags: ['google-apps-script'],
       verbose: false,
-      rateLimit: { delayBetweenRequests: 200 },
+      rateLimit: {},
       github: { sortBy: 'stars' as const },
     };
 
@@ -298,9 +298,7 @@ describe('ProductionGitHubApiClient', () => {
       });
     });
 
-    it('複数ページの検索では適切な待機時間を設ける', async () => {
-      const startTime = Date.now();
-
+    it('複数ページの検索を正常に実行できる', async () => {
       // 各ページで成功するモック
       for (let i = 0; i < 2; i++) {
         mockFetch.mockResolvedValueOnce({
@@ -309,11 +307,9 @@ describe('ProductionGitHubApiClient', () => {
         } as Response);
       }
 
-      await client.searchRepositoriesByPageRange(mockConfig, 1, 2, 10);
+      const result = await client.searchRepositoriesByPageRange(mockConfig, 1, 2, 10);
 
-      const elapsed = Date.now() - startTime;
-      // 1ページ目と2ページ目の間に200ms待機するため、少なくとも150ms以上かかるはず
-      expect(elapsed).toBeGreaterThan(150);
+      expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
   });
@@ -342,9 +338,7 @@ describe('ProductionGitHubApiClient', () => {
       expect(responseTime).toBeLessThan(200); // より余裕を持った上限
     });
 
-    it('レート制限の待機時間を確認', async () => {
-      const startTime = Date.now();
-
+    it('複数ページの検索でエラーハンドリングが正常に動作する', async () => {
       // 複数回のモック設定
       for (let i = 0; i < 3; i++) {
         mockFetch.mockResolvedValueOnce({
@@ -353,11 +347,11 @@ describe('ProductionGitHubApiClient', () => {
         } as Response);
       }
 
-      await client.searchRepositoriesByPageRange(
+      const result = await client.searchRepositoriesByPageRange(
         {
           gasTags: ['google-apps-script'],
           verbose: false,
-          rateLimit: { delayBetweenRequests: 200 },
+          rateLimit: {},
           github: { sortBy: 'stars' as const },
         },
         1,
@@ -365,9 +359,8 @@ describe('ProductionGitHubApiClient', () => {
         10
       );
 
-      const elapsed = Date.now() - startTime;
-      // 3ページで2回の待機（200ms × 2）なので、最低400ms程度
-      expect(elapsed).toBeGreaterThan(300); // より緩い条件に変更
+      expect(result.success).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(3);
     });
   });
 });

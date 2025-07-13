@@ -39,8 +39,6 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
 
   // インメモリキャッシュ（静的プロパティで全インスタンス共有）
   private static cache = new Map<string, CacheItem<unknown>>();
-  private static lastRateLimitTime = 0;
-  private static adaptiveDelay = 200;
 
   /**
    * キャッシュからデータを取得
@@ -80,26 +78,6 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
   }
 
   /**
-   * レート制限を考慮した動的待機時間を計算
-   * @private
-   */
-  private static calculateAdaptiveDelay(): number {
-    const now = Date.now();
-    const timeSinceLastRateLimit = now - this.lastRateLimitTime;
-
-    // 最近レート制限を受けた場合は待機時間を増加
-    if (timeSinceLastRateLimit < 60000) {
-      // 1分以内
-      this.adaptiveDelay = Math.min(this.adaptiveDelay * 1.5, 2000);
-    } else {
-      // レート制限から時間が経った場合は待機時間を減少
-      this.adaptiveDelay = Math.max(this.adaptiveDelay * 0.9, 100);
-    }
-
-    return this.adaptiveDelay;
-  }
-
-  /**
    * エクスポネンシャルバックオフによるリトライ機能付きfetch
    * @private
    */
@@ -113,8 +91,6 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
 
       // レート制限の場合
       if (response.status === 429) {
-        this.lastRateLimitTime = Date.now();
-
         // Retry-Afterヘッダーがある場合はそれを使用、なければ計算
         const retryAfter = response.headers.get('Retry-After');
         const waitTime = retryAfter
@@ -362,11 +338,6 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         if (searchResult.items.length === 0) {
           break;
         }
-
-        if (page < totalPages) {
-          const delayTime = ProductionGitHubApiClient.calculateAdaptiveDelay();
-          await new Promise(resolve => setTimeout(resolve, delayTime));
-        }
       }
 
       if (allRepositories.length > maxResults) {
@@ -511,11 +482,6 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
             console.log(`ページ ${page} で検索結果が0件のため処理を終了します`);
           }
           break;
-        }
-
-        if (page < endPage) {
-          const delayTime = ProductionGitHubApiClient.calculateAdaptiveDelay();
-          await new Promise(resolve => setTimeout(resolve, delayTime));
         }
       }
 

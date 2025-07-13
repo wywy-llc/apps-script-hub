@@ -99,7 +99,7 @@ describe('GASScriptIdExtractor', () => {
         scriptIdPatterns: [/スクリプトID[：:\s]*([A-Za-z0-9_-]{20,})/gi],
         webAppPatterns: [],
         gasTags: ['test'],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -113,7 +113,7 @@ describe('GASScriptIdExtractor', () => {
         scriptIdPatterns: [/MY_CUSTOM_ID:\s*([A-Za-z0-9_-]{20,})/gi],
         webAppPatterns: [],
         gasTags: ['test'],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 

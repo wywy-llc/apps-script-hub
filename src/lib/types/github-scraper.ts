@@ -6,7 +6,6 @@
 export interface ScraperConfig {
   rateLimit: {
     maxRequestsPerHour: number;
-    delayBetweenRequests: number;
   };
   scriptIdPatterns: RegExp[];
   webAppPatterns: RegExp[];

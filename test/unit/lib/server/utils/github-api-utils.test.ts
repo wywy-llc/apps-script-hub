@@ -183,7 +183,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -209,7 +209,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script', 'apps-script', 'gas-library'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -231,7 +231,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['test'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -274,7 +274,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -345,7 +345,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -389,7 +389,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: true,
       };
 
@@ -415,7 +415,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: [], // 空の配列
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -439,7 +439,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: undefined as unknown as string[], // 未定義
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -463,7 +463,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script', 'apps-script', 'gas-library', 'clasp', 'googleappsscript'], // cspell:disable-line
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -495,7 +495,7 @@ describe('GitHubApiUtils', () => {
           'automation',
         ],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -520,7 +520,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['test'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -546,7 +546,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['test'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
@@ -592,7 +592,7 @@ describe('GitHubApiUtils', () => {
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
         scriptIdPatterns: [],
-        rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
+        rateLimit: { maxRequestsPerHour: 5000 },
         verbose: false,
       };
 
