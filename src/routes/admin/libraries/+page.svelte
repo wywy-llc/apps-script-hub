@@ -55,6 +55,8 @@
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
+  let bulkValidateInProgress = $state(false);
+  let bulkValidateMessage = $state('');
   let selectedTags = $state(resetSelectedTags()); // 初期値は全タグ選択
 
   /**
@@ -209,6 +211,66 @@
     }
   }
 
+  /**
+   * ライブラリ一括検証・却下処理
+   */
+  async function handleBulkValidateAndReject() {
+    if (bulkValidateInProgress) return;
+
+    const confirmMessage = `既存のライブラリをスクレイピングパターンで検証し、適合しないライブラリを自動的に却下しますか？
+この処理には時間がかかる場合があります。`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    bulkValidateInProgress = true;
+    bulkValidateMessage = 'ライブラリを検証中...';
+
+    try {
+      const response = await fetch('/admin/libraries/bulk-validate-and-reject', {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        bulkValidateMessage = result.message;
+
+        // 却下されたライブラリがある場合は詳細情報を表示
+        if (result.rejectedLibraries && result.rejectedLibraries.length > 0) {
+          const rejectedNames = result.rejectedLibraries
+            .slice(0, 5) // 最初の5件のみ表示
+            .map((lib: { id: string; name: string; reason: string }) => lib.name)
+            .join(', ');
+
+          const additionalInfo =
+            result.rejectedLibraries.length > 5
+              ? ` 他${result.rejectedLibraries.length - 5}件`
+              : '';
+
+          bulkValidateMessage += `\n却下されたライブラリ: ${rejectedNames}${additionalInfo}`;
+        }
+      } else {
+        bulkValidateMessage = result.message || '一括検証中にエラーが発生しました。';
+      }
+
+      // 3秒後にページをリロード（更新されたデータを表示するため）
+      setTimeout(() => {
+        bulkValidateMessage = '';
+        window.location.reload();
+      }, 3000);
+    } catch (error) {
+      console.error('一括検証エラー:', error);
+      bulkValidateMessage = '一括検証中にエラーが発生しました。';
+    } finally {
+      bulkValidateInProgress = false;
+      setTimeout(() => {
+        bulkValidateMessage = '';
+      }, 5000);
+    }
+  }
+
   // URLを更新してページ遷移する関数
   function updatePageUrl(newPage: number) {
     const url = new URL($page.url);
@@ -291,6 +353,31 @@
           既存一括更新
         {/if}
       </button>
+      <button
+        onclick={handleBulkValidateAndReject}
+        disabled={bulkValidateInProgress}
+        class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        title="最新のスクレイピングパターンに適合しないライブラリを自動的に却下"
+      >
+        {#if bulkValidateInProgress}
+          <svg
+            class="mr-2 h-4 w-4 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          一括検証中...
+        {:else}
+          一括検証・却下
+        {/if}
+      </button>
     </div>
   </div>
 
@@ -307,6 +394,24 @@
         </svg>
         <div class="ml-3">
           <p class="text-sm font-medium">{bulkUpdateMessage}</p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- 一括検証メッセージ -->
+  {#if bulkValidateMessage}
+    <div class="mb-6 rounded-md bg-red-50 p-4 text-red-800">
+      <div class="flex">
+        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium whitespace-pre-line">{bulkValidateMessage}</p>
         </div>
       </div>
     </div>
