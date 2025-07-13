@@ -168,54 +168,120 @@
         {/if}
       </div>
       <div class="hidden md:-mt-px md:flex">
-        {#each Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1) as pageNum (pageNum)}
-          {#if pageNum === currentPage}
-            <span
-              class="inline-flex items-center border-t-2 border-blue-600 px-4 pt-4 text-sm font-medium text-blue-600"
-              aria-current="page"
-            >
-              {pageNum}
-            </span>
-          {:else}
-            {@const pageParams = new URLSearchParams()}
+        <!-- 現在のページを中心とした動的ページネーション -->
+        {#if totalPages <= 7}
+          <!-- 総ページ数が7以下の場合は全ページを表示 -->
+          {#each Array.from({ length: totalPages }, (_, i) => i + 1) as pageNum (pageNum)}
+            {#if pageNum === currentPage}
+              <span
+                class="inline-flex items-center border-t-2 border-blue-600 px-4 pt-4 text-sm font-medium text-blue-600"
+                aria-current="page"
+              >
+                {pageNum}
+              </span>
+            {:else}
+              {@const pageParams = new URLSearchParams()}
+              {#if searchQuery}
+                {pageParams.set('q', searchQuery)}
+              {/if}
+              {#if scriptType}
+                {pageParams.set('scriptType', scriptType)}
+              {/if}
+              {#if pageNum > 1}
+                {pageParams.set('page', pageNum.toString())}
+              {/if}
+              <a
+                href={`/user/search${pageParams.toString() ? `?${pageParams.toString()}` : ''}`}
+                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                aria-label="ページ {pageNum} へ"
+              >
+                {pageNum}
+              </a>
+            {/if}
+          {/each}
+        {:else}
+          <!-- 総ページ数が8以上の場合は現在のページを中心とした表示 -->
+          {@const startPage = Math.max(1, currentPage - 2)}
+          {@const endPage = Math.min(totalPages, currentPage + 2)}
+
+          <!-- 最初のページ -->
+          {#if startPage > 1}
+            {@const firstPageParams = new URLSearchParams()}
             {#if searchQuery}
-              {pageParams.set('q', searchQuery)}
+              {firstPageParams.set('q', searchQuery)}
             {/if}
             {#if scriptType}
-              {pageParams.set('scriptType', scriptType)}
-            {/if}
-            {#if pageNum > 1}
-              {pageParams.set('page', pageNum.toString())}
+              {firstPageParams.set('scriptType', scriptType)}
             {/if}
             <a
-              href={`/user/search${pageParams.toString() ? `?${pageParams.toString()}` : ''}`}
+              href={`/user/search${firstPageParams.toString() ? `?${firstPageParams.toString()}` : ''}`}
               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              aria-label="ページ {pageNum} へ"
+              aria-label="ページ 1 へ"
             >
-              {pageNum}
+              1
+            </a>
+            {#if startPage > 2}
+              <span
+                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500"
+                >...</span
+              >
+            {/if}
+          {/if}
+
+          <!-- 現在のページ周辺 -->
+          {#each Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i) as pageNum (pageNum)}
+            {#if pageNum === currentPage}
+              <span
+                class="inline-flex items-center border-t-2 border-blue-600 px-4 pt-4 text-sm font-medium text-blue-600"
+                aria-current="page"
+              >
+                {pageNum}
+              </span>
+            {:else}
+              {@const pageParams = new URLSearchParams()}
+              {#if searchQuery}
+                {pageParams.set('q', searchQuery)}
+              {/if}
+              {#if scriptType}
+                {pageParams.set('scriptType', scriptType)}
+              {/if}
+              {#if pageNum > 1}
+                {pageParams.set('page', pageNum.toString())}
+              {/if}
+              <a
+                href={`/user/search${pageParams.toString() ? `?${pageParams.toString()}` : ''}`}
+                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                aria-label="ページ {pageNum} へ"
+              >
+                {pageNum}
+              </a>
+            {/if}
+          {/each}
+
+          <!-- 最後のページ -->
+          {#if endPage < totalPages}
+            {#if endPage < totalPages - 1}
+              <span
+                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500"
+                >...</span
+              >
+            {/if}
+            {@const lastPageParams = new URLSearchParams()}
+            {#if searchQuery}
+              {lastPageParams.set('q', searchQuery)}
+            {/if}
+            {#if scriptType}
+              {lastPageParams.set('scriptType', scriptType)}
+            {/if}
+            {lastPageParams.set('page', totalPages.toString())}
+            <a
+              href={`/user/search?${lastPageParams.toString()}`}
+              class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              aria-label="最終ページ {totalPages} へ"
+            >
+              {totalPages}
             </a>
           {/if}
-        {/each}
-        {#if totalPages > 5}
-          <span
-            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500"
-            >...</span
-          >
-          {@const lastPageParams = new URLSearchParams()}
-          {#if searchQuery}
-            {lastPageParams.set('q', searchQuery)}
-          {/if}
-          {#if scriptType}
-            {lastPageParams.set('scriptType', scriptType)}
-          {/if}
-          {lastPageParams.set('page', totalPages.toString())}
-          <a
-            href={`/user/search?${lastPageParams.toString()}`}
-            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-            aria-label="最終ページ {totalPages} へ"
-          >
-            {totalPages}
-          </a>
         {/if}
       </div>
       <div class="-mt-px flex w-0 flex-1 justify-end">
