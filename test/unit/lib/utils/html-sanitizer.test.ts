@@ -70,8 +70,9 @@ describe('html-sanitizer', () => {
     test('コードブロックを含むMarkdownHTMLを安全に処理する', () => {
       const markdownHtml = `
         <h2>使用方法</h2>
-        <pre><code class="hljs language-javascript">
-
+        <pre><code class="hljs language-javascript">function hello() {
+  console.log('Hello, World!');
+}
         </code></pre>
         <p>このように使用してください。</p>
       `;

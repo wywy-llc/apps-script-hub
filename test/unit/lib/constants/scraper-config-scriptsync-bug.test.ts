@@ -133,7 +133,7 @@ Here are some examples:
 
 \`\`\`javascript
 function test() {
-  
+  console.log('test');
 }
 \`\`\`
 
@@ -180,7 +180,7 @@ Here are some examples:
 
 \`\`\`javascript
 function test() {
-  
+  console.log('test');
 }
 \`\`\`
 
