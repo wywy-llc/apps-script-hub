@@ -157,9 +157,12 @@
   async function handleBulkUpdate() {
     if (bulkUpdateInProgress) return;
 
+    // 却下ステータスのライブラリを除外
+    const targetLibraries = libraries.filter(lib => lib.status !== ('rejected' as LibraryStatus));
+
     if (
       !confirm(
-        `既存の${libraries.length}件のライブラリのGitHub情報（Star数等）を一括更新しますか？\n\nAI要約の更新は行われません。\nこの処理には時間がかかる場合があります。`
+        `既存の${targetLibraries.length}件のライブラリのGitHub情報（Star数等）を一括更新しますか？\n\n却下ステータスのライブラリは対象外です。\nAI要約の更新は行われません。\nこの処理には時間がかかる場合があります。`
       )
     ) {
       return;
@@ -171,10 +174,10 @@
     try {
       let successCount = 0;
       let errorCount = 0;
-      const totalLibraries = libraries.length;
+      const totalLibraries = targetLibraries.length;
 
-      for (let i = 0; i < libraries.length; i++) {
-        const library = libraries[i];
+      for (let i = 0; i < targetLibraries.length; i++) {
+        const library = targetLibraries[i];
         bulkUpdateMessage = `${i + 1}/${totalLibraries} GitHub情報を更新中: ${library.name}`;
 
         try {
