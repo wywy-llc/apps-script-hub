@@ -84,7 +84,7 @@ If you use this library in your own Google Apps Script project, please copy and 
     } else {
       console.log('🐛 ライブラリIDが抽出されていない');
     }
-    
+
     // 期待されるIDが必ず抽出されることを検証
     expect(hasExpectedId).toBe(true);
   });
@@ -100,7 +100,7 @@ If you use this library in your own Google Apps Script project, please copy and 
         expectedId: '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC',
       },
       {
-        name: "「The library's project key is as follows.」の後のID",
+        name: "The library's project key is as follows.の後のID",
         content: `The library's project key is as follows.
 
 1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC`,
@@ -220,7 +220,7 @@ If you use this library in your own Google Apps Script project, please copy and 
           console.log(`🐛 ${name}: 誤検知が発生`);
           console.log(`  誤検知されたID: ${foundMatches.join(', ')}`);
         }
-        
+
         // 誤検知が発生しないことを検証
         expect(foundMatches.length).toBe(0);
       }
