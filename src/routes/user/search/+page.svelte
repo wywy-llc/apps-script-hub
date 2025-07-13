@@ -45,6 +45,38 @@
     const queryString = params.toString();
     return createFullUrl(`/user/search${queryString ? `?${queryString}` : ''}`);
   })();
+
+  // 前のページのURL生成
+  $: prevPageUrl = (() => {
+    if (currentPage <= 1) return '';
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (scriptType) params.set('scriptType', scriptType);
+    if (currentPage - 1 > 1) params.set('page', (currentPage - 1).toString());
+    const queryString = params.toString();
+    return `/user/search${queryString ? `?${queryString}` : ''}`;
+  })();
+
+  // 次のページのURL生成
+  $: nextPageUrl = (() => {
+    if (currentPage >= totalPages) return '';
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (scriptType) params.set('scriptType', scriptType);
+    params.set('page', (currentPage + 1).toString());
+    const queryString = params.toString();
+    return `/user/search?${queryString}`;
+  })();
+
+  // 指定ページのURL生成関数
+  function getPageUrl(pageNum: number): string {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (scriptType) params.set('scriptType', scriptType);
+    if (pageNum > 1) params.set('page', pageNum.toString());
+    const queryString = params.toString();
+    return `/user/search${queryString ? `?${queryString}` : ''}`;
+  }
 </script>
 
 <svelte:head>
@@ -72,31 +104,10 @@
 
   <!-- Pagination Meta Tags -->
   {#if currentPage > 1}
-    {@const prevParams = new URLSearchParams()}
-    {#if searchQuery}
-      {prevParams.set('q', searchQuery)}
-    {/if}
-    {#if scriptType}
-      {prevParams.set('scriptType', scriptType)}
-    {/if}
-    {#if currentPage - 1 > 1}
-      {prevParams.set('page', (currentPage - 1).toString())}
-    {/if}
-    <link
-      rel="prev"
-      href={`/user/search${prevParams.toString() ? `?${prevParams.toString()}` : ''}`}
-    />
+    <link rel="prev" href={prevPageUrl} />
   {/if}
   {#if currentPage < totalPages}
-    {@const nextParams = new URLSearchParams()}
-    {#if searchQuery}
-      {nextParams.set('q', searchQuery)}
-    {/if}
-    {#if scriptType}
-      {nextParams.set('scriptType', scriptType)}
-    {/if}
-    {nextParams.set('page', (currentPage + 1).toString())}
-    <link rel="next" href={`/user/search?${nextParams.toString()}`} />
+    <link rel="next" href={nextPageUrl} />
   {/if}
 </svelte:head>
 
@@ -134,18 +145,8 @@
     >
       <div class="-mt-px flex w-0 flex-1">
         {#if currentPage > 1}
-          {@const prevParams = new URLSearchParams()}
-          {#if searchQuery}
-            {prevParams.set('q', searchQuery)}
-          {/if}
-          {#if scriptType}
-            {prevParams.set('scriptType', scriptType)}
-          {/if}
-          {#if currentPage - 1 > 1}
-            {prevParams.set('page', (currentPage - 1).toString())}
-          {/if}
           <a
-            href={`/user/search${prevParams.toString() ? `?${prevParams.toString()}` : ''}`}
+            href={prevPageUrl}
             class="inline-flex items-center border-t-2 border-transparent pt-4 pr-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
             aria-label="前のページへ"
             rel="prev"
@@ -180,18 +181,8 @@
                 {pageNum}
               </span>
             {:else}
-              {@const pageParams = new URLSearchParams()}
-              {#if searchQuery}
-                {pageParams.set('q', searchQuery)}
-              {/if}
-              {#if scriptType}
-                {pageParams.set('scriptType', scriptType)}
-              {/if}
-              {#if pageNum > 1}
-                {pageParams.set('page', pageNum.toString())}
-              {/if}
               <a
-                href={`/user/search${pageParams.toString() ? `?${pageParams.toString()}` : ''}`}
+                href={getPageUrl(pageNum)}
                 class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 aria-label="ページ {pageNum} へ"
               >
@@ -206,15 +197,8 @@
 
           <!-- 最初のページ -->
           {#if startPage > 1}
-            {@const firstPageParams = new URLSearchParams()}
-            {#if searchQuery}
-              {firstPageParams.set('q', searchQuery)}
-            {/if}
-            {#if scriptType}
-              {firstPageParams.set('scriptType', scriptType)}
-            {/if}
             <a
-              href={`/user/search${firstPageParams.toString() ? `?${firstPageParams.toString()}` : ''}`}
+              href={getPageUrl(1)}
               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
               aria-label="ページ 1 へ"
             >
@@ -238,18 +222,8 @@
                 {pageNum}
               </span>
             {:else}
-              {@const pageParams = new URLSearchParams()}
-              {#if searchQuery}
-                {pageParams.set('q', searchQuery)}
-              {/if}
-              {#if scriptType}
-                {pageParams.set('scriptType', scriptType)}
-              {/if}
-              {#if pageNum > 1}
-                {pageParams.set('page', pageNum.toString())}
-              {/if}
               <a
-                href={`/user/search${pageParams.toString() ? `?${pageParams.toString()}` : ''}`}
+                href={getPageUrl(pageNum)}
                 class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 aria-label="ページ {pageNum} へ"
               >
@@ -266,16 +240,8 @@
                 >...</span
               >
             {/if}
-            {@const lastPageParams = new URLSearchParams()}
-            {#if searchQuery}
-              {lastPageParams.set('q', searchQuery)}
-            {/if}
-            {#if scriptType}
-              {lastPageParams.set('scriptType', scriptType)}
-            {/if}
-            {lastPageParams.set('page', totalPages.toString())}
             <a
-              href={`/user/search?${lastPageParams.toString()}`}
+              href={getPageUrl(totalPages)}
               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
               aria-label="最終ページ {totalPages} へ"
             >
@@ -286,16 +252,8 @@
       </div>
       <div class="-mt-px flex w-0 flex-1 justify-end">
         {#if currentPage < totalPages}
-          {@const nextParams = new URLSearchParams()}
-          {#if searchQuery}
-            {nextParams.set('q', searchQuery)}
-          {/if}
-          {#if scriptType}
-            {nextParams.set('scriptType', scriptType)}
-          {/if}
-          {nextParams.set('page', (currentPage + 1).toString())}
           <a
-            href={`/user/search?${nextParams.toString()}`}
+            href={nextPageUrl}
             class="inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
             aria-label="次のページへ"
             rel="next"
