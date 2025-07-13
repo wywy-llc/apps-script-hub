@@ -11,7 +11,7 @@ export interface PatternMatchResult {
 
 /**
  * スクリプトIDパターンマッチング共通ヘルパー関数
- * 
+ *
  * @param content - マッチング対象の文字列
  * @returns マッチした結果の配列
  */
@@ -48,7 +48,7 @@ export function matchScriptIdPatterns(content: string): PatternMatchResult[] {
 
 /**
  * マッチした全ての文字列を平坦化して取得
- * 
+ *
  * @param content - マッチング対象の文字列
  * @returns マッチした全ての文字列の配列
  */
@@ -59,7 +59,7 @@ export function extractAllMatches(content: string): string[] {
 
 /**
  * 特定のIDが抽出されるかをチェック
- * 
+ *
  * @param content - マッチング対象の文字列
  * @param expectedId - 期待されるID
  * @returns 期待されるIDが抽出されるかどうか
@@ -71,7 +71,7 @@ export function containsExpectedId(content: string, expectedId: string): boolean
 
 /**
  * 誤検知がないことをチェック（何もマッチしないことを確認）
- * 
+ *
  * @param content - マッチング対象の文字列
  * @returns マッチする文字列が存在しないかどうか
  */

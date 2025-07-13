@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  extractAllMatches,
-  containsExpectedId,
-} from './scraper-pattern-test-helper.js';
+import { containsExpectedId, extractAllMatches } from './scraper-pattern-test-helper.js';
 
 describe('GeminiWithFiles ライブラリID抽出テスト', () => {
   it('GeminiWithFilesのREADMEからライブラリIDが正しく抽出される', () => {
