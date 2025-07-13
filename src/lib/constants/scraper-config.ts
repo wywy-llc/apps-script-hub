@@ -122,8 +122,7 @@ export const DEFAULT_GAS_TAGS = [
  */
 export const DEFAULT_SCRAPER_CONFIG: ScraperConfig = {
   rateLimit: {
-    maxRequestsPerHour: 60, // 認証なしの場合
-    delayBetweenRequests: 1200, // ms
+    maxRequestsPerHour: 5000, // 認証ありの場合
   },
   scriptIdPatterns: DEFAULT_SCRIPT_ID_PATTERNS,
   webAppPatterns: DEFAULT_WEB_APP_PATTERNS,

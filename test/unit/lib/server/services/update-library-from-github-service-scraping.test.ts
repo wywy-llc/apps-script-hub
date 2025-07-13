@@ -208,10 +208,7 @@ describe('UpdateLibraryFromGithubService - スクレイピング機能', () => {
 
   test('スクレイピング失敗時は既存の値を保持する', async () => {
     // Arrange
-    mockScrapeGASLibraryService.call.mockResolvedValue({
-      success: false,
-      error: 'スクレイピングに失敗しました',
-    });
+    mockScrapeGASLibraryService.call.mockRejectedValue(new Error('スクレイピングに失敗しました'));
 
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -221,7 +218,7 @@ describe('UpdateLibraryFromGithubService - スクレイピング機能', () => {
     // Assert
     expect(mockScrapeGASLibraryService.call).toHaveBeenCalledWith(mockLibraryData.repositoryUrl);
     expect(consoleSpy).toHaveBeenCalledWith(
-      'スクレイピング失敗: スクレイピングに失敗しました - 既存の値を保持します'
+      'スクレイピング失敗: Error: スクレイピングに失敗しました - 既存の値を保持します'
     );
 
     expect(mockDb.update).toHaveBeenCalledWith(expect.any(Object));
@@ -246,7 +243,9 @@ describe('UpdateLibraryFromGithubService - スクレイピング機能', () => {
 
     // Assert
     expect(mockScrapeGASLibraryService.call).toHaveBeenCalledWith(mockLibraryData.repositoryUrl);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('スクレイピングエラー:'));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'スクレイピング失敗: Error: ネットワークエラー - 既存の値を保持します'
+    );
 
     expect(mockDb.update).toHaveBeenCalledWith(expect.any(Object));
     expect(mockUpdateChain.set).toHaveBeenCalledWith(

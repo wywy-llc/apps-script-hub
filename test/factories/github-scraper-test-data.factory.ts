@@ -81,6 +81,7 @@ export const ScrapeResultTestDataFactories = createPresetFactories<ScrapeResultT
       starCount: 42,
       lastCommitAt: new Date('2023-12-01T00:00:00Z'),
       status: 'pending' as const,
+      scriptType: 'library',
     },
   }),
   successWithOAuth: () => ({
@@ -97,6 +98,7 @@ export const ScrapeResultTestDataFactories = createPresetFactories<ScrapeResultT
       starCount: 789,
       lastCommitAt: new Date('2023-12-02T00:00:00Z'),
       status: 'pending' as const,
+      scriptType: 'library',
     },
   }),
   failure: () => ({
@@ -115,9 +117,9 @@ export const ScraperConfigTestDataFactories = createPresetFactories<ScraperConfi
       /\b[A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?\b/,
       /script\.google\.com\/d\/([A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?)/,
     ],
+    webAppPatterns: [/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)/],
     rateLimit: {
-      maxRequestsPerHour: 60,
-      delayBetweenRequests: 100, // テスト用に短縮
+      maxRequestsPerHour: 5000,
     },
     verbose: false,
   }),
@@ -127,9 +129,9 @@ export const ScraperConfigTestDataFactories = createPresetFactories<ScraperConfi
       /\b[A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?\b/,
       /script\.google\.com\/d\/([A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?)/,
     ],
+    webAppPatterns: [/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)/],
     rateLimit: {
-      maxRequestsPerHour: 60,
-      delayBetweenRequests: 100,
+      maxRequestsPerHour: 5000,
     },
     verbose: true,
   }),
@@ -139,9 +141,9 @@ export const ScraperConfigTestDataFactories = createPresetFactories<ScraperConfi
       /\b[A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?\b/,
       /script\.google\.com\/d\/([A-Za-z0-9_-]{33}([A-Za-z0-9_-]{24})?)/,
     ],
+    webAppPatterns: [/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)/],
     rateLimit: {
-      maxRequestsPerHour: 3600,
-      delayBetweenRequests: 50, // テスト用に高速化
+      maxRequestsPerHour: 5000,
     },
     verbose: false,
   }),

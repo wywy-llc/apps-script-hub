@@ -7,8 +7,8 @@ import { db } from '$lib/server/db/index.js';
 import { library } from '$lib/server/db/schema.js';
 import { CreateLibraryService } from '$lib/server/services/create-library-service.js';
 import { ProcessBulkGASLibraryWithSaveService } from '$lib/server/services/process-bulk-gas-library-with-save-service.js';
-import { validateApiAuth } from '$lib/server/utils/api-auth.js';
 import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
+import { validateApiAuth } from '$lib/server/utils/api-auth.js';
 import { ErrorUtils } from '$lib/server/utils/error-utils.js';
 import type { ScrapedLibraryData } from '$lib/types/github-scraper.js';
 import type { BulkRegisterResponse } from '$lib/types/index.js';
@@ -170,7 +170,7 @@ export const POST: RequestHandler = async ({ request }) => {
     // タグ指定でのスクレイピング設定
     const customConfig = {
       rateLimit: {
-        maxRequestsPerHour: 60,
+        maxRequestsPerHour: 5000,
         delayBetweenRequests: 1000, // 1秒間隔
       },
       scriptIdPatterns: DEFAULT_SCRIPT_ID_PATTERNS,

@@ -32,9 +32,18 @@ vi.mock('../../../../../src/lib/server/services/generate-ai-summary-service.js',
   },
 }));
 
+vi.mock('../../../../../src/lib/server/services/scrape-gas-library-service.js', () => ({
+  ScrapeGASLibraryService: {
+    call: vi.fn(),
+  },
+}));
+
 vi.mock('../../../../../src/lib/server/utils/github-api-utils.js', () => ({
   GitHubApiUtils: {
     parseGitHubUrl: vi.fn(),
+    fetchRepositoryInfo: vi.fn(),
+    fetchReadme: vi.fn(),
+    fetchLastCommitDate: vi.fn(),
   },
 }));
 
@@ -50,6 +59,7 @@ import { LibraryRepository } from '../../../../../src/lib/server/repositories/li
 import { LibrarySummaryRepository } from '../../../../../src/lib/server/repositories/library-summary-repository.js';
 import { FetchGitHubRepoDataService } from '../../../../../src/lib/server/services/fetch-github-repo-data-service.js';
 import { GenerateAiSummaryService } from '../../../../../src/lib/server/services/generate-ai-summary-service.js';
+import { ScrapeGASLibraryService } from '../../../../../src/lib/server/services/scrape-gas-library-service.js';
 import { UpdateLibraryFromGithubService } from '../../../../../src/lib/server/services/update-library-from-github-service.js';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
 import { ServiceErrorUtil } from '../../../../../src/lib/server/utils/service-error-util.js';
@@ -60,6 +70,7 @@ const mockLibraryRepository = vi.mocked(LibraryRepository);
 const mockLibrarySummaryRepository = vi.mocked(LibrarySummaryRepository);
 const mockFetchGitHubRepoDataService = vi.mocked(FetchGitHubRepoDataService);
 const mockGenerateAiSummaryService = vi.mocked(GenerateAiSummaryService);
+const mockScrapeGASLibraryService = vi.mocked(ScrapeGASLibraryService);
 const mockGitHubApiUtils = vi.mocked(GitHubApiUtils);
 const mockServiceErrorUtil = vi.mocked(ServiceErrorUtil);
 
@@ -71,8 +82,20 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
 
   const mockLibraryData = {
     id: libraryId,
+    name: 'test-repo',
+    description: 'Test repository',
+    authorName: 'test-owner',
+    authorUrl: 'https://github.com/test-owner',
     repositoryUrl: 'https://github.com/test/repo',
+    starCount: 10,
+    licenseType: 'MIT',
+    licenseUrl: 'https://opensource.org/licenses/MIT',
+    scriptId: 'test-script-id', // 変更検知で必要
+    scriptType: 'library' as const, // 変更検知で必要
     lastCommitAt: existingLastCommitAt,
+    status: 'published' as const,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-10'),
   };
 
   const mockRepoData = {
@@ -106,6 +129,13 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
     mockLibraryRepository.findById.mockResolvedValue(mockLibraryData);
     mockGitHubApiUtils.parseGitHubUrl.mockReturnValue({ owner: 'test', repo: 'repo' });
     mockFetchGitHubRepoDataService.call.mockResolvedValue(mockRepoData);
+    mockScrapeGASLibraryService.call.mockResolvedValue({
+      success: true,
+      data: {
+        scriptId: 'test-script-id',
+        scriptType: 'library',
+      },
+    } as unknown as Awaited<ReturnType<typeof ScrapeGASLibraryService.call>>);
     mockLibrarySummaryRepository.exists.mockResolvedValue(false);
     mockGenerateAiSummaryService.call.mockResolvedValue(undefined);
     mockServiceErrorUtil.assertCondition.mockImplementation(() => {});
@@ -121,6 +151,15 @@ describe('UpdateLibraryFromGithubService - コスト削減機能', () => {
     // library_summaryが既に存在する場合をシミュレート
     mockLibrarySummaryRepository.exists.mockResolvedValue(true);
     mockFetchGitHubRepoDataService.call.mockResolvedValue(repoDataForTest);
+
+    // スクリプト情報に変更がないことをシミュレート（scriptIdとscriptTypeが変更されない）
+    mockScrapeGASLibraryService.call.mockResolvedValue({
+      success: true,
+      data: {
+        scriptId: 'test-script-id', // 既存と同じ
+        scriptType: 'library', // 既存と同じ
+      },
+    } as unknown as Awaited<ReturnType<typeof ScrapeGASLibraryService.call>>);
 
     await UpdateLibraryFromGithubService.call(libraryId);
 
