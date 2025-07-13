@@ -138,7 +138,6 @@ describe('FetchGitHubRepoDataService', () => {
 
     it('lastCommitAt が undefined の場合はエラーを投げる', async () => {
       vi.mocked(GitHubApiUtils.fetchLastCommitDate).mockResolvedValue(null);
-
       await expect(FetchGitHubRepoDataService.call(mockOwner, mockRepo)).rejects.toThrow(
         'FetchGitHubRepoDataService.call: Failed to fetch last commit date.'
       );

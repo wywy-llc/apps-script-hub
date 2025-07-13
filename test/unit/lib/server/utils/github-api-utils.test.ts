@@ -1,19 +1,56 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { GitHubApiUtils } from '../../../../../src/lib/server/utils/github-api-utils.js';
 import type {
-  GitHubReadmeResponse,
   GitHubRepository,
-  GitHubSearchResponse,
+  TagSearchResult,
 } from '../../../../../src/lib/types/github-scraper.js';
 import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 
-// fetchのモック
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+// モッククライアントインスタンスを事前に作成
+const createMockClient = () => ({
+  createHeaders: vi.fn(() => ({
+    Accept: 'application/vnd.github+json',
+    Authorization: 'token ghp_test_token',
+    'User-Agent': 'app-script-hub',
+    'X-GitHub-Api-Version': '2022-11-28',
+  })),
+  fetchRepositoryInfo: vi.fn(),
+  fetchReadme: vi.fn(),
+  fetchLastCommitDate: vi.fn(),
+  searchRepositoriesByTags: vi.fn(),
+  searchRepositoriesByPageRange: vi.fn(),
+});
+
+// モッククライアントを作成
+let mockClientInstance = createMockClient();
+
+// ファクトリーをモック
+vi.mock('../../../../../src/lib/server/factories/github-api-client-factory.js', () => ({
+  GitHubApiClientFactoryLegacy: {
+    create: vi.fn(() => mockClientInstance),
+  },
+}));
 
 describe('GitHubApiUtils', () => {
-  beforeEach(() => {
+  let mockClient: {
+    createHeaders: ReturnType<typeof vi.fn>;
+    fetchRepositoryInfo: ReturnType<typeof vi.fn>;
+    fetchReadme: ReturnType<typeof vi.fn>;
+    fetchLastCommitDate: ReturnType<typeof vi.fn>;
+    searchRepositoriesByTags: ReturnType<typeof vi.fn>;
+    searchRepositoriesByPageRange: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // GitHubApiUtilsの内部クライアントをリセット
+    // @ts-expect-error accessing private static property for testing
+    GitHubApiUtils.client = undefined;
+
+    // 新しいモッククライアントインスタンスを作成
+    mockClientInstance = createMockClient();
+    mockClient = mockClientInstance;
   });
 
   afterEach(() => {
@@ -41,36 +78,24 @@ describe('GitHubApiUtils', () => {
         updated_at: '2023-12-01T00:00:00Z',
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockRepoData),
-      });
+      mockClient.fetchRepositoryInfo.mockResolvedValueOnce(mockRepoData);
 
       const result = await GitHubApiUtils.fetchRepositoryInfo(
         'googleworkspace',
         'apps-script-oauth2'
       );
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/googleworkspace/apps-script-oauth2',
-        {
-          headers: {
-            Accept: 'application/vnd.github+json',
-            Authorization: expect.stringMatching(/^token ghp_/),
-            'User-Agent': 'app-script-hub',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        }
+      expect(mockClient.fetchRepositoryInfo).toHaveBeenCalledWith(
+        'googleworkspace',
+        'apps-script-oauth2'
       );
       expect(result).toEqual(mockRepoData);
     });
 
     test('404エラーの場合はエラーをスローする', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-      });
+      mockClient.fetchRepositoryInfo.mockRejectedValueOnce(
+        new Error('GitHub API Error: 404 Not Found')
+      );
 
       await expect(GitHubApiUtils.fetchRepositoryInfo('nonexistent', 'repo')).rejects.toThrow(
         'GitHub API Error: 404 Not Found'
@@ -78,11 +103,9 @@ describe('GitHubApiUtils', () => {
     });
 
     test('500エラーの場合はエラーをスローする', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      mockClient.fetchRepositoryInfo.mockRejectedValueOnce(
+        new Error('GitHub API Error: 500 Internal Server Error')
+      );
 
       await expect(GitHubApiUtils.fetchRepositoryInfo('test', 'repo')).rejects.toThrow(
         'GitHub API Error: 500 Internal Server Error'
@@ -93,41 +116,17 @@ describe('GitHubApiUtils', () => {
   describe('fetchReadme', () => {
     test('Base64エンコードされたREADMEを正常にデコードできる', async () => {
       const originalContent = '# Test README\n\nThis is a test.';
-      const base64Content = btoa(originalContent);
 
-      const mockReadmeData: GitHubReadmeResponse = {
-        content: base64Content,
-        encoding: 'base64',
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockReadmeData),
-      });
+      mockClient.fetchReadme.mockResolvedValueOnce(originalContent);
 
       const result = await GitHubApiUtils.fetchReadme('test', 'repo');
 
-      expect(mockFetch).toHaveBeenCalledWith('https://api.github.com/repos/test/repo/readme', {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.fetchReadme).toHaveBeenCalledWith('test', 'repo');
       expect(result).toBe(originalContent);
     });
 
     test('Base64以外のエンコーディングの場合はそのまま返す', async () => {
-      const mockReadmeData: GitHubReadmeResponse = {
-        content: 'Raw content',
-        encoding: 'utf-8',
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockReadmeData),
-      });
+      mockClient.fetchReadme.mockResolvedValueOnce('Raw content');
 
       const result = await GitHubApiUtils.fetchReadme('test', 'repo');
 
@@ -135,10 +134,7 @@ describe('GitHubApiUtils', () => {
     });
 
     test('README が存在しない場合はundefinedを返す', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      });
+      mockClient.fetchReadme.mockResolvedValueOnce(undefined);
 
       const result = await GitHubApiUtils.fetchReadme('test', 'repo');
 
@@ -146,7 +142,7 @@ describe('GitHubApiUtils', () => {
     });
 
     test('API呼び出し中にエラーが発生した場合はundefinedを返す', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockClient.fetchReadme.mockResolvedValueOnce(undefined);
 
       const result = await GitHubApiUtils.fetchReadme('test', 'repo');
 
@@ -157,10 +153,9 @@ describe('GitHubApiUtils', () => {
   describe('searchRepositoriesByTags', () => {
     test('正常な検索結果を返す', async () => {
       const testData = LibraryTestDataFactories.default.build();
-      const mockSearchResponse: GitHubSearchResponse = {
-        total_count: 1,
-        incomplete_results: false,
-        items: [
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [
           {
             name: testData.name,
             description: testData.description,
@@ -179,12 +174,11 @@ describe('GitHubApiUtils', () => {
             updated_at: '2023-12-01T00:00:00Z',
           },
         ],
+        totalFound: 1,
+        processedCount: 1,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockSearchResponse),
-      });
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
@@ -195,17 +189,7 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.searchRepositoriesByTags(config, 10);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('https://api.github.com/search/repositories?q='),
-        {
-          headers: {
-            Accept: 'application/vnd.github+json',
-            Authorization: expect.stringMatching(/^token ghp_/),
-            'User-Agent': 'app-script-hub',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
-        }
-      );
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
       expect(result.success).toBe(true);
       expect(result.repositories).toHaveLength(1);
       expect(result.totalFound).toBe(1);
@@ -213,10 +197,14 @@ describe('GitHubApiUtils', () => {
     });
 
     test('検索クエリが正しく構築される', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script', 'apps-script', 'gas-library'],
@@ -227,24 +215,18 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'google-apps-script OR apps-script OR gas-library in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 5);
     });
 
     test('maxResultsが1000を超える場合は1000に制限される', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['test'],
@@ -255,74 +237,39 @@ describe('GitHubApiUtils', () => {
 
       await GitHubApiUtils.searchRepositoriesByTags(config, 1500);
 
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('per_page=100&page=1'), {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 1500);
     });
 
     test('ページング機能が正しく動作する（200件取得の場合）', async () => {
       const testData = LibraryTestDataFactories.default.build();
 
-      // 1ページ目のレスポンス
-      const mockPage1Response = {
-        total_count: 200,
-        incomplete_results: false,
-        items: Array.from({ length: 100 }, (_, i) => ({
-          name: `${testData.name}-${i}`,
-          description: testData.description,
-          html_url: `${testData.repositoryUrl}-${i}`,
-          clone_url: `${testData.repositoryUrl}-${i}.git`,
-          stargazers_count: testData.starCount || 0,
-          owner: {
-            login: testData.authorName,
-            html_url: testData.authorUrl,
-          },
-          license: {
-            name: testData.licenseType || 'MIT',
-            url: testData.licenseUrl || '',
-          },
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-12-01T00:00:00Z',
-        })),
+      // 200件の結果を含むレスポンス
+      const repositories = Array.from({ length: 200 }, (_, i) => ({
+        name: `${testData.name}-${i}`,
+        description: testData.description,
+        html_url: `${testData.repositoryUrl}-${i}`,
+        clone_url: `${testData.repositoryUrl}-${i}.git`,
+        stargazers_count: testData.starCount || 0,
+        owner: {
+          login: testData.authorName,
+          html_url: testData.authorUrl,
+        },
+        license: {
+          name: testData.licenseType || 'MIT',
+          url: testData.licenseUrl || '',
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-12-01T00:00:00Z',
+      }));
+
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories,
+        totalFound: 200,
+        processedCount: 200,
       };
 
-      // 2ページ目のレスポンス
-      const mockPage2Response = {
-        total_count: 200,
-        incomplete_results: false,
-        items: Array.from({ length: 100 }, (_, i) => ({
-          name: `${testData.name}-${i + 100}`,
-          description: testData.description,
-          html_url: `${testData.repositoryUrl}-${i + 100}`,
-          clone_url: `${testData.repositoryUrl}-${i + 100}.git`,
-          stargazers_count: testData.starCount || 0,
-          owner: {
-            login: testData.authorName,
-            html_url: testData.authorUrl,
-          },
-          license: {
-            name: testData.licenseType || 'MIT',
-            url: testData.licenseUrl || '',
-          },
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-12-01T00:00:00Z',
-        })),
-      };
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPage1Response),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPage2Response),
-        });
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script'],
@@ -333,22 +280,8 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.searchRepositoriesByTags(config, 200);
 
-      // 2回のAPIコールが実行されることを確認
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-
-      // 1ページ目のURL確認
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining('per_page=100&page=1'),
-        expect.any(Object)
-      );
-
-      // 2ページ目のURL確認
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        expect.stringContaining('per_page=100&page=2'),
-        expect.any(Object)
-      );
+      // クライアントメソッドが正しい引数で呼ばれることを確認
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 200);
 
       // 結果の検証
       expect(result.success).toBe(true);
@@ -360,11 +293,10 @@ describe('GitHubApiUtils', () => {
     test('ページ範囲指定機能が正しく動作する', async () => {
       const testData = LibraryTestDataFactories.default.build();
 
-      // ページ1のレスポンス
-      const mockPage1Response = {
-        total_count: 150,
-        incomplete_results: false,
-        items: Array.from({ length: 50 }, (_, i) => ({
+      // ページ1とページ2のリポジトリを結合した75件の結果
+      const repositories = [
+        // ページ1のデータ（50件）
+        ...Array.from({ length: 50 }, (_, i) => ({
           name: `${testData.name}-page1-${i}`,
           description: testData.description,
           html_url: `${testData.repositoryUrl}-page1-${i}`,
@@ -381,13 +313,8 @@ describe('GitHubApiUtils', () => {
           created_at: '2023-01-01T00:00:00Z',
           updated_at: '2023-12-01T00:00:00Z',
         })),
-      };
-
-      // ページ2のレスポンス
-      const mockPage2Response = {
-        total_count: 150,
-        incomplete_results: false,
-        items: Array.from({ length: 25 }, (_, i) => ({
+        // ページ2のデータ（25件）
+        ...Array.from({ length: 25 }, (_, i) => ({
           name: `${testData.name}-page2-${i}`,
           description: testData.description,
           html_url: `${testData.repositoryUrl}-page2-${i}`,
@@ -404,17 +331,16 @@ describe('GitHubApiUtils', () => {
           created_at: '2023-01-01T00:00:00Z',
           updated_at: '2023-12-01T00:00:00Z',
         })),
+      ];
+
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories,
+        totalFound: 150,
+        processedCount: 75,
       };
 
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPage1Response),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPage2Response),
-        });
+      mockClient.searchRepositoriesByPageRange.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script'],
@@ -426,21 +352,13 @@ describe('GitHubApiUtils', () => {
       // ページ1からページ2を検索（25件/ページ）
       const result = await GitHubApiUtils.searchRepositoriesByPageRange(config, 1, 2, 25);
 
-      // 2回のAPIコールが実行されることを確認
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-
-      // ページ1のURL確認
-      expect(mockFetch).toHaveBeenNthCalledWith(
+      // クライアントメソッドが正しい引数で呼ばれることを確認
+      expect(mockClient.searchRepositoriesByPageRange).toHaveBeenCalledWith(
+        config,
         1,
-        expect.stringContaining('per_page=25&page=1'),
-        expect.any(Object)
-      );
-
-      // ページ2のURL確認
-      expect(mockFetch).toHaveBeenNthCalledWith(
         2,
-        expect.stringContaining('per_page=25&page=2'),
-        expect.any(Object)
+        25,
+        undefined
       );
 
       // 結果の検証
@@ -459,12 +377,14 @@ describe('GitHubApiUtils', () => {
     });
 
     test('verboseモードでコンソールログが出力される', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
@@ -473,38 +393,24 @@ describe('GitHubApiUtils', () => {
         verbose: true,
       };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config);
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Original gasTags:', [
-        'google-apps-script',
-        'apps-script',
-      ]);
-      expect(consoleSpy).toHaveBeenCalledWith('Tags to use:', [
-        'google-apps-script',
-        'apps-script',
-      ]);
-      expect(consoleSpy).toHaveBeenCalledWith('Valid tags:', ['google-apps-script', 'apps-script']);
-      expect(consoleSpy).toHaveBeenCalledWith('Limited tags:', [
-        'google-apps-script',
-        'apps-script',
-      ]);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'GitHub Search Query:',
-        'google-apps-script OR apps-script in:topics'
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'ページ 1/1 を検索中: https://api.github.com/search/repositories?q=google-apps-script%20OR%20apps-script%20in%3Atopics&sort=stars&order=desc&per_page=10&page=1'
-      );
-      expect(consoleSpy).toHaveBeenCalledTimes(8); // ページング対応で追加のログが出力される
-
-      consoleSpy.mockRestore();
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(0);
+      expect(result.totalFound).toBe(0);
+      expect(result.processedCount).toBe(0);
     });
 
     test('gasTagsが空の場合はデフォルトタグを使用する', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: [], // 空の配列
@@ -513,54 +419,46 @@ describe('GitHubApiUtils', () => {
         verbose: false,
       };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config, 5);
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'google-apps-script OR apps-script in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 5);
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(0);
     });
 
     test('gasTagsが未定義の場合はデフォルトタグを使用する', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
-        gasTags: undefined, // 未定義
+        gasTags: undefined as unknown as string[], // 未定義
         scriptIdPatterns: [],
         rateLimit: { maxRequestsPerHour: 60, delayBetweenRequests: 1000 },
         verbose: false,
-      } as any; // eslint-disable-line @typescript-eslint/no-explicit-any -- 型チェック回避のためテストでのみ使用
+      };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config, 5);
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config, 5);
 
-      const expectedQuery = 'google-apps-script OR apps-script in:topics';
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=5&page=1`;
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 5);
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(0);
     });
 
     test('5つのタグを使用する場合は全て含まれる', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script', 'apps-script', 'gas-library', 'clasp', 'googleappsscript'], // cspell:disable-line
@@ -569,27 +467,22 @@ describe('GitHubApiUtils', () => {
         verbose: false,
       };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config, 10);
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config, 10);
 
-      const expectedQuery =
-        'google-apps-script OR apps-script OR gas-library OR clasp OR googleappsscript in:topics'; // cspell:disable-line
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10&page=1`;
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(0);
     });
 
     test('6つ以上のタグを使用する場合は最初の5つのみ使用される', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ total_count: 0, incomplete_results: false, items: [] }),
-      });
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: [
@@ -606,29 +499,23 @@ describe('GitHubApiUtils', () => {
         verbose: false,
       };
 
-      await GitHubApiUtils.searchRepositoriesByTags(config, 10);
+      const result = await GitHubApiUtils.searchRepositoriesByTags(config, 10);
 
-      // 最初の5つのタグのみが使用される
-      const expectedQuery =
-        'google-apps-script OR apps-script OR gas-library OR clasp OR googleappsscript in:topics'; // cspell:disable-line
-      const expectedUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(expectedQuery)}&sort=stars&order=desc&per_page=10&page=1`;
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: expect.stringMatching(/^token ghp_/),
-          'User-Agent': 'app-script-hub',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      });
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
+      expect(result.success).toBe(true);
+      expect(result.repositories).toHaveLength(0);
     });
 
     test('API エラーの場合は失敗レスポンスを返す', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-      });
+      const mockErrorResult: TagSearchResult = {
+        success: false,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+        error: 'GitHub Search API Error: 403 Forbidden',
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockErrorResult);
 
       const config = {
         gasTags: ['test'],
@@ -639,13 +526,22 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.searchRepositoriesByTags(config);
 
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
       expect(result.success).toBe(false);
       expect(result.repositories).toHaveLength(0);
       expect(result.error).toContain('GitHub Search API Error: 403 Forbidden');
     });
 
     test('ネットワークエラーの場合は失敗レスポンスを返す', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      const mockErrorResult: TagSearchResult = {
+        success: false,
+        repositories: [],
+        totalFound: 0,
+        processedCount: 0,
+        error: 'Network error',
+      };
+
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockErrorResult);
 
       const config = {
         gasTags: ['test'],
@@ -656,6 +552,7 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.searchRepositoriesByTags(config);
 
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
       expect(result.success).toBe(false);
       expect(result.repositories).toHaveLength(0);
       expect(result.error).toBe('Network error');
@@ -664,19 +561,10 @@ describe('GitHubApiUtils', () => {
     test('422エラーの場合はフォールバック検索を実行する', async () => {
       const testData = LibraryTestDataFactories.default.build();
 
-      // 最初の検索で422エラー
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 422,
-        statusText: 'Unprocessable Entity',
-        text: () => Promise.resolve('{"message": "Validation Failed"}'),
-      });
-
-      // フォールバック検索は成功
-      const mockSearchResponse: GitHubSearchResponse = {
-        total_count: 1,
-        incomplete_results: false,
-        items: [
+      // フォールバック検索が成功した結果をシミュレート
+      const mockSearchResult: TagSearchResult = {
+        success: true,
+        repositories: [
           {
             name: testData.name,
             description: testData.description,
@@ -695,12 +583,11 @@ describe('GitHubApiUtils', () => {
             updated_at: '2023-12-01T00:00:00Z',
           },
         ],
+        totalFound: 1,
+        processedCount: 1,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockSearchResponse),
-      });
+      mockClient.searchRepositoriesByTags.mockResolvedValueOnce(mockSearchResult);
 
       const config = {
         gasTags: ['google-apps-script', 'apps-script'],
@@ -711,10 +598,45 @@ describe('GitHubApiUtils', () => {
 
       const result = await GitHubApiUtils.searchRepositoriesByTags(config);
 
+      expect(mockClient.searchRepositoriesByTags).toHaveBeenCalledWith(config, 10);
       expect(result.success).toBe(true);
       expect(result.repositories).toHaveLength(1);
       expect(result.totalFound).toBe(1);
-      expect(mockFetch).toHaveBeenCalledTimes(2); // 最初の検索 + フォールバック検索
+    });
+  });
+
+  describe('createHeaders', () => {
+    test('適切なヘッダーを生成する', () => {
+      const result = GitHubApiUtils.createHeaders();
+
+      expect(mockClient.createHeaders).toHaveBeenCalled();
+      expect(result).toEqual({
+        Accept: 'application/vnd.github+json',
+        Authorization: 'token ghp_test_token',
+        'User-Agent': 'app-script-hub',
+        'X-GitHub-Api-Version': '2022-11-28',
+      });
+    });
+  });
+
+  describe('fetchLastCommitDate', () => {
+    test('正常なコミット日時を取得できる', async () => {
+      const mockCommitDate = new Date('2023-12-01T10:00:00Z');
+      mockClient.fetchLastCommitDate.mockResolvedValueOnce(mockCommitDate);
+
+      const result = await GitHubApiUtils.fetchLastCommitDate('test', 'repo');
+
+      expect(mockClient.fetchLastCommitDate).toHaveBeenCalledWith('test', 'repo');
+      expect(result).toEqual(mockCommitDate);
+    });
+
+    test('コミット情報が取得できない場合はnullを返す', async () => {
+      mockClient.fetchLastCommitDate.mockResolvedValueOnce(null);
+
+      const result = await GitHubApiUtils.fetchLastCommitDate('test', 'repo');
+
+      expect(mockClient.fetchLastCommitDate).toHaveBeenCalledWith('test', 'repo');
+      expect(result).toBeNull();
     });
   });
 

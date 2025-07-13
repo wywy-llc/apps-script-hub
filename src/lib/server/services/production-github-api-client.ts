@@ -12,11 +12,138 @@ import type {
 } from '$lib/types/github-scraper.js';
 
 /**
+ * インメモリキャッシュアイテムの型定義
+ */
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
+
+/**
  * 本番環境用のGitHub API クライアント
  * 実際のGitHub APIを呼び出す実装
+ *
+ * 動作原理:
+ * 1. インメモリキャッシュによる重複API呼び出しの削減（TTL付き）
+ * 2. レート制限時の動的待機時間調整
+ * 3. エクスポネンシャルバックオフによるリトライ機能
+ * 4. 適応的待機時間によるパフォーマンス最適化
  */
 export class ProductionGitHubApiClient implements GitHubApiClient {
   private static readonly GITHUB_API_BASE = 'https://api.github.com';
+  private static readonly DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5分
+  private static readonly RATE_LIMIT_CACHE_TTL = 60 * 1000; // 1分（レート制限時）
+  private static readonly MAX_RETRIES = 3;
+  private static readonly BASE_RETRY_DELAY = 1000; // 1秒
+
+  // インメモリキャッシュ（静的プロパティで全インスタンス共有）
+  private static cache = new Map<string, CacheItem<unknown>>();
+  private static lastRateLimitTime = 0;
+  private static adaptiveDelay = 200;
+
+  /**
+   * キャッシュからデータを取得
+   * @private
+   */
+  private static getFromCache<T>(key: string): T | null {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    const now = Date.now();
+    if (now - item.timestamp > item.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return item.data as T;
+  }
+
+  /**
+   * データをキャッシュに保存
+   * @private
+   */
+  private static setCache<T>(key: string, data: T, ttl: number = this.DEFAULT_CACHE_TTL): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl,
+    });
+
+    // キャッシュサイズが1000を超えた場合、古いエントリを削除
+    if (this.cache.size > 1000) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
+    }
+  }
+
+  /**
+   * レート制限を考慮した動的待機時間を計算
+   * @private
+   */
+  private static calculateAdaptiveDelay(): number {
+    const now = Date.now();
+    const timeSinceLastRateLimit = now - this.lastRateLimitTime;
+
+    // 最近レート制限を受けた場合は待機時間を増加
+    if (timeSinceLastRateLimit < 60000) {
+      // 1分以内
+      this.adaptiveDelay = Math.min(this.adaptiveDelay * 1.5, 2000);
+    } else {
+      // レート制限から時間が経った場合は待機時間を減少
+      this.adaptiveDelay = Math.max(this.adaptiveDelay * 0.9, 100);
+    }
+
+    return this.adaptiveDelay;
+  }
+
+  /**
+   * エクスポネンシャルバックオフによるリトライ機能付きfetch
+   * @private
+   */
+  private static async fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    retryCount: number = 0
+  ): Promise<Response> {
+    try {
+      const response = await fetch(url, options);
+
+      // レート制限の場合
+      if (response.status === 429) {
+        this.lastRateLimitTime = Date.now();
+
+        // Retry-Afterヘッダーがある場合はそれを使用、なければ計算
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter
+          ? parseInt(retryAfter) * 1000
+          : this.BASE_RETRY_DELAY * Math.pow(2, retryCount);
+
+        if (retryCount < this.MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          return this.fetchWithRetry(url, options, retryCount + 1);
+        }
+      }
+
+      // その他の5xx系エラーでリトライ
+      if (response.status >= 500 && response.status < 600 && retryCount < this.MAX_RETRIES) {
+        const waitTime = this.BASE_RETRY_DELAY * Math.pow(2, retryCount);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return this.fetchWithRetry(url, options, retryCount + 1);
+      }
+
+      return response;
+    } catch (error) {
+      if (retryCount < this.MAX_RETRIES) {
+        const waitTime = this.BASE_RETRY_DELAY * Math.pow(2, retryCount);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return this.fetchWithRetry(url, options, retryCount + 1);
+      }
+      throw error;
+    }
+  }
 
   /**
    * GitHub API用の認証ヘッダーを生成
@@ -40,21 +167,35 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
   }
 
   /**
-   * GitHub APIからリポジトリ情報を取得
+   * GitHub APIからリポジトリ情報を取得（キャッシュ機能付き）
    * @param owner リポジトリオーナー名
    * @param repo リポジトリ名
    * @returns リポジトリ情報
    */
   async fetchRepositoryInfo(owner: string, repo: string): Promise<GitHubRepository> {
+    const cacheKey = `repo:${owner}/${repo}`;
+
+    // キャッシュから取得を試行
+    const cached = ProductionGitHubApiClient.getFromCache<GitHubRepository>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const headers = this.createHeaders();
-    const response = await fetch(
-      `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}`,
-      { headers }
-    );
+    const url = `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}`;
+
+    const response = await ProductionGitHubApiClient.fetchWithRetry(url, { headers });
+
     if (!response.ok) {
       throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
     }
-    return response.json();
+
+    const data = await response.json();
+
+    // 成功時はキャッシュに保存
+    ProductionGitHubApiClient.setCache(cacheKey, data);
+
+    return data;
   }
 
   /**
@@ -64,28 +205,52 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
    * @returns READMEの内容（取得できない場合はundefined）
    */
   async fetchReadme(owner: string, repo: string): Promise<string | undefined> {
+    const cacheKey = `readme:${owner}/${repo}`;
+
+    // キャッシュから取得を試行
+    const cached = ProductionGitHubApiClient.getFromCache<string>(cacheKey);
+    if (cached !== null) {
+      return cached || undefined; // 空文字列の場合もundefinedとして返す
+    }
+
     try {
       const headers = this.createHeaders();
-      const response = await fetch(
-        `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}/readme`,
-        {
-          headers,
-        }
-      );
+      const url = `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}/readme`;
+
+      const response = await ProductionGitHubApiClient.fetchWithRetry(url, { headers });
+
       if (!response.ok) {
+        // 404の場合もキャッシュして重複リクエストを防ぐ
+        ProductionGitHubApiClient.setCache(
+          cacheKey,
+          '',
+          ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+        );
         return undefined;
       }
 
       const readmeData: GitHubReadmeResponse = await response.json();
 
+      let content: string;
       // Base64デコード
       if (readmeData.encoding === 'base64') {
-        return atob(readmeData.content.replace(/\n/g, ''));
+        content = atob(readmeData.content.replace(/\n/g, ''));
+      } else {
+        content = readmeData.content;
       }
 
-      return readmeData.content;
+      // 成功時はキャッシュに保存
+      ProductionGitHubApiClient.setCache(cacheKey, content);
+
+      return content;
     } catch (error) {
       console.warn('README取得に失敗:', error);
+      // エラーの場合は短時間キャッシュして連続エラーを防ぐ
+      ProductionGitHubApiClient.setCache(
+        cacheKey,
+        '',
+        ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+      );
       return undefined;
     }
   }
@@ -199,7 +364,8 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         }
 
         if (page < totalPages) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+          const delayTime = ProductionGitHubApiClient.calculateAdaptiveDelay();
+          await new Promise(resolve => setTimeout(resolve, delayTime));
         }
       }
 
@@ -348,7 +514,8 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
         }
 
         if (page < endPage) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+          const delayTime = ProductionGitHubApiClient.calculateAdaptiveDelay();
+          await new Promise(resolve => setTimeout(resolve, delayTime));
         }
       }
 
@@ -385,25 +552,57 @@ export class ProductionGitHubApiClient implements GitHubApiClient {
    * @returns 最終コミット日時（取得できない場合はnull）
    */
   async fetchLastCommitDate(owner: string, repo: string): Promise<Date | null> {
+    const cacheKey = `commits:${owner}/${repo}`;
+
+    // キャッシュから取得を試行（コミット日時は短時間キャッシュ）
+    const cached = ProductionGitHubApiClient.getFromCache<string>(cacheKey);
+    if (cached !== null) {
+      return cached ? new Date(cached) : null;
+    }
+
     try {
       const headers = this.createHeaders();
+      const url = `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=1`;
 
-      const latestResponse = await fetch(
-        `${ProductionGitHubApiClient.GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=1`,
-        { headers }
-      );
-      if (!latestResponse.ok) {
+      const response = await ProductionGitHubApiClient.fetchWithRetry(url, { headers });
+
+      if (!response.ok) {
+        // エラーの場合は短時間キャッシュ
+        ProductionGitHubApiClient.setCache(
+          cacheKey,
+          '',
+          ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+        );
         return null;
       }
-      const latestCommits = await latestResponse.json();
+
+      const latestCommits = await response.json();
       if (!latestCommits || latestCommits.length === 0) {
+        ProductionGitHubApiClient.setCache(
+          cacheKey,
+          '',
+          ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+        );
         return null;
       }
+
       const lastCommitAt = new Date(latestCommits[0].commit.committer.date);
+
+      // 成功時は短時間キャッシュ
+      ProductionGitHubApiClient.setCache(
+        cacheKey,
+        lastCommitAt.toISOString(),
+        ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+      );
 
       return lastCommitAt;
     } catch (error) {
       console.error('コミット日時取得エラー:', error);
+      ProductionGitHubApiClient.setCache(
+        cacheKey,
+        '',
+        ProductionGitHubApiClient.RATE_LIMIT_CACHE_TTL
+      );
       return null;
     }
   }

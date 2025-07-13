@@ -10,11 +10,121 @@ import { GenerateAiSummaryService } from './generate-ai-summary-service.js';
 import { ScrapeGASLibraryService } from './scrape-gas-library-service.js';
 
 /**
+ * 更新が必要な変更を検出する型定義
+ */
+interface ChangeDetection {
+  hasChanges: boolean;
+  changedFields: string[];
+  requiresAISummary: boolean;
+}
+
+/**
  * GitHub リポジトリ情報を再取得するサービス
+ *
+ * 動作原理:
+ * 1. 外部API呼び出しの並行実行による高速化
+ * 2. 差分更新による不要なデータベース操作の削減
+ * 3. 変更検出による条件付きAI要約生成
+ * 4. エラーハンドリングの最適化
  */
 export class UpdateLibraryFromGithubService {
   /**
-   * GitHub APIから情報を再取得してライブラリを更新する
+   * 変更検出による差分更新の判定
+   * @private
+   */
+  private static detectChanges(
+    existingData: {
+      name: string;
+      description: string;
+      authorName: string;
+      authorUrl: string;
+      repositoryUrl: string;
+      starCount: number;
+      licenseType: string;
+      licenseUrl: string;
+      scriptId: string;
+      scriptType: string;
+      lastCommitAt: Date;
+    },
+    newRepoInfo: {
+      name: string;
+      description: string;
+      authorName: string;
+      authorUrl: string;
+      repositoryUrl: string;
+      starCount: number;
+    },
+    newLicenseInfo: {
+      type: string;
+      url: string;
+    },
+    newLastCommitAt: Date,
+    newScriptId: string,
+    newScriptType: string
+  ): ChangeDetection {
+    const changedFields: string[] = [];
+
+    // 各フィールドの変更をチェック
+    if (existingData.name !== newRepoInfo.name) changedFields.push('name');
+    if (existingData.description !== newRepoInfo.description) changedFields.push('description');
+    if (existingData.authorName !== newRepoInfo.authorName) changedFields.push('authorName');
+    if (existingData.authorUrl !== newRepoInfo.authorUrl) changedFields.push('authorUrl');
+    if (existingData.repositoryUrl !== newRepoInfo.repositoryUrl)
+      changedFields.push('repositoryUrl');
+    if (existingData.starCount !== newRepoInfo.starCount) changedFields.push('starCount');
+    if (existingData.licenseType !== newLicenseInfo.type) changedFields.push('licenseType');
+    if (existingData.licenseUrl !== newLicenseInfo.url) changedFields.push('licenseUrl');
+    if (existingData.scriptId !== newScriptId) changedFields.push('scriptId');
+    if (existingData.scriptType !== newScriptType) changedFields.push('scriptType');
+
+    const hasCommitChanges = existingData.lastCommitAt.getTime() !== newLastCommitAt.getTime();
+    if (hasCommitChanges) changedFields.push('lastCommitAt');
+
+    return {
+      hasChanges: changedFields.length > 0,
+      changedFields,
+      requiresAISummary:
+        hasCommitChanges ||
+        changedFields.includes('scriptId') ||
+        changedFields.includes('scriptType'),
+    };
+  }
+
+  /**
+   * 外部API呼び出しを並行実行で最適化
+   * @private
+   */
+  private static async fetchExternalData(repositoryUrl: string) {
+    const parsedUrl = GitHubApiUtils.parseGitHubUrl(repositoryUrl);
+    ServiceErrorUtil.assertCondition(
+      !!parsedUrl,
+      'GitHub リポジトリURLが正しくありません',
+      'UpdateLibraryFromGithubService.fetchExternalData'
+    );
+    const { owner, repo } = parsedUrl!;
+
+    // GitHub基本情報とスクレイピングを並行実行
+    const [githubData, scrapeResult] = await Promise.allSettled([
+      FetchGitHubRepoDataService.call(owner, repo),
+      ScrapeGASLibraryService.call(repositoryUrl),
+    ]);
+
+    // 結果の検証
+    if (githubData.status === 'rejected') {
+      throw githubData.reason;
+    }
+    if (scrapeResult.status === 'rejected') {
+      console.warn(`スクレイピング失敗: ${scrapeResult.reason} - 既存の値を保持します`);
+    }
+
+    return {
+      githubData: githubData.value,
+      scrapeResult: scrapeResult.status === 'fulfilled' ? scrapeResult.value : null,
+    };
+  }
+
+  /**
+   * GitHub APIから情報を再取得してライブラリを更新する（最適化版）
    * @param libraryId ライブラリID
    * @param options オプション設定
    */
@@ -27,88 +137,80 @@ export class UpdateLibraryFromGithubService {
       'UpdateLibraryFromGithubService.call'
     );
 
-    const parsedUrl = GitHubApiUtils.parseGitHubUrl(libraryData!.repositoryUrl);
-    ServiceErrorUtil.assertCondition(
-      !!parsedUrl,
-      'GitHub リポジトリURLが正しくありません',
-      'UpdateLibraryFromGithubService.call'
-    );
-    const { owner, repo } = parsedUrl!;
+    // 外部データ取得とサマリー存在確認を並行実行
+    const [externalData, summaryExists] = await Promise.all([
+      this.fetchExternalData(libraryData!.repositoryUrl),
+      LibrarySummaryRepository.exists(libraryId),
+    ]);
 
-    // GitHub から基本情報を取得
-    const { repoInfo, licenseInfo, lastCommitAt } = await FetchGitHubRepoDataService.call(
-      owner,
-      repo
-    );
+    const { githubData, scrapeResult } = externalData;
+    const { repoInfo, licenseInfo, lastCommitAt } = githubData;
 
-    // スクレイピングでGAS固有の情報を取得
+    // スクリプトID情報を取得（既存値をデフォルトに使用）
     let scriptId = libraryData!.scriptId;
     let scriptType = libraryData!.scriptType;
 
-    try {
-      console.log(
-        `ライブラリ更新: スクレイピングを実行してスクリプトID情報を更新 - ${libraryData!.repositoryUrl}`
-      );
-      const scrapeResult = await ScrapeGASLibraryService.call(libraryData!.repositoryUrl);
+    if (scrapeResult?.success && scrapeResult.data) {
+      const newScriptId = scrapeResult.data.scriptId;
+      const newScriptType = scrapeResult.data.scriptType;
 
-      if (scrapeResult.success && scrapeResult.data) {
-        const newScriptId = scrapeResult.data.scriptId;
-        const newScriptType = scrapeResult.data.scriptType;
-
-        // スクリプトIDが変更された場合はログ出力
-        if (newScriptId !== libraryData!.scriptId) {
-          console.log(`スクリプトID更新: ${libraryData!.scriptId} → ${newScriptId}`);
-          scriptId = newScriptId;
-        }
-
-        // スクリプトタイプが変更された場合はログ出力
-        if (newScriptType !== libraryData!.scriptType) {
-          console.log(`スクリプトタイプ更新: ${libraryData!.scriptType} → ${newScriptType}`);
-          scriptType = newScriptType;
-        }
-      } else {
-        console.warn(`スクレイピング失敗: ${scrapeResult.error} - 既存の値を保持します`);
+      // 変更があった場合のみログ出力
+      if (newScriptId !== libraryData!.scriptId) {
+        console.log(`スクリプトID更新: ${libraryData!.scriptId} → ${newScriptId}`);
+        scriptId = newScriptId;
       }
-    } catch (error) {
-      console.warn(`スクレイピングエラー: ${error} - 既存の値を保持します`);
+
+      if (newScriptType !== libraryData!.scriptType) {
+        console.log(`スクリプトタイプ更新: ${libraryData!.scriptType} → ${newScriptType}`);
+        scriptType = newScriptType;
+      }
     }
 
-    // 新しいlastCommitAtと既存データを比較
-    const hasCommitChanges = libraryData!.lastCommitAt.getTime() !== lastCommitAt.getTime();
+    // 変更検出による差分更新判定
+    const changeDetection = this.detectChanges(
+      libraryData!,
+      repoInfo,
+      licenseInfo,
+      lastCommitAt,
+      scriptId,
+      scriptType
+    );
 
-    // library_summaryが存在するかチェック
-    const summaryExists = await LibrarySummaryRepository.exists(libraryId);
+    // 変更がある場合のみデータベース更新
+    if (changeDetection.hasChanges) {
+      console.log(`更新フィールド: ${changeDetection.changedFields.join(', ')}`);
 
-    // AI要約生成判定: lastCommitAtに変化がある または library_summaryが存在しない場合（スキップオプションが無効の場合）
-    const shouldGenerateSummary = !options.skipAiSummary && (hasCommitChanges || !summaryExists);
+      await db
+        .update(library)
+        .set({
+          name: repoInfo.name,
+          description: repoInfo.description,
+          authorName: repoInfo.authorName,
+          authorUrl: repoInfo.authorUrl,
+          repositoryUrl: repoInfo.repositoryUrl,
+          starCount: repoInfo.starCount,
+          licenseType: licenseInfo.type,
+          licenseUrl: licenseInfo.url,
+          lastCommitAt: lastCommitAt,
+          scriptId: scriptId,
+          scriptType: scriptType,
+          updatedAt: new Date(),
+        })
+        .where(eq(library.id, libraryId));
+    } else {
+      console.log(`変更なし - データベース更新をスキップ: ${libraryId}`);
+    }
 
-    // ライブラリを更新（スクリプトIDとタイプも含む）
-    await db
-      .update(library)
-      .set({
-        name: repoInfo.name,
-        description: repoInfo.description,
-        authorName: repoInfo.authorName,
-        authorUrl: repoInfo.authorUrl,
-        repositoryUrl: repoInfo.repositoryUrl,
-        starCount: repoInfo.starCount,
-        licenseType: licenseInfo.type,
-        licenseUrl: licenseInfo.url,
-        lastCommitAt: lastCommitAt,
-        scriptId: scriptId,
-        scriptType: scriptType,
-        updatedAt: new Date(),
-      })
-      .where(eq(library.id, libraryId));
+    // AI要約生成判定（最適化された条件）
+    const shouldGenerateSummary =
+      !options.skipAiSummary && (changeDetection.requiresAISummary || !summaryExists);
 
-    // AIによるライブラリ要約を生成してDBに保存（lastCommitAtに変化がある または library_summaryが存在しない場合）
     if (shouldGenerateSummary) {
-      const reason =
-        hasCommitChanges && summaryExists
+      const reason = !summaryExists
+        ? 'library_summaryが存在しないため'
+        : changeDetection.changedFields.includes('lastCommitAt')
           ? 'lastCommitAtが変更されたため'
-          : !summaryExists
-            ? 'library_summaryが存在しないため'
-            : 'lastCommitAtが変更されたため';
+          : 'スクリプト情報が変更されたため';
 
       await GenerateAiSummaryService.call({
         libraryId,
@@ -117,9 +219,7 @@ export class UpdateLibraryFromGithubService {
         logContext: reason,
       });
     } else {
-      console.log(
-        `lastCommitAtに変化がなく、library_summaryも存在するため、AI要約生成をスキップします: ${libraryId}`
-      );
+      console.log(`AI要約生成をスキップ: ${libraryId}`);
     }
   }
 
