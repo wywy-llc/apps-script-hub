@@ -27,7 +27,7 @@
 
   let { data, form }: Props = $props();
 
-  let libraries = $state(data.libraries);
+  let libraries: typeof data.libraries = $state(data.libraries);
   let currentPage = $state(data.currentPage);
 
   // dataが更新された時にcurrentPageも同期
@@ -84,8 +84,8 @@
         if (result.type === 'success') {
           // ライブラリのステータスを更新
           libraries = libraries.map(lib =>
-            lib.id === libraryId ? { ...lib, status: newStatus } : lib
-          );
+            lib.id === libraryId ? { ...lib, status: newStatus as LibraryStatus } : lib
+          ) as typeof libraries;
         } else {
           console.error('ステータス更新に失敗しました:', result.data?.error || '不明なエラー');
         }
