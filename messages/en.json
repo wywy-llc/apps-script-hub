@@ -91,6 +91,7 @@
   "library_management": "Library Management",
   "publish": "Publish",
   "unpublish": "Unpublish",
+  "reject": "Reject",
   "library_registration_success": "Library has been successfully registered. Redirecting to the details page...",
   "library_registration_title": "Add New Library",
   "terms_page_title": "Terms of Service",

@@ -9,7 +9,7 @@ import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
 import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
 import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ url }) => {
@@ -38,7 +38,16 @@ export const load = (async ({ url }) => {
     })
     .from(library)
     .leftJoin(user, eq(library.requesterId, user.id))
-    .orderBy(desc(library.updatedAt));
+    .orderBy(
+      // ステータス順: pending, published, rejected の順番
+      sql`CASE 
+        WHEN ${library.status} = 'pending' THEN 1 
+        WHEN ${library.status} = 'published' THEN 2 
+        WHEN ${library.status} = 'rejected' THEN 3 
+        ELSE 4 
+      END`,
+      desc(library.updatedAt)
+    );
 
   return {
     libraries,
