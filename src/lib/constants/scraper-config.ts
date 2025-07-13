@@ -63,14 +63,15 @@ export const SCRIPT_ID_EXCLUSION_PATTERNS: RegExp[] = [
   // 画像ファイル拡張子を除外
   /1[A-Za-z0-9_-]{24,69}\.(png|jpg|jpeg|gif|webp|svg)/gi,
 
-  // JSON形式のIDフィールドを除外
+  // JSON形式のIDフィールドを除外（GAS以外の特定のIDフィールドのみ）
   /["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'][A-Za-z0-9_-]+["']/gi,
 
   // UUID形式（ハイフン区切り）を除外
   /1[a-f0-9]{7}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
 
-  // JSON配列やオブジェクト内の値を除外
-  /["'][A-Za-z0-9_-]+["']\s*[,}]/gi,
+  // JSON配列やオブジェクト内の一般的な値を除外（GAS関連フィールド以外）
+  // userSymbol、versionなどのGAS以外のフィールドのみ除外
+  /["'](?:userSymbol|version|name|type|description)["']\s*:\s*["'][A-Za-z0-9_-]+["']/gi,
 ];
 
 /**
