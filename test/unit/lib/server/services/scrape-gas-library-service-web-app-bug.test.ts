@@ -84,12 +84,8 @@ Create a Google Apps Script project and copy the files from the \`src\` folder.
       'https://github.com/UplandJacob2/Schedules-App'
     );
 
-    console.log('Schedules App result:', result);
-
     expect(result.success).toBe(true);
     if (result.success) {
-      console.log('scriptType:', result.data.scriptType);
-      console.log('scriptId:', result.data.scriptId);
       // WebアプリURLのみが検出されているため、web_appに分類されるべき
       expect(result.data.scriptType).toBe('web_app');
       // 最初に見つかったWebアプリURLのスクリプトIDが使用されるべき

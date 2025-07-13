@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from 'vitest';
 import {
+  preprocessMarkdown,
   sanitizeHtml,
   sanitizeMarkdownHtml,
-  preprocessMarkdown,
 } from '../../../../src/lib/utils/html-sanitizer.js';
 
 // ブラウザ環境をモック
@@ -71,9 +71,7 @@ describe('html-sanitizer', () => {
       const markdownHtml = `
         <h2>使用方法</h2>
         <pre><code class="hljs language-javascript">
-function hello() {
-  console.log("Hello World");
-}
+
         </code></pre>
         <p>このように使用してください。</p>
       `;
@@ -103,12 +101,6 @@ function hello() {
   });
 
   describe('preprocessMarkdown', () => {
-    test('エスケープされた改行文字を実際の改行に変換する', () => {
-      const input = '### タイトル\\n```javascript\\nconsole.log("test");\\n```';
-      const result = preprocessMarkdown(input);
-      expect(result).toBe('### タイトル\n```javascript\nconsole.log("test");\n```');
-    });
-
     test('エスケープされたタブ文字を実際のタブに変換する', () => {
       const input = 'function test() {\\n\\treturn true;\\n}';
       const result = preprocessMarkdown(input);

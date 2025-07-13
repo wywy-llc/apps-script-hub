@@ -42,30 +42,22 @@ In order to use this library, please install this library.
   const expectedScriptId = '1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL';
 
   test('ScriptSyncのREADMEでスクリプトIDが抽出できるかテスト', () => {
-    console.log('ScriptSync README内容をテスト中...');
-    console.log(`期待されるスクリプトID: ${expectedScriptId} (文字数: ${expectedScriptId.length})`);
-
     const foundScriptIds: string[] = [];
 
     // 各パターンを個別にテスト
-    DEFAULT_SCRIPT_ID_PATTERNS.forEach((pattern, index) => {
+    DEFAULT_SCRIPT_ID_PATTERNS.forEach(pattern => {
       const matches = [...scriptSyncReadme.matchAll(pattern)];
 
       if (matches.length > 0) {
-        console.log(`パターン ${index + 1} で検出:`);
         matches.forEach(match => {
           const extractedId = match[1] || match[0];
-          console.log(`  - ${extractedId}`);
+
           if (extractedId === expectedScriptId) {
             foundScriptIds.push(extractedId);
-            console.log(`  ✅ 期待されるスクリプトIDを検出!`);
           }
         });
       }
     });
-
-    console.log(`\\n検出されたスクリプトID数: ${foundScriptIds.length}`);
-    console.log('検出されたスクリプトID:', foundScriptIds);
 
     // 期待されるスクリプトIDが検出されるかをテスト
     expect(foundScriptIds).toContain(expectedScriptId);
@@ -82,7 +74,6 @@ In order to use this library, please install this library.
 \`\`\``;
 
     const matches = [...testText.matchAll(pattern)];
-    console.log('ライブラリキーパターンのマッチ結果:', matches);
 
     expect(matches.length).toBeGreaterThan(0);
     if (matches.length > 0) {
@@ -98,7 +89,6 @@ In order to use this library, please install this library.
 \`\`\``;
 
     const matches = [...testText.matchAll(pattern)];
-    console.log('コードブロックパターンのマッチ結果:', matches);
 
     expect(matches.length).toBeGreaterThan(0);
     if (matches.length > 0) {
@@ -108,8 +98,6 @@ In order to use this library, please install this library.
 
   test('文字数制限の確認: 57文字のスクリプトIDは範囲内か', () => {
     const scriptId = '1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL';
-    console.log(`スクリプトIDの文字数: ${scriptId.length}`);
-    console.log('文字数制限: 24-69文字');
 
     expect(scriptId.length).toBeGreaterThanOrEqual(24);
     expect(scriptId.length).toBeLessThanOrEqual(69);
@@ -117,14 +105,10 @@ In order to use this library, please install this library.
   });
 
   test('実際のGasScriptIdExtractorでスクリプトIDが抽出できるかテスト', () => {
-    console.log('GasScriptIdExtractorを使用してスクリプトIDを抽出中...');
-
     const extractedId = GASScriptIdExtractor.extractScriptId(
       scriptSyncReadme,
       DEFAULT_SCRIPT_ID_PATTERNS
     );
-    console.log(`抽出されたスクリプトID: ${extractedId}`);
-    console.log(`期待されるスクリプトID: ${expectedScriptId}`);
 
     expect(extractedId).toBe(expectedScriptId);
   });
@@ -149,7 +133,7 @@ Here are some examples:
 
 \`\`\`javascript
 function test() {
-  console.log('test');
+  
 }
 \`\`\`
 
@@ -169,14 +153,10 @@ The library ID is: **\`1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL
 }
 \`\`\``;
 
-    console.log('複雑なREADMEでGasScriptIdExtractorを使用してスクリプトIDを抽出中...');
-
     const extractedId = GASScriptIdExtractor.extractScriptId(
       complexReadme,
       DEFAULT_SCRIPT_ID_PATTERNS
     );
-    console.log(`抽出されたスクリプトID: ${extractedId}`);
-    console.log(`期待されるスクリプトID: ${expectedScriptId}`);
 
     expect(extractedId).toBe(expectedScriptId);
   });
@@ -200,7 +180,7 @@ Here are some examples:
 
 \`\`\`javascript
 function test() {
-  console.log('test');
+  
 }
 \`\`\`
 
@@ -220,27 +200,13 @@ The library ID is: **\`1nUiajCHQReVwWPq7rNAvsIcWvPptmMUSzeytnzVHDpdoxUIvuX0e_reL
 }
 \`\`\``;
 
-    console.log('\\n=== 除外パターンのデバッグ ===');
-
-    // 各除外パターンをテスト
-    SCRIPT_ID_EXCLUSION_PATTERNS.forEach((pattern, index) => {
-      console.log(`\\n除外パターン ${index + 1}: ${pattern.source}`);
+    // 各除外パターンをテスト（デバッグ用）
+    const excludingPatterns = SCRIPT_ID_EXCLUSION_PATTERNS.filter(pattern => {
       const matches = [...complexReadme.matchAll(new RegExp(pattern.source, pattern.flags))];
-
-      if (matches.length > 0) {
-        console.log(`  マッチ数: ${matches.length}`);
-        matches.forEach((match, matchIndex) => {
-          console.log(`  マッチ ${matchIndex + 1}: "${match[0]}"`);
-          if (match[0].includes(expectedScriptId)) {
-            console.log(`  ⚠️ このマッチが対象スクリプトIDを除外している可能性があります`);
-          }
-        });
-      } else {
-        console.log(`  マッチなし`);
-      }
+      return matches.some(match => match[0].includes(expectedScriptId));
     });
 
-    // パターンの個別確認用（失敗を許可）
-    expect(true).toBe(true);
+    // 除外パターンによってスクリプトIDが除外されていないことを確認
+    expect(excludingPatterns.length).toBe(0);
   });
 });
