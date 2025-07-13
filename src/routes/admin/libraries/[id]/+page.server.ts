@@ -104,6 +104,7 @@ export const actions: Actions = {
     const statusMessages = {
       [LIBRARY_STATUS.PUBLISHED]: 'ライブラリを公開しました。',
       [LIBRARY_STATUS.PENDING]: 'ライブラリを未公開にしました。',
+      [LIBRARY_STATUS.REJECTED]: 'ライブラリを却下しました。',
     };
 
     return {

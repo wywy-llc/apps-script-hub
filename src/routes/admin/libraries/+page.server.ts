@@ -5,11 +5,11 @@ import {
 } from '$lib/constants/github-search';
 import { db } from '$lib/server/db';
 import { library, librarySummary, user } from '$lib/server/db/schema';
-import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
 import { ActionErrorHandler } from '$lib/server/utils/action-error-handler.js';
+import { generateAuthHeader } from '$lib/server/utils/api-auth.js';
 import type { BulkRegisterResponse } from '$lib/types/index.js';
 import { fail } from '@sveltejs/kit';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ url }) => {
@@ -17,32 +17,88 @@ export const load = (async ({ url }) => {
   const pageParam = url.searchParams.get('page');
   const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10)) || 1 : 1;
 
-  // ライブラリ一覧をデータベースから取得（申請者情報も含む）
-  const libraries = await db
-    .select({
-      id: library.id,
-      name: library.name,
-      scriptId: library.scriptId,
-      authorName: library.authorName,
-      authorUrl: library.authorUrl,
-      status: library.status,
-      scriptType: library.scriptType,
-      updatedAt: library.updatedAt,
-      starCount: library.starCount,
-      description: library.description,
-      lastCommitAt: library.lastCommitAt,
-      requesterId: library.requesterId,
-      requestNote: library.requestNote,
-      requesterName: user.name,
-      requesterEmail: user.email,
-    })
-    .from(library)
-    .leftJoin(user, eq(library.requesterId, user.id))
-    .orderBy(desc(library.updatedAt));
+  // 検索パラメータを取得
+  const searchQuery = url.searchParams.get('search') || '';
+  const scriptTypeFilter = url.searchParams.get('scriptType') || '';
+
+  // 基本クエリ
+  const baseQuery = {
+    id: library.id,
+    name: library.name,
+    scriptId: library.scriptId,
+    authorName: library.authorName,
+    authorUrl: library.authorUrl,
+    status: library.status,
+    scriptType: library.scriptType,
+    updatedAt: library.updatedAt,
+    starCount: library.starCount,
+    description: library.description,
+    lastCommitAt: library.lastCommitAt,
+    requesterId: library.requesterId,
+    requestNote: library.requestNote,
+    requesterName: user.name,
+    requesterEmail: user.email,
+  };
+
+  const orderByClause = [
+    // ステータス順: pending, published, rejected の順番
+    sql`CASE
+      WHEN ${library.status} = 'pending' THEN 1
+      WHEN ${library.status} = 'published' THEN 2
+      WHEN ${library.status} = 'rejected' THEN 3
+      ELSE 4
+    END`,
+    desc(library.updatedAt),
+  ] as const;
+
+  let libraries;
+
+  // 検索条件に応じてクエリを分岐
+  if (searchQuery.trim() && scriptTypeFilter && scriptTypeFilter !== 'all') {
+    // 両方の条件がある場合
+    const searchTerm = `%${searchQuery.trim()}%`;
+    libraries = await db
+      .select(baseQuery)
+      .from(library)
+      .leftJoin(user, eq(library.requesterId, user.id))
+      .where(
+        and(
+          or(ilike(library.name, searchTerm), ilike(library.description, searchTerm)),
+          eq(library.scriptType, scriptTypeFilter as 'library' | 'web_app')
+        )
+      )
+      .orderBy(...orderByClause);
+  } else if (searchQuery.trim()) {
+    // テキスト検索のみ
+    const searchTerm = `%${searchQuery.trim()}%`;
+    libraries = await db
+      .select(baseQuery)
+      .from(library)
+      .leftJoin(user, eq(library.requesterId, user.id))
+      .where(or(ilike(library.name, searchTerm), ilike(library.description, searchTerm)))
+      .orderBy(...orderByClause);
+  } else if (scriptTypeFilter && scriptTypeFilter !== 'all') {
+    // スクリプトタイプフィルターのみ
+    libraries = await db
+      .select(baseQuery)
+      .from(library)
+      .leftJoin(user, eq(library.requesterId, user.id))
+      .where(eq(library.scriptType, scriptTypeFilter as 'library' | 'web_app'))
+      .orderBy(...orderByClause);
+  } else {
+    // 条件なし（全件）
+    libraries = await db
+      .select(baseQuery)
+      .from(library)
+      .leftJoin(user, eq(library.requesterId, user.id))
+      .orderBy(...orderByClause);
+  }
 
   return {
     libraries,
     currentPage,
+    searchQuery,
+    scriptTypeFilter,
   };
 }) satisfies PageServerLoad;
 

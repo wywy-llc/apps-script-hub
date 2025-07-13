@@ -27,12 +27,13 @@
 
   let { data, form }: Props = $props();
 
-  let libraries = $state(data.libraries);
+  let libraries: typeof data.libraries = $state(data.libraries);
   let currentPage = $state(data.currentPage);
 
-  // dataが更新された時にcurrentPageも同期
+  // dataが更新された時にcurrentPageと検索値も同期
   $effect(() => {
     currentPage = data.currentPage;
+    searchValue = data.searchQuery; // 検索値をサーバーサイドの値と同期
 
     // 現在のページが総ページ数を超えている場合は1ページ目にリダイレクト
     if (totalPages > 0 && currentPage > totalPages) {
@@ -55,7 +56,10 @@
   let maxResults = $derived(Math.max(0, (endPage - startPage + 1) * perPage));
   let bulkUpdateInProgress = $state(false);
   let bulkUpdateMessage = $state('');
+  let bulkValidateInProgress = $state(false);
+  let bulkValidateMessage = $state('');
   let selectedTags = $state(resetSelectedTags()); // 初期値は全タグ選択
+  let searchValue = $state(data.searchQuery); // 検索入力の状態管理
 
   /**
    * selectedTagsを初期値にリセット
@@ -84,8 +88,8 @@
         if (result.type === 'success') {
           // ライブラリのステータスを更新
           libraries = libraries.map(lib =>
-            lib.id === libraryId ? { ...lib, status: newStatus } : lib
-          );
+            lib.id === libraryId ? { ...lib, status: newStatus as LibraryStatus } : lib
+          ) as typeof libraries;
         } else {
           console.error('ステータス更新に失敗しました:', result.data?.error || '不明なエラー');
         }
@@ -209,6 +213,66 @@
     }
   }
 
+  /**
+   * ライブラリ一括検証・却下処理
+   */
+  async function handleBulkValidateAndReject() {
+    if (bulkValidateInProgress) return;
+
+    const confirmMessage = `既存のライブラリをスクレイピングパターンで検証し、適合しないライブラリを自動的に却下しますか？
+この処理には時間がかかる場合があります。`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    bulkValidateInProgress = true;
+    bulkValidateMessage = 'ライブラリを検証中...';
+
+    try {
+      const response = await fetch('/admin/libraries/bulk-validate-and-reject', {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        bulkValidateMessage = result.message;
+
+        // 却下されたライブラリがある場合は詳細情報を表示
+        if (result.rejectedLibraries && result.rejectedLibraries.length > 0) {
+          const rejectedNames = result.rejectedLibraries
+            .slice(0, 5) // 最初の5件のみ表示
+            .map((lib: { id: string; name: string; reason: string }) => lib.name)
+            .join(', ');
+
+          const additionalInfo =
+            result.rejectedLibraries.length > 5
+              ? ` 他${result.rejectedLibraries.length - 5}件`
+              : '';
+
+          bulkValidateMessage += `\n却下されたライブラリ: ${rejectedNames}${additionalInfo}`;
+        }
+      } else {
+        bulkValidateMessage = result.message || '一括検証中にエラーが発生しました。';
+      }
+
+      // 3秒後にページをリロード（更新されたデータを表示するため）
+      setTimeout(() => {
+        bulkValidateMessage = '';
+        window.location.reload();
+      }, 3000);
+    } catch (error) {
+      console.error('一括検証エラー:', error);
+      bulkValidateMessage = '一括検証中にエラーが発生しました。';
+    } finally {
+      bulkValidateInProgress = false;
+      setTimeout(() => {
+        bulkValidateMessage = '';
+      }, 5000);
+    }
+  }
+
   // URLを更新してページ遷移する関数
   function updatePageUrl(newPage: number) {
     const url = new URL($page.url);
@@ -237,6 +301,33 @@
       updatePageUrl(currentPage + 1);
     }
   }
+
+  /**
+   * 検索フォーム送信時の処理
+   */
+  function handleSearchSubmit(event: SubmitEvent) {
+    event.preventDefault();
+
+    const form = event.target as HTMLFormElement;
+
+    // フォームから直接値を取得
+    const searchInput = form.querySelector('input[name="search"]') as HTMLInputElement;
+    const actualSearchValue = searchInput?.value || '';
+
+    // URLを構築
+    const params = new URLSearchParams();
+    if (actualSearchValue.trim()) {
+      params.set('search', actualSearchValue.trim());
+    }
+    if (data.scriptTypeFilter) {
+      params.set('scriptType', data.scriptTypeFilter);
+    }
+
+    const newUrl = `/admin/libraries${params.toString() ? '?' + params.toString() : ''}`;
+
+    // ブラウザの標準的な画面遷移を使用
+    window.location.href = newUrl;
+  }
 </script>
 
 <svelte:head>
@@ -250,47 +341,145 @@
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-  <div class="mb-8 flex items-center justify-between">
-    <h1 class="text-3xl font-bold text-gray-900">ライブラリ管理</h1>
-    <div class="flex space-x-2">
-      <a
-        href="/admin/libraries/new"
-        class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-      >
-        新規追加
-      </a>
-      <button
-        onclick={toggleBulkAddForm}
-        class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
-        title="GitHubタグ検索で新しいライブラリを一括追加"
-      >
-        一括新規追加
-      </button>
-      <button
-        onclick={handleBulkUpdate}
-        disabled={bulkUpdateInProgress}
-        class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
-        title="既存ライブラリのGitHub情報を一括更新（Star数等）"
-      >
-        {#if bulkUpdateInProgress}
-          <svg
-            class="mr-2 h-4 w-4 animate-spin"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+  <div class="mb-8">
+    <div class="mb-4 flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-gray-900">ライブラリ管理</h1>
+      <div class="flex space-x-2">
+        <a
+          href="/admin/libraries/new"
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+        >
+          新規追加
+        </a>
+        <button
+          onclick={toggleBulkAddForm}
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+          title="GitHubタグ検索で新しいライブラリを一括追加"
+        >
+          一括新規追加
+        </button>
+        <button
+          onclick={handleBulkUpdate}
+          disabled={bulkUpdateInProgress}
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+          title="既存ライブラリのGitHub情報を一括更新（Star数等）"
+        >
+          {#if bulkUpdateInProgress}
+            <svg
+              class="mr-2 h-4 w-4 animate-spin"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            既存更新中...
+          {:else}
+            既存一括更新
+          {/if}
+        </button>
+        <button
+          onclick={handleBulkValidateAndReject}
+          disabled={bulkValidateInProgress}
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          title="最新のスクレイピングパターンに適合しないライブラリを自動的に却下"
+        >
+          {#if bulkValidateInProgress}
+            <svg
+              class="mr-2 h-4 w-4 animate-spin"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            一括検証中...
+          {:else}
+            一括検証・却下
+          {/if}
+        </button>
+      </div>
+    </div>
+
+    <!-- 検索フォーム -->
+    <div class="flex items-center gap-4">
+      <div class="max-w-md flex-1">
+        <form method="GET" class="relative" id="searchForm" onsubmit={handleSearchSubmit}>
+          <input
+            type="text"
+            name="search"
+            bind:value={searchValue}
+            placeholder="ライブラリ名、説明で検索..."
+            class="block w-full rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-sm placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            autocomplete="off"
+          />
+          <!-- スクリプトタイプを隠しフィールドで保持 -->
+          <input type="hidden" name="scriptType" value={data.scriptTypeFilter} />
+          <button
+            type="submit"
+            class="absolute inset-y-0 right-0 flex items-center pr-3"
+            aria-label="検索実行"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          既存更新中...
-        {:else}
-          既存一括更新
-        {/if}
-      </button>
+            <svg
+              class="h-5 w-5 text-gray-400 hover:text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- スクリプトタイプフィルター -->
+      <div class="flex items-center gap-2">
+        <label for="scriptTypeFilter" class="text-sm font-medium text-gray-700">タイプ:</label>
+        <form method="GET" id="scriptTypeForm">
+          <!-- 検索クエリを隠しフィールドで保持 -->
+          <input type="hidden" name="search" bind:value={searchValue} />
+          <select
+            id="scriptTypeFilter"
+            name="scriptType"
+            value={data.scriptTypeFilter}
+            onchange={e => (e.target as HTMLSelectElement).form?.submit()}
+            class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="">すべて</option>
+            <option value="library">ライブラリ</option>
+            <option value="web_app">Webアプリ</option>
+          </select>
+        </form>
+      </div>
+
+      {#if data.searchQuery || data.scriptTypeFilter}
+        <div class="flex items-center gap-2">
+          {#if data.searchQuery}
+            <span class="text-sm text-gray-600">検索中: "{data.searchQuery}"</span>
+          {/if}
+          {#if data.scriptTypeFilter}
+            <span class="text-sm text-gray-600">
+              タイプ: {data.scriptTypeFilter === 'library' ? 'ライブラリ' : 'Webアプリ'}
+            </span>
+          {/if}
+          <a href="/admin/libraries" class="text-sm text-blue-600 hover:text-blue-800"> クリア </a>
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -307,6 +496,24 @@
         </svg>
         <div class="ml-3">
           <p class="text-sm font-medium">{bulkUpdateMessage}</p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- 一括検証メッセージ -->
+  {#if bulkValidateMessage}
+    <div class="mb-6 rounded-md bg-red-50 p-4 text-red-800">
+      <div class="flex">
+        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium whitespace-pre-line">{bulkValidateMessage}</p>
         </div>
       </div>
     </div>
@@ -566,6 +773,22 @@
       </div>
     </div>
   {/if}
+
+  <!-- 検索結果情報 -->
+  <div class="mb-4 flex items-center justify-between">
+    <div class="text-sm text-gray-600">
+      {#if data.searchQuery}
+        検索結果: {totalItems}件のライブラリが見つかりました
+      {:else}
+        全 {totalItems}件のライブラリ
+      {/if}
+    </div>
+    {#if totalPages > 1}
+      <div class="text-sm text-gray-600">
+        {totalPages}ページ中 {currentPage}ページ目を表示
+      </div>
+    {/if}
+  </div>
 
   <!-- Library List - Card Layout -->
   <div class="space-y-4">

@@ -56,18 +56,18 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
 export const DEFAULT_WEB_APP_PATTERNS: RegExp[] = [
   // Markdownリンク形式（最も確実）- .gsと.js両方対応
   /\[.*?\]\([^)]*\.(?:gs|js)\)/gi,
-  // ファイルリスト形式（行頭やリスト記号の後）- .gsと.js両方対応
-  /(?:^|\n|[-*+]\s+|[\d]+\.\s+)(?:[a-zA-Z0-9_-]+\.(?:gs|js))\b/gim,
-  // ディレクトリ構造やファイル一覧での記載
-  /(?:├|└|│)\s*[a-zA-Z0-9_-]+\.(?:gs|js)\b/gi,
-  // ファイルパス形式（スラッシュで始まる）
-  /\/[a-zA-Z0-9_/-]+\.(?:gs|js)\b/gi,
-  // 典型的なGASファイル名（行頭または空白後、クォートなし）
-  /(?:^|\s)(?:main|code|app|script|index|appsscript)\.(?:gs|js)\b/gim,
+  // ファイルリスト形式（行頭やリスト記号の後）- Google Apps Scriptコンテキストでの.gsファイルのみ
+  /(?:^|\n|[-*+]\s+|[\d]+\.\s+)(?:[a-zA-Z0-9_-]+\.gs)\b/gim,
+  // ディレクトリ構造やファイル一覧での記載 - .gsファイルのみ
+  /(?:├|└|│)\s*[a-zA-Z0-9_-]+\.gs\b/gi,
+  // ファイルパス形式（スラッシュで始まる）- .gsファイルのみ
+  /\/[a-zA-Z0-9_/-]+\.gs\b/gi,
+  // 典型的なGASファイル名（行頭または空白後、クォートなし）- .gsのみに限定
+  /(?:^|\s)(?:main|code|app|script|index|appsscript)\.gs\b/gim,
   // Google Apps Scriptと.gs/.jsの組み合わせ
   /google\s*apps?\s*script.*?[a-zA-Z0-9_-]+\.(?:gs|js)/gi,
-  // GASでよく使われるファイル名パターン（.gsまたは.js）
-  /\b(?:code|main|app|script|index)[a-zA-Z0-9_-]*\.(?:gs|js)\b/gi,
+  // GASでよく使われるファイル名パターン - .gsのみに限定
+  /\b(?:code|main|app|script|index)[a-zA-Z0-9_-]*\.gs\b/gi,
   // HTML関連ファイル（Webアプリの特徴）
   /[a-zA-Z0-9_-]+\.html\b/gi,
 ];
@@ -81,16 +81,14 @@ export const DEFAULT_WEB_APP_PATTERNS: RegExp[] = [
  */
 export const DEFAULT_GAS_TAGS = [
   'google-apps-script',
+  'apps-script',
   'google-sheets',
   'google-workspace',
-  'apps-script',
   'gas',
-  'gmail',
   'google-drive',
   'google-docs',
   'clasp',
   'gas-library',
-  'typescript',
 ] as const;
 
 /**

@@ -91,6 +91,7 @@
   "library_management": "ライブラリ管理",
   "publish": "公開する",
   "unpublish": "未公開に戻す",
+  "reject": "却下する",
   "library_registration_success": "ライブラリが正常に登録されました。詳細ページに移動します...",
   "library_registration_title": "新規ライブラリ追加",
   "terms_page_title": "利用規約",

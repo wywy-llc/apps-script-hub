@@ -41,7 +41,7 @@ export const library = pgTable('library', {
     withTimezone: true,
     mode: 'date',
   }).notNull(),
-  status: text('status', { enum: ['pending', 'published'] })
+  status: text('status', { enum: ['pending', 'published', 'rejected'] })
     .notNull()
     .default('pending'),
   scriptType: text('script_type', { enum: ['library', 'web_app'] })
