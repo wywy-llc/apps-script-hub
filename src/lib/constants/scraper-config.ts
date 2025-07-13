@@ -48,14 +48,29 @@ export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
   // キャプチャグループに先頭の「1」も含める
   /(?:library_id|clasp|apps.?script)[^a-zA-Z0-9_-]*['"`]?(1[A-Za-z0-9_-]{24,69})['"`]?/gi,
 
-  // 7. 1で始まる文字列（厳格化：特定のコンテキストを除外）
-  // - HTTP/HTTPS URL内の文字列を除外（GitHub画像URL等の誤検知対策）
-  // - *.png, *.jpg等の画像ファイル拡張子を除外
-  // - email_id, session_id等のJSONフィールドを除外
-  // - UUID形式（ハイフン区切り）を完全に除外
-  // - コンマ区切り形式のUUID(1a2b3c4d,5e6f,7890,abcd,ef1234567890)を除外
-  // キャプチャグループに先頭の「1」も含める
-  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])(?<!https?:\/\/[^\s)]+\/)\b(1(?![a-f0-9]*-[a-f0-9]*-[a-f0-9]*-[a-f0-9]*-[a-f0-9]*)[A-Za-z0-9_-]{24,69})(?!\.[a-z]{2,4})\b(?!["']\s*[,}])/g,
+  // 7. 基本的な1で始まる文字列（キャプチャグループに先頭の「1」も含める）
+  /\b(1[A-Za-z0-9_-]{24,69})\b/g,
+];
+
+/**
+ * スクリプトID候補から除外すべきパターン
+ * 誤検知を防ぐため、これらのパターンに一致する文字列は除外される
+ */
+export const SCRIPT_ID_EXCLUSION_PATTERNS: RegExp[] = [
+  // URL内の文字列を除外（GitHub画像URL等、ただしscript.google.comは除外しない）
+  /https?:\/\/(?!script\.google\.com)[^\s)]+\/[A-Za-z0-9_-]+/gi,
+
+  // 画像ファイル拡張子を除外
+  /1[A-Za-z0-9_-]{24,69}\.(png|jpg|jpeg|gif|webp|svg)/gi,
+
+  // JSON形式のIDフィールドを除外
+  /["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'][A-Za-z0-9_-]+["']/gi,
+
+  // UUID形式（ハイフン区切り）を除外
+  /1[a-f0-9]{7}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
+
+  // JSON配列やオブジェクト内の値を除外
+  /["'][A-Za-z0-9_-]+["']\s*[,}]/gi,
 ];
 
 /**
