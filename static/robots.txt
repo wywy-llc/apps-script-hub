@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Allow: /user/
+Disallow: /admin
 
 Sitemap: https://appscripthub.com/sitemap.xml
