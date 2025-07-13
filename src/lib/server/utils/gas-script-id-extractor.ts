@@ -1,4 +1,7 @@
-import { DEFAULT_SCRIPT_ID_PATTERNS } from '$lib/constants/scraper-config.js';
+import {
+  DEFAULT_SCRIPT_ID_PATTERNS,
+  SCRIPT_ID_EXCLUSION_PATTERNS,
+} from '$lib/constants/scraper-config.js';
 import type { ScraperConfig } from '$lib/types/github-scraper.js';
 
 /**
@@ -12,6 +15,29 @@ export class GASScriptIdExtractor {
   public static readonly DEFAULT_SCRIPT_ID_PATTERNS = DEFAULT_SCRIPT_ID_PATTERNS;
 
   /**
+   * 候補文字列が除外パターンに一致するかチェック
+   *
+   * @param candidate - チェック対象の文字列
+   * @param content - 元のコンテンツ（コンテキストチェック用）
+   * @returns 除外すべき場合true
+   */
+  private static shouldExcludeCandidate(candidate: string, content: string): boolean {
+    for (const exclusionPattern of SCRIPT_ID_EXCLUSION_PATTERNS) {
+      exclusionPattern.lastIndex = 0; // グローバル正規表現をリセット
+
+      // 除外パターンの直接的なマッチをチェック
+      const matches = content.matchAll(new RegExp(exclusionPattern.source, exclusionPattern.flags));
+      for (const match of matches) {
+        // マッチした文字列に候補が含まれている場合は除外
+        if (match[0].includes(candidate)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * READMEからGASスクリプトIDを抽出
    *
    * @param readme - README内容
@@ -23,10 +49,15 @@ export class GASScriptIdExtractor {
     patterns: RegExp[] = this.DEFAULT_SCRIPT_ID_PATTERNS
   ): string | undefined {
     for (const pattern of patterns) {
+      pattern.lastIndex = 0; // グローバル正規表現をリセット
       const matches = readme.matchAll(pattern);
       for (const match of matches) {
-        if (match[1] && match[1].length >= 20) {
-          return match[1];
+        const candidateId: string = match[1] || '';
+        if (candidateId && candidateId.length >= 20) {
+          // 除外パターンチェック
+          if (!this.shouldExcludeCandidate(candidateId, readme)) {
+            return candidateId;
+          }
         }
       }
     }

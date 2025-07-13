@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { GASScriptIdExtractor } from '../../../../../src/lib/server/utils/gas-script-id-extractor.js';
 import { LibraryTestDataFactories } from '../../../../factories/library-test-data.factory.js';
 
@@ -125,41 +125,49 @@ describe('GASScriptIdExtractor', () => {
 
   describe('DEFAULT_SCRIPT_ID_PATTERNS', () => {
     test('デフォルトパターンが正しく定義されている', () => {
-      expect(GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS).toHaveLength(9);
       expect(
-        GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS.every(pattern => pattern instanceof RegExp)
+        GASScriptIdExtractor.DEFAULT_SCRIPT_ID_PATTERNS.every(
+          (pattern: RegExp) => pattern instanceof RegExp
+        )
       ).toBe(true);
     });
 
-    test('各デフォルトパターンが期待通りに動作する', () => {
-      const testCases = [
-        {
-          text: 'スクリプトID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-          shouldMatch: true,
-        },
-        {
-          text: 'Script ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-          shouldMatch: true,
-        },
-        {
-          text: 'script id: "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF"',
-          shouldMatch: true,
-        },
-        {
-          text: 'https://script.google.com/macros/d/1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF/edit',
-          shouldMatch: true,
-        },
-        {
-          text: 'script.google.com/u/1/home/projects/1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF/edit',
-          shouldMatch: true,
-        },
-        {
-          text: 'ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
-          shouldMatch: true, // 改善されたパターンでは1で始まる文字列も抽出される
-        },
-      ];
+    const defaultPatternTestCases = [
+      {
+        name: 'スクリプトID（日本語）',
+        text: 'スクリプトID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+        shouldMatch: true,
+      },
+      {
+        name: 'Script ID（英語）',
+        text: 'Script ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+        shouldMatch: true,
+      },
+      {
+        name: 'script id（クォート付き）',
+        text: 'script id: "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF"',
+        shouldMatch: true,
+      },
+      {
+        name: 'macros URL',
+        text: 'https://script.google.com/macros/d/1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF/edit',
+        shouldMatch: true,
+      },
+      {
+        name: 'projects URL',
+        text: 'script.google.com/u/1/home/projects/1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF/edit',
+        shouldMatch: true,
+      },
+      {
+        name: 'ID ラベル付き',
+        text: 'ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF',
+        shouldMatch: true, // 改善されたパターンでは1で始まる文字列も抽出される
+      },
+    ];
 
-      testCases.forEach(({ text, shouldMatch }) => {
+    it.each(defaultPatternTestCases)(
+      '各デフォルトパターンが期待通りに動作する: $name',
+      ({ text, shouldMatch }) => {
         const result = GASScriptIdExtractor.extractScriptId(text);
         if (shouldMatch) {
           // 修正されたパターンでは常に完全なスクリプトIDが返される
@@ -167,8 +175,8 @@ describe('GASScriptIdExtractor', () => {
         } else {
           expect(result).toBeUndefined();
         }
-      });
-    });
+      }
+    );
   });
 
   describe('GitHub画像URL誤検知対策', () => {

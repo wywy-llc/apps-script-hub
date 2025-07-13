@@ -10,41 +10,67 @@ import type { ScraperConfig } from '$lib/types/github-scraper.js';
  * - 構造: 連続するハイフンやアンダースコアは含まない（--や__は無効）
  *
  * パターンの優先順位（上から順に適用）:
- * 1. Google Script URL形式（最も信頼性が高い）
- * 2. 明示的な「スクリプトID」「Script ID」ラベル付き
- * 3. script.google.comドメインの一般URL
- * 4. GAS特有のコンテキストでの文字列リテラル
+ * 1. ライブラリキー明示記載（最高精度）
+ * 2. コードブロック内のライブラリID（高精度）
+ * 3. Google Script URL形式（高精度）
+ * 4. 明示的な「スクリプトID」「Script ID」ラベル付き
+ * 5. script.google.comドメインの一般URL
+ * 6. GAS特有のコンテキストでの文字列リテラル
  *
  * 注意: 誤検出を防ぐため、JSON形式のemail_idやその他のIDと区別
  */
 export const DEFAULT_SCRIPT_ID_PATTERNS: RegExp[] = [
-  // 1. Google Script URL形式（最高精度）
+  // 1. ライブラリキー明示記載（最高精度）
+  // 「The library's project key is as follows」や「ライブラリのプロジェクトキー」の後のID
+  /(?:library["']?s?\s*project\s*key|project\s*key|ライブラリ.*?プロジェクト.*?キー|ライブラリ.*?キー)[^:]*[:：]?\s*(?:is\s*)?(?:as\s*follows[.。]?)?\s*```?\s*(1[A-Za-z0-9_-]{24,69})\s*```?/gi,
+
+  // 2. コードブロック内のライブラリID（高精度）
+  // Markdownコードブロック内の1で始まる長い文字列
+  /```[^`]*?(1[A-Za-z0-9_-]{24,69})[^`]*?```/gs,
+
+  // 3. Google Script URL形式（高精度）
   /https:\/\/script\.google\.com\/macros\/d\/([A-Za-z0-9_-]{25,70})\/edit/gi,
   /https:\/\/script\.google\.com\/macros\/d\/([A-Za-z0-9_-]{25,70})/gi,
 
-  // 2. 明示的ラベル付き（高精度）
+  // 4. 明示的ラベル付き（高精度）
   /(?:スクリプト|script)\s*(?:id|ID)[：:\s=]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
   /(?:gas|GAS)\s*(?:id|ID)[：:\s=]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
 
-  // 2.1. ライブラリインストール手順でのスクリプトID（高精度）
+  // 4.1. ライブラリインストール手順でのスクリプトID（高精度）
   /(?:library|ライブラリ).*?(?:script\s*id|スクリプトID)[：:\s]*['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
   /(?:find\s*a\s*library|ライブラリ.*?検索).*?['"`]?([A-Za-z0-9_-]{25,70})['"`]?/gi,
 
-  // 3. script.google.comドメインの一般URL（中精度）
+  // 5. script.google.comドメインの一般URL（中精度）
   /script\.google\.com\/.*?\/([A-Za-z0-9_-]{25,70})/gi,
 
-  // 4. GAS特有のコンテキストでの文字列リテラル（中精度）
+  // 6. GAS特有のコンテキストでの文字列リテラル（中精度）
   // 'library_id'や'clasp'等のコンテキストの近くにある場合のみ
   // キャプチャグループに先頭の「1」も含める
   /(?:library_id|clasp|apps.?script)[^a-zA-Z0-9_-]*['"`]?(1[A-Za-z0-9_-]{24,69})['"`]?/gi,
 
-  // 5. 1で始まる文字列（厳格化：特定のコンテキストを除外）
-  // - HTTP/HTTPS URL内の文字列を除外（GitHub画像URL等の誤検知対策）
-  // - *.png, *.jpg等の画像ファイル拡張子を除外
-  // - email_id, session_id等のJSONフィールドを除外
-  // - UUID形式（ハイフン区切り）を除外
-  // キャプチャグループに先頭の「1」も含める
-  /(?<!["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'])(?<!https?:\/\/[^\s)]+\/)\b(1[A-Za-z0-9_-]{24,69})(?!\.[a-z]{2,4})(?!-[a-f0-9]{8}-[a-f0-9]{4})\b(?!["']\s*[,}])/g,
+  // 7. 基本的な1で始まる文字列（キャプチャグループに先頭の「1」も含める）
+  /\b(1[A-Za-z0-9_-]{24,69})\b/g,
+];
+
+/**
+ * スクリプトID候補から除外すべきパターン
+ * 誤検知を防ぐため、これらのパターンに一致する文字列は除外される
+ */
+export const SCRIPT_ID_EXCLUSION_PATTERNS: RegExp[] = [
+  // URL内の文字列を除外（GitHub画像URL等、ただしscript.google.comは除外しない）
+  /https?:\/\/(?!script\.google\.com)[^\s)]+\/[A-Za-z0-9_-]+/gi,
+
+  // 画像ファイル拡張子を除外
+  /1[A-Za-z0-9_-]{24,69}\.(png|jpg|jpeg|gif|webp|svg)/gi,
+
+  // JSON形式のIDフィールドを除外
+  /["'](?:email_id|session_id|api_key|user_id|token)["']\s*:\s*["'][A-Za-z0-9_-]+["']/gi,
+
+  // UUID形式（ハイフン区切り）を除外
+  /1[a-f0-9]{7}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi,
+
+  // JSON配列やオブジェクト内の値を除外
+  /["'][A-Za-z0-9_-]+["']\s*[,}]/gi,
 ];
 
 /**
