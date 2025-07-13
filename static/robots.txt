@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Allow: /user/
+
+Sitemap: https://appscripthub.com/sitemap.xml
