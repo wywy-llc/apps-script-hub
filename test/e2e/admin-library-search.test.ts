@@ -126,7 +126,7 @@ test.describe('Admin Screen - Library Search Functionality', () => {
 
     // 検索条件の表示が消えていることを確認
     await expect(page.locator('text=検索中:')).not.toBeVisible();
-    await expect(page.locator('text=タイプ:')).not.toBeVisible();
+    await expect(page.locator('text=タイプ: ライブラリ')).not.toBeVisible();
 
     // フォームがリセットされていることを確認
     await expect(searchInput).toHaveValue('');
