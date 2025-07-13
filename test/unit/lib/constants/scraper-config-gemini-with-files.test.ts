@@ -95,10 +95,11 @@ Install the library:
 \`\`\`
 
 Alternative method:
-Script ID: 1AnotherScriptId234567890123456789012345`;
+Script ID: 1AnotherScriptId1234567890123456789012345678901234567890123`;
 
     const result = GASScriptIdExtractor.extractScriptId(readmeWithCodeBlock);
-    const expectedFirstId = '1dolXnIeXKz-BH1BlwRDaKhzC2smJcGyVxMxGYhaY2kqiLa857odLXrIC';
+    // 「Script ID:」ラベル付きの方が優先度が高いため、そちらが抽出される
+    const expectedFirstId = '1AnotherScriptId1234567890123456789012345678901234567890123';
 
     expect(result).toBe(expectedFirstId);
   });
