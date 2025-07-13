@@ -102,6 +102,11 @@ describe('html-sanitizer', () => {
   });
 
   describe('preprocessMarkdown', () => {
+    test('エスケープされた改行文字を実際の改行に変換する', () => {
+      const input = '### タイトル\\n```javascript\\nconsole.log("test");\\n```';
+      const result = preprocessMarkdown(input);
+      expect(result).toBe('### タイトル\n```javascript\nconsole.log("test");\n```');
+    });
     test('エスケープされたタブ文字を実際のタブに変換する', () => {
       const input = 'function test() {\\n\\treturn true;\\n}';
       const result = preprocessMarkdown(input);
