@@ -2,7 +2,7 @@
   import Button from '$lib/components/Button.svelte';
   import LibraryCard from '$lib/components/LibraryCard.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
-  import { createAppUrl, createFullUrl, getLogoUrl } from '$lib/constants/app-config.js';
+  import { createAppUrl, getLogoUrl } from '$lib/constants/app-config.js';
   import {
     featured_libraries,
     featured_web_apps,
@@ -33,14 +33,14 @@
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content={createFullUrl('HOME')} />
+  <meta property="twitter:url" content={createAppUrl('/user')} />
   <meta property="twitter:title" content={meta_title_home()} />
   <meta property="twitter:description" content={meta_description_home()} />
   <meta property="twitter:image" content={getLogoUrl()} />
 
   <!-- Additional SEO Meta Tags -->
   <meta name="author" content="wywy LLC" />
-  <link rel="canonical" href={createFullUrl('HOME')} />
+  <link rel="canonical" href={createAppUrl('/user')} />
 </svelte:head>
 
 <!-- GASライブラリ検索ヘッダー -->
