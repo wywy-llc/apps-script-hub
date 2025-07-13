@@ -81,11 +81,12 @@ If you use this library in your own Google Apps Script project, please copy and 
 
     if (hasExpectedId) {
       console.log('✅ ライブラリIDが正しく抽出されている');
-      expect(hasExpectedId).toBe(true);
     } else {
       console.log('🐛 ライブラリIDが抽出されていない');
-      expect(hasExpectedId).toBe(false); // バグを再現
     }
+    
+    // 期待されるIDが必ず抽出されることを検証
+    expect(hasExpectedId).toBe(true);
   });
 
   it('ライブラリID記載パターンの個別テスト', () => {
@@ -167,8 +168,8 @@ If you use this library in your own Google Apps Script project, please copy and 
         });
       }
 
-      // 各ケースでの結果を記録
-      expect(foundMatches).toBeDefined();
+      // 期待されるIDが正しく抽出されることを検証
+      expect(foundMatches.flatMap(f => f.matches)).toContain(expectedId);
     });
   });
 
@@ -215,12 +216,13 @@ If you use this library in your own Google Apps Script project, please copy and 
       if (shouldNotMatch) {
         if (foundMatches.length === 0) {
           console.log(`✅ ${name}: 正しく誤検知を回避`);
-          expect(foundMatches.length).toBe(0);
         } else {
           console.log(`🐛 ${name}: 誤検知が発生`);
           console.log(`  誤検知されたID: ${foundMatches.join(', ')}`);
-          expect(foundMatches.length).toBe(0);
         }
+        
+        // 誤検知が発生しないことを検証
+        expect(foundMatches.length).toBe(0);
       }
     });
   });
