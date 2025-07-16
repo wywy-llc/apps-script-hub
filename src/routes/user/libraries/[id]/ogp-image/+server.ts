@@ -1,4 +1,3 @@
-import { APP_CONFIG } from '$lib/constants/app-config.js';
 import {
   OGP_IMAGE_CONFIG,
   OGP_IMAGE_HEADERS,
@@ -8,6 +7,8 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import type { RequestHandler } from './$types';
 
 /**
@@ -43,6 +44,19 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 };
 
+/**
+ * ロゴ画像をbase64エンコードして取得
+ */
+function getLogoBase64(): string {
+  try {
+    const logoPath = join(process.cwd(), 'static', 'logo.png');
+    const logoBuffer = readFileSync(logoPath);
+    return `data:image/png;base64,${logoBuffer.toString('base64')}`;
+  } catch (error) {
+    console.error('ロゴ画像の読み込みに失敗:', error);
+    return '';
+  }
+}
 
 /**
  * OGP画像のSVGを生成
@@ -101,7 +115,7 @@ function generateOgpSvg(title: string, authorName: string): string {
       
       <!-- ロゴ（右下） -->
       <g transform="translate(${WIDTH - PADDING - LOGO_SIZE}, ${HEIGHT - PADDING - LOGO_SIZE})">
-        <image href="${APP_CONFIG.BASE_URL}${APP_CONFIG.LOGO_PATH}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
+        <image href="${getLogoBase64()}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
       </g>
       
       <!-- サイト名 -->
