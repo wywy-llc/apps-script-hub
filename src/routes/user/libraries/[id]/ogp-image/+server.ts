@@ -7,9 +7,10 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import type { RequestHandler } from './$types';
+
+// ビルド時にロゴ画像をインポート（Viteが自動的にBase64に変換）
+import logoUrl from '$lib/assets/logo.png';
 
 /**
  * 動的OGP画像生成API
@@ -44,28 +45,12 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 };
 
-// クラウド環境対応: ロゴ画像をbase64として事前に埋め込み
-const LOGO_BASE64 =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiM2MzY2ZjEiLz4KPHN2ZyB4PSIyMCIgeT0iMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0xMCAxMGwyMCAyME0zMCAxMGwtMjAgMjBNMTAgMzBsMjAtMjBNMzAgMzBsLTIwLTIwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2Zz4KPC9zdmc+';
-
 /**
- * ロゴ画像をbase64エンコードして取得（クラウド環境対応）
+ * ビルド時にロゴ画像をBase64データURLに変換
+ * Viteが自動的にPNG画像をBase64エンコードされたdata URLに変換します
+ * これにより実行時のファイルI/Oが不要になり、パフォーマンスが向上します
  */
-function getLogoBase64(): string {
-  // 開発環境では実際のファイルを読み込み、本番環境では埋め込み画像を使用
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const logoPath = join(process.cwd(), 'static', 'logo.png');
-      const logoBuffer = readFileSync(logoPath);
-      return `data:image/png;base64,${logoBuffer.toString('base64')}`;
-    } catch (error) {
-      console.error('ロゴ画像の読み込みに失敗:', error);
-      return LOGO_BASE64; // フォールバック
-    }
-  }
-
-  return LOGO_BASE64; // 本番環境では埋め込み画像を使用
-}
+const LOGO_BASE64 = logoUrl;
 
 /**
  * OGP画像のSVGを生成
@@ -124,7 +109,7 @@ function generateOgpSvg(title: string, authorName: string): string {
       
       <!-- ロゴ（右下） -->
       <g transform="translate(${WIDTH - PADDING - LOGO_SIZE}, ${HEIGHT - PADDING - LOGO_SIZE})">
-        <image href="${getLogoBase64()}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
+        <image href="${LOGO_BASE64}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
       </g>
       
       <!-- サイト名 -->
