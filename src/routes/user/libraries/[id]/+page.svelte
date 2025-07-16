@@ -130,7 +130,7 @@
   <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta property="og:site_name" content="GAS Library Hub" />
   <meta property="og:image" content={createAppUrl(`/user/libraries/${library.id}/ogp-image`)} />
-  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:type" content="image/svg+xml" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content={`${library.name} - ${library.authorName}`} />
