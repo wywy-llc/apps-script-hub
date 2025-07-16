@@ -130,6 +130,10 @@
   <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta property="og:site_name" content="GAS Library Hub" />
   <meta property="og:image" content={createAppUrl(`/user/libraries/${library.id}/ogp-image`)} />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={`${library.name} - ${library.authorName}`} />
   <meta property="article:author" content={library.authorName} />
   <meta property="article:section" content="Google Apps Script" />
   <meta property="article:tag" content="Google Apps Script" />
@@ -142,6 +146,7 @@
   <meta name="twitter:title" content={getSeoTitle()} />
   <meta name="twitter:description" content={getSeoDescription()} />
   <meta name="twitter:image" content={createAppUrl(`/user/libraries/${library.id}/ogp-image`)} />
+  <meta name="twitter:image:alt" content={`${library.name} - ${library.authorName}`} />
   <meta name="twitter:creator" content={`@${library.authorName}`} />
 
   <!-- Additional SEO Meta Tags -->
