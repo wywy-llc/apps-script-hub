@@ -88,11 +88,12 @@ function generateOgpSvg(title: string, authorName: string): string {
         ${escapeXml(displayTitle)}
       </text>
       
-      <!-- 作者名（左下） -->
-      <text x="${PADDING}" y="${HEIGHT - PADDING - 20}" 
+      <!-- 作者名（左下） - ロゴの中央に揃える -->
+      <text x="${PADDING}" y="${HEIGHT - PADDING - LOGO_SIZE / 2 + FONT_SIZE.AUTHOR / 3}" 
             fill="${COLORS.AUTHOR}" 
             font-size="${FONT_SIZE.AUTHOR}" 
-            font-family="Arial, sans-serif">
+            font-family="Arial, sans-serif"
+            dominant-baseline="middle">
         ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
       </text>
       

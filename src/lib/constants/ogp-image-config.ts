@@ -9,7 +9,7 @@ export const OGP_IMAGE_CONFIG = {
 
   // フォントサイズ
   FONT_SIZE: {
-    TITLE: 48,
+    TITLE: 56,
     AUTHOR: 28,
     SITE_NAME: 20,
     LOGO_TEXT: 24,
@@ -21,13 +21,13 @@ export const OGP_IMAGE_CONFIG = {
 
   // カラーパレット
   COLORS: {
-    BACKGROUND: '#1a1a1a',
-    BACKGROUND_SECONDARY: '#0f172a',
-    BACKGROUND_GRADIENT_END: '#1e293b',
-    TITLE: '#ffffff',
-    AUTHOR: '#a0a0a0',
-    ACCENT: '#10b981',
-    LOGO_BACKGROUND: '#10b981',
+    // 基本パレット
+    BACKGROUND_SECONDARY: '#1a1f36', // 深い藍色
+    BACKGROUND_GRADIENT_END: '#2a2f4a', // グラデーション終点
+    TITLE: '#f5f5f5', // 純白ではなく、やや温かみのある白
+    AUTHOR: '#9ca3af', // 落ち着いたグレー
+    ACCENT: '#6366f1', // 洗練された紫藍色（現代的な日本の色彩）
+    LOGO_BACKGROUND: '#6366f1',
     LOGO_TEXT: '#ffffff',
   },
 
