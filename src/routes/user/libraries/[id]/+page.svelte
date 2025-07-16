@@ -1,6 +1,6 @@
 <script lang="ts">
   import LibraryDetail from '$lib/components/LibraryDetail.svelte';
-  import { createAppUrl, getLogoUrl } from '$lib/constants/app-config.js';
+  import { createAppUrl } from '$lib/constants/app-config.js';
   import { copy_count_update_failed } from '$lib/paraglide/messages.js';
   import { getLocale } from '$lib/paraglide/runtime.js';
   import {
@@ -129,7 +129,7 @@
   <meta property="og:type" content="article" />
   <meta property="og:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta property="og:site_name" content="GAS Library Hub" />
-  <meta property="og:image" content={getLogoUrl()} />
+  <meta property="og:image" content={createAppUrl(`/user/libraries/${library.id}/ogp-image`)} />
   <meta property="article:author" content={library.authorName} />
   <meta property="article:section" content="Google Apps Script" />
   <meta property="article:tag" content="Google Apps Script" />
@@ -141,7 +141,7 @@
   <meta name="twitter:url" content={createAppUrl(`/user/libraries/${library.id}`)} />
   <meta name="twitter:title" content={getSeoTitle()} />
   <meta name="twitter:description" content={getSeoDescription()} />
-  <meta name="twitter:image" content={getLogoUrl()} />
+  <meta name="twitter:image" content={createAppUrl(`/user/libraries/${library.id}/ogp-image`)} />
   <meta name="twitter:creator" content={`@${library.authorName}`} />
 
   <!-- Additional SEO Meta Tags -->
