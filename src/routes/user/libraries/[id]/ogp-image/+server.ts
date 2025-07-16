@@ -44,18 +44,27 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 };
 
+// クラウド環境対応: ロゴ画像をbase64として事前に埋め込み
+const LOGO_BASE64 =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiM2MzY2ZjEiLz4KPHN2ZyB4PSIyMCIgeT0iMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0xMCAxMGwyMCAyME0zMCAxMGwtMjAgMjBNMTAgMzBsMjAtMjBNMzAgMzBsLTIwLTIwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2Zz4KPC9zdmc+';
+
 /**
- * ロゴ画像をbase64エンコードして取得
+ * ロゴ画像をbase64エンコードして取得（クラウド環境対応）
  */
 function getLogoBase64(): string {
-  try {
-    const logoPath = join(process.cwd(), 'static', 'logo.png');
-    const logoBuffer = readFileSync(logoPath);
-    return `data:image/png;base64,${logoBuffer.toString('base64')}`;
-  } catch (error) {
-    console.error('ロゴ画像の読み込みに失敗:', error);
-    return '';
+  // 開発環境では実際のファイルを読み込み、本番環境では埋め込み画像を使用
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const logoPath = join(process.cwd(), 'static', 'logo.png');
+      const logoBuffer = readFileSync(logoPath);
+      return `data:image/png;base64,${logoBuffer.toString('base64')}`;
+    } catch (error) {
+      console.error('ロゴ画像の読み込みに失敗:', error);
+      return LOGO_BASE64; // フォールバック
+    }
   }
+
+  return LOGO_BASE64; // 本番環境では埋め込み画像を使用
 }
 
 /**
