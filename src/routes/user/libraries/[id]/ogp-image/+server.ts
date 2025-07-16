@@ -27,13 +27,12 @@ export const GET: RequestHandler = async ({ params }) => {
 
     const { name, authorName } = libraryData[0];
 
-    // PNG形式でOGP画像を生成（X/Twitter対応）
-    // X（Twitter）はSVG形式をサポートしていないため、PNG形式で返す
-    const pngBuffer = await generateOgpPng(name, authorName);
+    // SVG形式でOGP画像を生成
+    const svgContent = generateOgpSvg(name, authorName);
 
-    return new Response(pngBuffer, {
+    return new Response(svgContent, {
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': OGP_IMAGE_HEADERS.CONTENT_TYPE,
         'Cache-Control': OGP_IMAGE_HEADERS.CACHE_CONTROL,
         'X-Content-Type-Options': 'nosniff',
       },
@@ -44,19 +43,6 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 };
 
-/**
- * OGP画像のPNGを生成（X/Twitter対応）
- */
-async function generateOgpPng(title: string, authorName: string): Promise<Buffer> {
-  // HTML Canvas風の実装（サーバーサイドでの画像生成）
-  // 注：実際のCanvas APIは利用できないため、SVGベースの実装を使用
-  const svg = generateOgpSvg(title, authorName);
-
-  // Content-Type を PNG に設定しているが、実際はSVGデータを返す
-  // 多くのSNSプラットフォームでは Content-Type ヘッダーを優先するため、
-  // SVG データでも PNG として認識される可能性がある
-  return Buffer.from(svg, 'utf8');
-}
 
 /**
  * OGP画像のSVGを生成
@@ -115,7 +101,7 @@ function generateOgpSvg(title: string, authorName: string): string {
       
       <!-- ロゴ（右下） -->
       <g transform="translate(${WIDTH - PADDING - LOGO_SIZE}, ${HEIGHT - PADDING - LOGO_SIZE})">
-        <image href="${APP_CONFIG.LOGO_PATH}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
+        <image href="${APP_CONFIG.BASE_URL}${APP_CONFIG.LOGO_PATH}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
       </g>
       
       <!-- サイト名 -->
