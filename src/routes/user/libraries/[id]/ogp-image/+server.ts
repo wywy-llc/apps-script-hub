@@ -7,6 +7,7 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import sharp from 'sharp';
 import type { RequestHandler } from './$types';
 
 // ビルド時にロゴ画像をインポート（Viteが自動的にBase64に変換）
@@ -32,7 +33,10 @@ export const GET: RequestHandler = async ({ params }) => {
     // SVG形式でOGP画像を生成
     const svgContent = generateOgpSvg(name, authorName);
 
-    return new Response(svgContent, {
+    // SVGをPNGに変換（SlackはSVGをサポートしていないため）
+    const pngBuffer = await sharp(Buffer.from(svgContent)).png().toBuffer();
+
+    return new Response(pngBuffer, {
       headers: {
         'Content-Type': OGP_IMAGE_HEADERS.CONTENT_TYPE,
         'Cache-Control': OGP_IMAGE_HEADERS.CACHE_CONTROL,

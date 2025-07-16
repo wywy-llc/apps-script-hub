@@ -55,6 +55,6 @@ export const OGP_IMAGE_MESSAGES = {
  * OGP画像のMIMEタイプとヘッダー設定
  */
 export const OGP_IMAGE_HEADERS = {
-  CONTENT_TYPE: 'image/svg+xml',
+  CONTENT_TYPE: 'image/png',
   CACHE_CONTROL: `public, max-age=${OGP_IMAGE_CONFIG.CACHE_DURATION}`,
 } as const;
