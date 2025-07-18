@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ params }) => {
     // Fontconfig警告を抑制する環境変数を設定
     process.env.FONTCONFIG_FILE = '/dev/null';
     process.env.FONTCONFIG_PATH = '/dev/null';
-    
+
     const libraryId = params.id;
 
     // ライブラリ情報を取得
@@ -51,18 +51,6 @@ export const GET: RequestHandler = async ({ params }) => {
     throw error(500, OGP_IMAGE_MESSAGES.GENERATION_FAILED);
   }
 };
-
-/**
- * XMLで使用する特殊文字をエスケープ
- */
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 /**
  * PNG画像を直接生成（フォント問題を回避）
@@ -99,39 +87,11 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       : title;
 
   // テキストをSVGで描画し、エラー時はボックスでフォールバック
-  let textOverlay;
+  // 本番環境でのフォント問題を回避するため、直接色付きボックスを使用
+  console.log('Title:', displayTitle, 'Author:', authorName);
+
   try {
-    // テキストSVGを作成（Fontconfig警告を回避し、シンプルなフォント指定）
-    const textSvg = `
-      <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="Arial, sans-serif">
-          ${escapeXml(displayTitle)}
-        </text>
-        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="Arial, sans-serif">
-          ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
-        </text>
-        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="Arial, sans-serif" text-anchor="end">
-          ${OGP_IMAGE_MESSAGES.SITE_NAME}
-        </text>
-      </svg>
-    `;
-    textOverlay = Buffer.from(textSvg, 'utf8');
-
-    // テキストを合成
-    basePng = await sharp(basePng)
-      .composite([{ input: textOverlay, top: 0, left: 0 }])
-      .png()
-      .toBuffer();
-
-    console.log('Text overlay successful - Title:', displayTitle, 'Author:', authorName);
-    console.log('SVG length:', textSvg.length, 'Buffer length:', textOverlay.length);
-  } catch (error) {
-    console.error('Text overlay failed, using fallback boxes:', error);
-    console.log('Environment:', process.env.NODE_ENV);
-    console.log('Platform:', process.platform);
-    console.log('Vercel deployment:', process.env.VERCEL);
-
-    // フォールバック: 色付きボックスでテキスト領域を示す
+    // 色付きボックスでテキスト領域を示す（フォント問題を回避）
     const titleBox = await sharp({
       create: {
         width: Math.min(displayTitle.length * 32, WIDTH - 120),
@@ -166,19 +126,19 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       .toBuffer();
 
     // ボックスを合成
-    try {
-      basePng = await sharp(basePng)
-        .composite([
-          { input: titleBox, top: 60, left: 60 },
-          { input: authorBox, top: HEIGHT - 60 - 80 / 2 - 15, left: 60 },
-          { input: siteBox, top: HEIGHT - 60 - 80 - 30, left: WIDTH - 60 - 200 },
-        ])
-        .png()
-        .toBuffer();
-    } catch (boxError) {
-      console.error('Box overlay also failed:', boxError);
-      // ボックス合成にも失敗した場合は背景のみを使用
-    }
+    basePng = await sharp(basePng)
+      .composite([
+        { input: titleBox, top: 60, left: 60 },
+        { input: authorBox, top: HEIGHT - 60 - 80 / 2 - 15, left: 60 },
+        { input: siteBox, top: HEIGHT - 60 - 80 - 30, left: WIDTH - 60 - 200 },
+      ])
+      .png()
+      .toBuffer();
+
+    console.log('Colored boxes overlay successful');
+  } catch (boxError) {
+    console.error('Box overlay failed:', boxError);
+    // ボックス合成に失敗した場合は背景のみを使用
   }
 
   let logoBuffer;
