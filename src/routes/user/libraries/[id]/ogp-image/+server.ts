@@ -7,6 +7,10 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import sharp from 'sharp';
+import { fileURLToPath } from 'url';
 import type { RequestHandler } from './$types';
 
 // ビルド時にロゴ画像をインポート（Viteが自動的にBase64に変換）
@@ -32,7 +36,10 @@ export const GET: RequestHandler = async ({ params }) => {
     // SVG形式でOGP画像を生成
     const svgContent = generateOgpSvg(name, authorName);
 
-    return new Response(svgContent, {
+    // SVGをPNGに変換してロゴを合成
+    const pngBuffer = await convertSvgToPngWithLogo(svgContent);
+
+    return new Response(pngBuffer, {
       headers: {
         'Content-Type': OGP_IMAGE_HEADERS.CONTENT_TYPE,
         'Cache-Control': OGP_IMAGE_HEADERS.CACHE_CONTROL,
@@ -134,4 +141,45 @@ function escapeXml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * SVGをPNGに変換してロゴを合成
+ * Sharpライブラリを使用して安定した処理を実現
+ */
+async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
+  const { WIDTH, HEIGHT, LOGO_SIZE, PADDING } = OGP_IMAGE_CONFIG;
+
+  // ロゴを除いたSVGを作成（ロゴは後で合成）
+  const svgWithoutLogo = svgContent.replace(
+    /<g transform="translate\([^>]+\)">[\s\S]*?<image[^>]*\/>[\s\S]*?<\/g>/,
+    ''
+  );
+
+  // SVGをPNGに変換
+  const basePng = await sharp(Buffer.from(svgWithoutLogo, 'utf8'))
+    .png()
+    .resize(WIDTH, HEIGHT)
+    .toBuffer();
+
+  // ロゴファイルを読み込み
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const logoPath = join(__dirname, '../../../../../lib/assets/logo.png');
+  const logoBuffer = readFileSync(logoPath);
+
+  // ロゴをリサイズして合成
+  const resizedLogo = await sharp(logoBuffer).resize(LOGO_SIZE, LOGO_SIZE).png().toBuffer();
+
+  // ロゴを右下に合成
+  return await sharp(basePng)
+    .composite([
+      {
+        input: resizedLogo,
+        top: HEIGHT - PADDING - LOGO_SIZE,
+        left: WIDTH - PADDING - LOGO_SIZE,
+      },
+    ])
+    .png()
+    .toBuffer();
 }
