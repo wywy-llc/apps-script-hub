@@ -8,9 +8,8 @@ import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import sharp from 'sharp';
-import { fileURLToPath } from 'url';
 import type { RequestHandler } from './$types';
 
 // ビルド時にロゴ画像をインポート（Viteが自動的にBase64に変換）
@@ -151,25 +150,78 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
   const { WIDTH, HEIGHT, LOGO_SIZE, PADDING } = OGP_IMAGE_CONFIG;
 
   // ロゴを除いたSVGを作成（ロゴは後で合成）
-  const svgWithoutLogo = svgContent.replace(
-    /<g transform="translate\([^>]+\)">[\s\S]*?<image[^>]*\/>[\s\S]*?<\/g>/,
-    ''
-  );
+  const svgWithoutLogo = generateSvgWithoutLogo(svgContent);
+
+  console.log('SVG without logo:', svgWithoutLogo);
 
   // SVGをPNGに変換
-  const basePng = await sharp(Buffer.from(svgWithoutLogo, 'utf8'))
-    .png()
-    .resize(WIDTH, HEIGHT)
-    .toBuffer();
+  let basePng;
+  try {
+    basePng = await sharp(Buffer.from(svgWithoutLogo, 'utf8'))
+      .png()
+      .resize(WIDTH, HEIGHT)
+      .toBuffer();
+  } catch (error) {
+    console.error('Sharp SVG processing error:', error);
+    // フォールバック: ロゴなしのベース画像を作成
+    basePng = await sharp({
+      create: {
+        width: WIDTH,
+        height: HEIGHT,
+        channels: 4,
+        background: { r: 26, g: 31, b: 54, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer();
+  }
 
-  // ロゴファイルを読み込み
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const logoPath = join(__dirname, '../../../../../lib/assets/logo.png');
-  const logoBuffer = readFileSync(logoPath);
+  let logoBuffer;
+  try {
+    // logoUrlがファイルパスの場合の処理
+    if (typeof logoUrl === 'string' && logoUrl.startsWith('data:')) {
+      const base64Data = logoUrl.split(',')[1];
+      logoBuffer = Buffer.from(base64Data, 'base64');
+    } else if (typeof logoUrl === 'string' && logoUrl.startsWith('/')) {
+      // ファイルパスの場合は実際のファイルを読み込み
+      const logoPath = join(process.cwd(), logoUrl);
+      console.log('Reading logo file from:', logoPath);
+      logoBuffer = readFileSync(logoPath);
+    } else {
+      // 既にBase64データの場合
+      logoBuffer = Buffer.from(logoUrl, 'base64');
+    }
+  } catch (error) {
+    console.error('Logo processing error:', error);
+    logoBuffer = await sharp({
+      create: {
+        width: LOGO_SIZE,
+        height: LOGO_SIZE,
+        channels: 4,
+        background: { r: 99, g: 102, b: 241, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer();
+  }
 
   // ロゴをリサイズして合成
-  const resizedLogo = await sharp(logoBuffer).resize(LOGO_SIZE, LOGO_SIZE).png().toBuffer();
+  let resizedLogo;
+  try {
+    resizedLogo = await sharp(logoBuffer).resize(LOGO_SIZE, LOGO_SIZE).png().toBuffer();
+  } catch (error) {
+    console.error('Logo resize error:', error);
+    resizedLogo = await sharp({
+      create: {
+        width: LOGO_SIZE,
+        height: LOGO_SIZE,
+        channels: 4,
+        background: { r: 99, g: 102, b: 241, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer();
+  }
 
   // ロゴを右下に合成
   return await sharp(basePng)
@@ -182,4 +234,15 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
     ])
     .png()
     .toBuffer();
+}
+
+/**
+ * ロゴを除いたSVGを生成
+ */
+function generateSvgWithoutLogo(originalSvgContent: string): string {
+  // ロゴ部分の正規表現を使用して除去
+  return originalSvgContent.replace(
+    /<g transform="translate\([^>]+\)">[\s\S]*?<image[^>]*\/>[\s\S]*?<\/g>/,
+    ''
+  );
 }
