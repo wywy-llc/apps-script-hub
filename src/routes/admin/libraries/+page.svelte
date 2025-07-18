@@ -162,14 +162,14 @@
 
     if (
       !confirm(
-        `既存の${targetLibraries.length}件のライブラリのGitHub情報（Star数等）を一括更新しますか？\n\n却下ステータスのライブラリは対象外です。\nAI要約の更新は行われません。\nこの処理には時間がかかる場合があります。`
+        `既存の${targetLibraries.length}件のライブラリのGitHub情報（Star数等）とOGP画像を一括更新しますか？\n\n却下ステータスのライブラリは対象外です。\nAI要約の更新は行われません。\nこの処理には時間がかかる場合があります。`
       )
     ) {
       return;
     }
 
     bulkUpdateInProgress = true;
-    bulkUpdateMessage = '既存ライブラリのGitHub情報を一括更新中...';
+    bulkUpdateMessage = '既存ライブラリのGitHub情報とOGP画像を一括更新中...';
 
     try {
       let successCount = 0;
@@ -178,7 +178,7 @@
 
       for (let i = 0; i < targetLibraries.length; i++) {
         const library = targetLibraries[i];
-        bulkUpdateMessage = `${i + 1}/${totalLibraries} GitHub情報を更新中: ${library.name}`;
+        bulkUpdateMessage = `${i + 1}/${totalLibraries} GitHub情報とOGP画像を更新中: ${library.name}`;
 
         try {
           const response = await fetch(`/admin/libraries/${library.id}/scraping`, {
@@ -199,7 +199,7 @@
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      bulkUpdateMessage = `GitHub情報の一括更新が完了しました。成功: ${successCount}件、失敗: ${errorCount}件`;
+      bulkUpdateMessage = `GitHub情報とOGP画像の一括更新が完了しました。成功: ${successCount}件、失敗: ${errorCount}件`;
 
       setTimeout(() => {
         bulkUpdateMessage = '';
@@ -207,7 +207,7 @@
       }, 3000);
     } catch (error) {
       console.error('GitHub情報一括更新エラー:', error);
-      bulkUpdateMessage = 'GitHub情報の一括更新中にエラーが発生しました。';
+      bulkUpdateMessage = 'GitHub情報とOGP画像の一括更新中にエラーが発生しました。';
     } finally {
       bulkUpdateInProgress = false;
       setTimeout(() => {
@@ -365,7 +365,7 @@
           onclick={handleBulkUpdate}
           disabled={bulkUpdateInProgress}
           class="inline-flex items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
-          title="既存ライブラリのGitHub情報を一括更新（Star数等）"
+          title="既存ライブラリのGitHub情報とOGP画像を一括更新（Star数等）"
         >
           {#if bulkUpdateInProgress}
             <svg

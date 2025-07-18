@@ -7,6 +7,7 @@ import { ServiceErrorUtil } from '$lib/server/utils/service-error-util.js';
 import { eq } from 'drizzle-orm';
 import { FetchGitHubRepoDataService } from './fetch-github-repo-data-service.js';
 import { GenerateAiSummaryService } from './generate-ai-summary-service.js';
+import { GenerateOgpImageService } from './generate-ogp-image-service.js';
 import { ScrapeGASLibraryService } from './scrape-gas-library-service.js';
 
 /**
@@ -128,7 +129,10 @@ export class UpdateLibraryFromGithubService {
    * @param libraryId ライブラリID
    * @param options オプション設定
    */
-  static async call(libraryId: string, options: { skipAiSummary?: boolean } = {}) {
+  static async call(
+    libraryId: string,
+    options: { skipAiSummary?: boolean; generateOgpImage?: boolean } = {}
+  ) {
     // ライブラリを取得
     const libraryData = await LibraryRepository.findById(libraryId);
     ServiceErrorUtil.assertCondition(
@@ -220,6 +224,25 @@ export class UpdateLibraryFromGithubService {
       });
     } else {
       console.log(`AI要約生成をスキップ: ${libraryId}`);
+    }
+
+    // OGP画像生成判定（オプション有効時のみ）
+    if (options.generateOgpImage) {
+      try {
+        // 最新のライブラリデータを取得（更新後の情報が必要）
+        const updatedLibraryData = await LibraryRepository.findById(libraryId);
+        if (updatedLibraryData) {
+          const ogpImagePath = await GenerateOgpImageService.call({
+            libraryId: libraryId,
+            title: updatedLibraryData.name,
+            authorName: updatedLibraryData.authorName,
+          });
+          console.log(`OGP画像生成完了: ${libraryId} -> ${ogpImagePath}`);
+        }
+      } catch (error) {
+        console.error(`OGP画像生成エラー (${libraryId}):`, error);
+        // OGP画像生成エラーは処理を止めずに続行
+      }
     }
   }
 

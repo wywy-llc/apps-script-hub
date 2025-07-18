@@ -10,12 +10,15 @@ export const POST: RequestHandler = async ({ params }) => {
   }
 
   try {
-    // GitHubからライブラリ情報を更新（AI要約生成はスキップ）
-    await UpdateLibraryFromGithubService.call(libraryId, { skipAiSummary: true });
+    // GitHubからライブラリ情報を更新（AI要約生成はスキップ、OGP画像生成は有効）
+    await UpdateLibraryFromGithubService.call(libraryId, {
+      skipAiSummary: true,
+      generateOgpImage: true,
+    });
 
     return json({
       success: true,
-      message: 'スクレイピングが完了しました。',
+      message: 'スクレイピングとOGP画像生成が完了しました。',
     });
   } catch (err) {
     console.error('スクレイピング処理エラー:', err);
