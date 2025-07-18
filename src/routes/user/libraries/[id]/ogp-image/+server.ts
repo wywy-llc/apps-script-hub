@@ -118,8 +118,6 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       .composite([{ input: textOverlay, top: 0, left: 0 }])
       .png()
       .toBuffer();
-
-    console.log('Text overlay successful');
   } catch (error) {
     console.error('Text overlay failed, using fallback boxes:', error);
 
