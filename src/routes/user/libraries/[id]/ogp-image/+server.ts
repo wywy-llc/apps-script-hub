@@ -94,31 +94,83 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       ? title.substring(0, MAX_TITLE_LENGTH - TRUNCATE_SUFFIX.length) + TRUNCATE_SUFFIX
       : title;
 
-  // タイトルと作者名をテキストとして描画（フォントの問題を回避するため、シンプルな文字描画）
-  const textOverlay = Buffer.from(
-    `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="Arial,Helvetica,sans-serif">
-        ${escapeXml(displayTitle)}
-      </text>
-      <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="Arial,Helvetica,sans-serif">
-        ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
-      </text>
-      <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="Arial,Helvetica,sans-serif" text-anchor="end">
-        ${OGP_IMAGE_MESSAGES.SITE_NAME}
-      </text>
-    </svg>`,
-    'utf8'
-  );
-
-  // テキストを合成
+  // テキストをSVGで描画し、エラー時はボックスでフォールバック
+  let textOverlay;
   try {
+    // テキストSVGを作成（フォントをシンプルに指定）
+    const textSvg = `
+      <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="sans-serif">
+          ${escapeXml(displayTitle)}
+        </text>
+        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="sans-serif">
+          ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
+        </text>
+        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="sans-serif" text-anchor="end">
+          ${OGP_IMAGE_MESSAGES.SITE_NAME}
+        </text>
+      </svg>
+    `;
+    textOverlay = Buffer.from(textSvg, 'utf8');
+
+    // テキストを合成
     basePng = await sharp(basePng)
       .composite([{ input: textOverlay, top: 0, left: 0 }])
       .png()
       .toBuffer();
+
+    console.log('Text overlay successful');
   } catch (error) {
-    console.error('Text overlay error:', error);
-    // テキスト合成に失敗した場合は背景のみを使用
+    console.error('Text overlay failed, using fallback boxes:', error);
+
+    // フォールバック: 色付きボックスでテキスト領域を示す
+    const titleBox = await sharp({
+      create: {
+        width: Math.min(displayTitle.length * 32, WIDTH - 120),
+        height: 70,
+        channels: 4,
+        background: { r: 245, g: 245, b: 245, alpha: 0.9 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    const authorBox = await sharp({
+      create: {
+        width: Math.min((OGP_IMAGE_MESSAGES.AUTHOR_PREFIX + authorName).length * 16, WIDTH - 120),
+        height: 35,
+        channels: 4,
+        background: { r: 156, g: 163, b: 175, alpha: 0.8 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    const siteBox = await sharp({
+      create: {
+        width: Math.min(OGP_IMAGE_MESSAGES.SITE_NAME.length * 12, 200),
+        height: 25,
+        channels: 4,
+        background: { r: 156, g: 163, b: 175, alpha: 0.7 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    // ボックスを合成
+    try {
+      basePng = await sharp(basePng)
+        .composite([
+          { input: titleBox, top: 60, left: 60 },
+          { input: authorBox, top: HEIGHT - 60 - 80 / 2 - 15, left: 60 },
+          { input: siteBox, top: HEIGHT - 60 - 80 - 30, left: WIDTH - 60 - 200 },
+        ])
+        .png()
+        .toBuffer();
+    } catch (boxError) {
+      console.error('Box overlay also failed:', boxError);
+      // ボックス合成にも失敗した場合は背景のみを使用
+    }
   }
 
   let logoBuffer;
