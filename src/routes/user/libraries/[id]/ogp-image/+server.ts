@@ -152,8 +152,6 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
   // ロゴを除いたSVGを作成（ロゴは後で合成）
   const svgWithoutLogo = generateSvgWithoutLogo(svgContent);
 
-  console.log('SVG without logo:', svgWithoutLogo);
-
   // SVGをPNGに変換
   let basePng;
   try {
