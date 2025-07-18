@@ -183,7 +183,6 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
     } else if (typeof logoUrl === 'string' && logoUrl.startsWith('/')) {
       // ファイルパスの場合は実際のファイルを読み込み
       const logoPath = join(process.cwd(), logoUrl);
-      console.log('Reading logo file from:', logoPath);
       logoBuffer = readFileSync(logoPath);
     } else {
       // 既にBase64データの場合
