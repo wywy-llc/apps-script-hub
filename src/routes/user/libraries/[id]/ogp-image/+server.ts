@@ -86,59 +86,48 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       ? title.substring(0, MAX_TITLE_LENGTH - TRUNCATE_SUFFIX.length) + TRUNCATE_SUFFIX
       : title;
 
-  // テキストをSVGで描画し、エラー時はボックスでフォールバック
-  // 本番環境でのフォント問題を回避するため、直接色付きボックスを使用
+  // テキストをSVGオーバーレイで描画（シンプルなアプローチ）
   console.log('Title:', displayTitle, 'Author:', authorName);
 
   try {
-    // 色付きボックスでテキスト領域を示す（フォント問題を回避）
-    const titleBox = await sharp({
-      create: {
-        width: Math.min(displayTitle.length * 32, WIDTH - 120),
-        height: 70,
-        channels: 4,
-        background: { r: 245, g: 245, b: 245, alpha: 0.9 },
-      },
-    })
-      .png()
-      .toBuffer();
+    // テキストを含むSVGオーバーレイを作成
+    const textOverlaySvg = `
+      <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+        <!-- タイトル背景 -->
+        <rect x="50" y="50" width="${Math.min(displayTitle.length * 32, WIDTH - 100)}" height="80" fill="#f5f5f5" fill-opacity="0.9" rx="8"/>
+        <!-- タイトルテキスト -->
+        <text x="60" y="90" fill="#1a1f36" font-size="24" font-weight="bold" font-family="Arial, sans-serif">
+          ${displayTitle}
+        </text>
+        
+        <!-- 作者名背景 -->
+        <rect x="50" y="${HEIGHT - 120}" width="${Math.min((OGP_IMAGE_MESSAGES.AUTHOR_PREFIX + authorName).length * 16, WIDTH - 100)}" height="40" fill="#9ca3af" fill-opacity="0.8" rx="6"/>
+        <!-- 作者名テキスト -->
+        <text x="60" y="${HEIGHT - 95}" fill="#ffffff" font-size="18" font-family="Arial, sans-serif">
+          ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${authorName}
+        </text>
+        
+        <!-- サイト名背景 -->
+        <rect x="${WIDTH - 250}" y="${HEIGHT - 60}" width="200" height="30" fill="#6366f1" fill-opacity="0.7" rx="4"/>
+        <!-- サイト名テキスト -->
+        <text x="${WIDTH - 240}" y="${HEIGHT - 40}" fill="#ffffff" font-size="16" font-family="Arial, sans-serif">
+          ${OGP_IMAGE_MESSAGES.SITE_NAME}
+        </text>
+      </svg>
+    `;
 
-    const authorBox = await sharp({
-      create: {
-        width: Math.min((OGP_IMAGE_MESSAGES.AUTHOR_PREFIX + authorName).length * 16, WIDTH - 120),
-        height: 35,
-        channels: 4,
-        background: { r: 156, g: 163, b: 175, alpha: 0.8 },
-      },
-    })
-      .png()
-      .toBuffer();
+    const textOverlay = Buffer.from(textOverlaySvg, 'utf8');
 
-    const siteBox = await sharp({
-      create: {
-        width: Math.min(OGP_IMAGE_MESSAGES.SITE_NAME.length * 12, 200),
-        height: 25,
-        channels: 4,
-        background: { r: 156, g: 163, b: 175, alpha: 0.7 },
-      },
-    })
-      .png()
-      .toBuffer();
-
-    // ボックスを合成
+    // テキストオーバーレイを合成
     basePng = await sharp(basePng)
-      .composite([
-        { input: titleBox, top: 60, left: 60 },
-        { input: authorBox, top: HEIGHT - 60 - 80 / 2 - 15, left: 60 },
-        { input: siteBox, top: HEIGHT - 60 - 80 - 30, left: WIDTH - 60 - 200 },
-      ])
+      .composite([{ input: textOverlay, top: 0, left: 0 }])
       .png()
       .toBuffer();
 
-    console.log('Colored boxes overlay successful');
-  } catch (boxError) {
-    console.error('Box overlay failed:', boxError);
-    // ボックス合成に失敗した場合は背景のみを使用
+    console.log('Text overlay with backgrounds successful');
+  } catch (textError) {
+    console.error('Text overlay failed:', textError);
+    // テキスト合成に失敗した場合は背景のみを使用
   }
 
   let logoBuffer;
