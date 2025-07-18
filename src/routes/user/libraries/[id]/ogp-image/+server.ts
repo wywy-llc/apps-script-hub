@@ -96,17 +96,27 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
 
   // テキストをSVGで描画し、エラー時はボックスでフォールバック
   let textOverlay;
+  
+  // 本番環境での強制フォールバックテスト
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  console.log('Production environment detected:', isProduction);
+  
+  if (isProduction) {
+    console.log('Forcing fallback boxes in production');
+    throw new Error('Forcing fallback in production for testing');
+  }
+  
   try {
-    // テキストSVGを作成（フォントをシンプルに指定）
+    // テキストSVGを作成（Vercel本番環境対応フォント指定）
     const textSvg = `
       <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="sans-serif">
+        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
           ${escapeXml(displayTitle)}
         </text>
-        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="sans-serif">
+        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
           ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
         </text>
-        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="sans-serif" text-anchor="end">
+        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" text-anchor="end">
           ${OGP_IMAGE_MESSAGES.SITE_NAME}
         </text>
       </svg>
@@ -118,8 +128,14 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
       .composite([{ input: textOverlay, top: 0, left: 0 }])
       .png()
       .toBuffer();
+
+    console.log('Text overlay successful - Title:', displayTitle, 'Author:', authorName);
+    console.log('SVG length:', textSvg.length, 'Buffer length:', textOverlay.length);
   } catch (error) {
     console.error('Text overlay failed, using fallback boxes:', error);
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Platform:', process.platform);
+    console.log('Vercel deployment:', process.env.VERCEL);
 
     // フォールバック: 色付きボックスでテキスト領域を示す
     const titleBox = await sharp({
