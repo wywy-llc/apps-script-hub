@@ -1,9 +1,9 @@
+import { APP_CONFIG } from '$lib/constants/app-config.js';
 import {
   OGP_IMAGE_CONFIG,
   OGP_IMAGE_HEADERS,
   OGP_IMAGE_MESSAGES,
 } from '$lib/constants/ogp-image-config.js';
-import { APP_CONFIG } from '$lib/constants/app-config.js';
 import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
@@ -71,7 +71,7 @@ function generateOgpSvg(title: string, authorName: string): string {
           <stop offset="100%" style="stop-color:${COLORS.BACKGROUND_GRADIENT_END};stop-opacity:1" />
         </linearGradient>
       </defs>
-      
+
       <!-- 背景 -->
       <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#backgroundGradient)" />
       
