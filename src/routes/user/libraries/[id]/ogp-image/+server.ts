@@ -97,9 +97,7 @@ async function generatePngDirectly(title: string, authorName: string): Promise<B
   `;
 
   // SVGをPNGに変換
-  return await sharp(Buffer.from(svgContent))
-    .png()
-    .toBuffer();
+  return await sharp(Buffer.from(svgContent)).png().toBuffer();
 }
 
 /**
