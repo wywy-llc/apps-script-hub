@@ -21,6 +21,10 @@ import logoUrl from '$lib/assets/logo.png';
  */
 export const GET: RequestHandler = async ({ params }) => {
   try {
+    // Fontconfig警告を抑制する環境変数を設定
+    process.env.FONTCONFIG_FILE = '/dev/null';
+    process.env.FONTCONFIG_PATH = '/dev/null';
+    
     const libraryId = params.id;
 
     // ライブラリ情報を取得
@@ -97,16 +101,16 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
   // テキストをSVGで描画し、エラー時はボックスでフォールバック
   let textOverlay;
   try {
-    // テキストSVGを作成（Vercel本番環境対応フォント指定）
+    // テキストSVGを作成（Fontconfig警告を回避し、シンプルなフォント指定）
     const textSvg = `
       <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+        <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="Arial, sans-serif">
           ${escapeXml(displayTitle)}
         </text>
-        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+        <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="Arial, sans-serif">
           ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
         </text>
-        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" text-anchor="end">
+        <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="Arial, sans-serif" text-anchor="end">
           ${OGP_IMAGE_MESSAGES.SITE_NAME}
         </text>
       </svg>
