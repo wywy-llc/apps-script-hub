@@ -96,16 +96,6 @@ async function convertSvgToPngWithLogo(title: string, authorName: string): Promi
 
   // テキストをSVGで描画し、エラー時はボックスでフォールバック
   let textOverlay;
-  
-  // 本番環境での強制フォールバックテスト
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
-  console.log('Production environment detected:', isProduction);
-  
-  if (isProduction) {
-    console.log('Forcing fallback boxes in production');
-    throw new Error('Forcing fallback in production for testing');
-  }
-  
   try {
     // テキストSVGを作成（Vercel本番環境対応フォント指定）
     const textSvg = `
