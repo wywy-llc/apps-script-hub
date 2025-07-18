@@ -32,11 +32,8 @@ export const GET: RequestHandler = async ({ params }) => {
 
     const { name, authorName } = libraryData[0];
 
-    // SVG形式でOGP画像を生成
-    const svgContent = generateOgpSvg(name, authorName);
-
-    // SVGをPNGに変換してロゴを合成
-    const pngBuffer = await convertSvgToPngWithLogo(svgContent);
+    // PNG画像を直接生成（SVGを使用せず、フォント問題を回避）
+    const pngBuffer = await convertSvgToPngWithLogo(name, authorName);
 
     return new Response(pngBuffer, {
       headers: {
@@ -52,85 +49,6 @@ export const GET: RequestHandler = async ({ params }) => {
 };
 
 /**
- * ビルド時にロゴ画像をBase64データURLに変換
- * Viteが自動的にPNG画像をBase64エンコードされたdata URLに変換します
- * これにより実行時のファイルI/Oが不要になり、パフォーマンスが向上します
- */
-const LOGO_BASE64 = logoUrl;
-
-/**
- * OGP画像のSVGを生成
- */
-function generateOgpSvg(title: string, authorName: string): string {
-  const {
-    WIDTH,
-    HEIGHT,
-    FONT_SIZE,
-    PADDING,
-    LOGO_SIZE,
-    COLORS,
-    MAX_TITLE_LENGTH,
-    TRUNCATE_SUFFIX,
-  } = OGP_IMAGE_CONFIG;
-
-  // タイトルを適切な長さに調整
-  const displayTitle =
-    title.length > MAX_TITLE_LENGTH
-      ? title.substring(0, MAX_TITLE_LENGTH - TRUNCATE_SUFFIX.length) + TRUNCATE_SUFFIX
-      : title;
-
-  return `
-    <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <defs>
-        <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${COLORS.BACKGROUND_SECONDARY};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${COLORS.BACKGROUND_GRADIENT_END};stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      
-      <!-- 背景 -->
-      <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#backgroundGradient)" />
-      
-      <!-- 装飾的な背景パターン -->
-      <circle cx="${WIDTH - 100}" cy="100" r="60" fill="${COLORS.ACCENT}" opacity="0.1" />
-      <circle cx="100" cy="${HEIGHT - 100}" r="40" fill="${COLORS.ACCENT}" opacity="0.1" />
-      
-      <!-- タイトル（左上） -->
-      <text x="${PADDING}" y="${PADDING + FONT_SIZE.TITLE}" 
-            fill="${COLORS.TITLE}" 
-            font-size="${FONT_SIZE.TITLE}" 
-            font-weight="bold" 
-            font-family="Arial, sans-serif">
-        ${escapeXml(displayTitle)}
-      </text>
-      
-      <!-- 作者名（左下） - ロゴの中央に揃える -->
-      <text x="${PADDING}" y="${HEIGHT - PADDING - LOGO_SIZE / 2 + FONT_SIZE.AUTHOR / 3}" 
-            fill="${COLORS.AUTHOR}" 
-            font-size="${FONT_SIZE.AUTHOR}" 
-            font-family="Arial, sans-serif"
-            dominant-baseline="middle">
-        ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
-      </text>
-      
-      <!-- ロゴ（右下） -->
-      <g transform="translate(${WIDTH - PADDING - LOGO_SIZE}, ${HEIGHT - PADDING - LOGO_SIZE})">
-        <image href="${LOGO_BASE64}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" />
-      </g>
-      
-      <!-- サイト名 -->
-      <text x="${WIDTH - PADDING}" y="${HEIGHT - PADDING - LOGO_SIZE - 20}" 
-            fill="${COLORS.AUTHOR}" 
-            font-size="${FONT_SIZE.SITE_NAME}" 
-            font-family="Arial, sans-serif" 
-            text-anchor="end">
-        ${OGP_IMAGE_MESSAGES.SITE_NAME}
-      </text>
-    </svg>
-  `;
-}
-
-/**
  * XMLで使用する特殊文字をエスケープ
  */
 function escapeXml(text: string): string {
@@ -143,35 +61,64 @@ function escapeXml(text: string): string {
 }
 
 /**
- * SVGをPNGに変換してロゴを合成
- * Sharpライブラリを使用して安定した処理を実現
+ * PNG画像を直接生成（フォント問題を回避）
+ * Sharpライブラリで背景、テキスト、ロゴを合成
  */
-async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
-  const { WIDTH, HEIGHT, LOGO_SIZE, PADDING } = OGP_IMAGE_CONFIG;
+async function convertSvgToPngWithLogo(title: string, authorName: string): Promise<Buffer> {
+  const { WIDTH, HEIGHT, LOGO_SIZE, PADDING, MAX_TITLE_LENGTH, TRUNCATE_SUFFIX } = OGP_IMAGE_CONFIG;
 
-  // ロゴを除いたSVGを作成（ロゴは後で合成）
-  const svgWithoutLogo = generateSvgWithoutLogo(svgContent);
+  // グラデーション背景を作成
+  const backgroundSvg = `
+    <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a1f36;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#2a2f4a;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg)" />
+      <circle cx="${WIDTH - 100}" cy="100" r="60" fill="#6366f1" opacity="0.1" />
+      <circle cx="100" cy="${HEIGHT - 100}" r="40" fill="#6366f1" opacity="0.1" />
+    </svg>
+  `;
 
-  // SVGをPNGに変換
-  let basePng;
+  // 背景をPNGに変換
+  let basePng = await sharp(Buffer.from(backgroundSvg, 'utf8'))
+    .png()
+    .resize(WIDTH, HEIGHT)
+    .toBuffer();
+
+  // タイトルを表示用に調整
+  const displayTitle =
+    title.length > MAX_TITLE_LENGTH
+      ? title.substring(0, MAX_TITLE_LENGTH - TRUNCATE_SUFFIX.length) + TRUNCATE_SUFFIX
+      : title;
+
+  // タイトルと作者名をテキストとして描画（フォントの問題を回避するため、シンプルな文字描画）
+  const textOverlay = Buffer.from(
+    `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+      <text x="60" y="116" fill="#f5f5f5" font-size="56" font-weight="bold" font-family="Arial,Helvetica,sans-serif">
+        ${escapeXml(displayTitle)}
+      </text>
+      <text x="60" y="${HEIGHT - 60 - 80 / 2 + 28 / 3}" fill="#9ca3af" font-size="28" font-family="Arial,Helvetica,sans-serif">
+        ${OGP_IMAGE_MESSAGES.AUTHOR_PREFIX}${escapeXml(authorName)}
+      </text>
+      <text x="${WIDTH - 60}" y="${HEIGHT - 60 - 80 - 20}" fill="#9ca3af" font-size="20" font-family="Arial,Helvetica,sans-serif" text-anchor="end">
+        ${OGP_IMAGE_MESSAGES.SITE_NAME}
+      </text>
+    </svg>`,
+    'utf8'
+  );
+
+  // テキストを合成
   try {
-    basePng = await sharp(Buffer.from(svgWithoutLogo, 'utf8'))
+    basePng = await sharp(basePng)
+      .composite([{ input: textOverlay, top: 0, left: 0 }])
       .png()
-      .resize(WIDTH, HEIGHT)
       .toBuffer();
   } catch (error) {
-    console.error('Sharp SVG processing error:', error);
-    // フォールバック: ロゴなしのベース画像を作成
-    basePng = await sharp({
-      create: {
-        width: WIDTH,
-        height: HEIGHT,
-        channels: 4,
-        background: { r: 26, g: 31, b: 54, alpha: 1 },
-      },
-    })
-      .png()
-      .toBuffer();
+    console.error('Text overlay error:', error);
+    // テキスト合成に失敗した場合は背景のみを使用
   }
 
   let logoBuffer;
@@ -231,15 +178,4 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
     ])
     .png()
     .toBuffer();
-}
-
-/**
- * ロゴを除いたSVGを生成
- */
-function generateSvgWithoutLogo(originalSvgContent: string): string {
-  // ロゴ部分の正規表現を使用して除去
-  return originalSvgContent.replace(
-    /<g transform="translate\([^>]+\)">[\s\S]*?<image[^>]*\/>[\s\S]*?<\/g>/,
-    ''
-  );
 }
