@@ -7,10 +7,7 @@ import { db } from '$lib/server/db';
 import { library } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
 import sharp from 'sharp';
-import { fileURLToPath } from 'url';
 import type { RequestHandler } from './$types';
 
 // ビルド時にロゴ画像をインポート（Viteが自動的にBase64に変換）
@@ -162,11 +159,8 @@ async function convertSvgToPngWithLogo(svgContent: string): Promise<Buffer> {
     .resize(WIDTH, HEIGHT)
     .toBuffer();
 
-  // ロゴファイルを読み込み
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const logoPath = join(__dirname, '../../../../../lib/assets/logo.png');
-  const logoBuffer = readFileSync(logoPath);
+  // Base64データからロゴバッファを作成
+  const logoBuffer = Buffer.from(logoUrl.split(',')[1], 'base64');
 
   // ロゴをリサイズして合成
   const resizedLogo = await sharp(logoBuffer).resize(LOGO_SIZE, LOGO_SIZE).png().toBuffer();
